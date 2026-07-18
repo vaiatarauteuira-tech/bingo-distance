@@ -13,7 +13,7 @@ let players = {};
 let pool = Array.from({length: 75}, (_, i) => i + 1);
 let drawnNumbers = [];
 let orders = [];
-let playerCount = 0; // Compteur pour donner les codes dans l'ordre (01, 02, 03...)
+let playerCount = 0; // Compteur pour les 3 chiffres (001, 002...)
 
 io.on('connection', (socket) => {
     
@@ -21,13 +21,26 @@ io.on('connection', (socket) => {
         socket.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
     });
 
-    // Remplace la génération automatique par une création UN PAR UN
+    // Inscription personnalisée : NOM + 3 CHIFFRES
     socket.on('admin-add-player', (nomJoueur) => {
         playerCount++;
-        const numeroFormate = String(playerCount).padStart(2, '0');
-        const code = `BINGO-${numeroFormate}`;
         
-        // Sécurité si le nom est vide
+        // 1. On nettoie le nom pour le code (Ex: "Jean Dupont" devient "JEANDUPONT")
+        let nomNettoye = nomJoueur
+            .trim()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlève les accents
+            .replace(/[^a-zA-Z0-9]/g, "") // Enlève les espaces et tirets
+            .toUpperCase();
+
+        // Sécurité si le champ était vide ou ne contenait que des symboles
+        if (!nomNettoye) { nomNettoye = "JOUEUR"; }
+
+        // 2. On formate le compteur sur 3 chiffres (ex: 1 devient "001")
+        const chiffresFormates = String(playerCount).padStart(3, '0');
+        
+        // 3. Création du code sur-mesure (ex: "JEANDUPONT001")
+        const code = `${nomNettoye}${chiffresFormates}`;
+        
         const nomFinal = nomJoueur.trim() || `Joueur ${playerCount}`;
 
         players[code] = {
@@ -42,7 +55,6 @@ io.on('connection', (socket) => {
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
     });
 
-    // Bouton pour tout remettre à zéro si besoin
     socket.on('admin-reset-all', () => {
         players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; playerCount = 0;
         io.emit('game-reset');
@@ -58,10 +70,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('player-login', (code) => {
-        if (players[code]) {
-            players[code].online = true;
-            players[code].socketId = socket.id;
-            socket.emit('login-success', players[code]);
+        // On force la vérification en MAJUSCULES au cas où le joueur tape en minuscules
+        const codeVerif = code.trim().toUpperCase();
+        if (players[codeVerif]) {
+            players[codeVerif].online = true;
+            players[codeVerif].socketId = socket.id;
+            socket.emit('login-success', players[codeVerif]);
             io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
         } else {
             socket.emit('login-error');
