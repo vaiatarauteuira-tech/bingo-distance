@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Événementiel - Mon Espace</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; text-align: center; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .pions-box { display: flex; gap: 10px; margin: 15px 0; }
+        .pion { flex: 1; background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #eee; }
+        .pion h3 { margin: 5px 0 0 0; font-size: 1.5rem; }
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 15px 0; background: #1a202c; padding: 8px; border-radius: 6px; }
+        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 1.1rem; }
+        .cell.marked { background: #48bb78; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-container">
+        <h3 id="p-name" style="margin-top:0; color:#28a745;">Connexion en cours...</h3>
+        <div style="background:#fff3cd; font-size:1.6rem; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:15px; color:#dc3545;">
+            📢 Numéro Tiré : <span id="live-ball">-</span>
+        </div>
+
+        <h4>🎒 Vos Pions Disponibles :</h4>
+        <div class="pions-box">
+            <div class="pion">Pions 20<h3 id="p20">0</h3></div>
+            <div class="pion">Pions 50<h3 id="p50">0</h3></div>
+            <div class="pion">Pions 100<h3 id="p100">0</h3></div>
+        </div>
+
+        <h4>🎲 Votre Carton de Jeu :</h4>
+        <div class="board" id="bingo-board"></div>
+
+        <div style="background:#edf2f7; padding:12px; border-radius:6px; text-align:left;">
+            <h4 style="margin:0 0 8px 0;">💳 Boutique (Recharger par virement) :</h4>
+            <select id="b-type"><option value="p20">Pions de 20</option><option value="p50">Pions de 50</option><option value="p100">Pions de 100</option></select>
+            <input type="number" id="b-qte" value="5" min="1">
+            <button onclick="commander()" style="background:#dd6b20;">Envoyer la demande de virement</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const monCode = sessionStorage.getItem('joueurCode');
+
+        if(!monCode) {
+            window.location.href = '/';
+        } else {
+            // Se connecter automatiquement avec le code récupéré du portail d'accueil
+            socket.emit('player-login', monCode);
+        }
+
+        socket.on('login-success', (player) => {
+            document.getElementById('p-name').textContent = `👋 Table de : ${player.nom}`;
+            updatePionsView(player);
+            
+            const b = document.getElementById('bingo-board');
+            b.innerHTML = '';
+            player.grille.forEach((num, idx) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
+                else { c.textContent = num; c.onclick = () => c.classList.toggle('marked'); }
+                b.appendChild(c);
+            });
+        });
+
+        socket.on('login-error', () => {
+            alert("Accès refusé. Ce code n'existe pas ou la partie n'est pas initialisée.");
+            window.location.href = '/';
+        });
+
+        socket.on('new-ball', (data) => document.getElementById('live-ball').textContent = data.actuelle);
+        socket.on('update-pions', (player) => updatePionsView(player));
+        socket.on('game-reset', () => window.location.reload());
+
+        function updatePionsView(p) {
+            document.getElementById('p20').textContent = p.p20;
+            document.getElementById('p50').textContent = p.p50;
+            document.getElementById('p100').textContent = p.p100;
+        }
+
+        function commander() {
+            const type = document.getElementById('b-type').value;
+            const qte = document.getElementById('b-qte').value;
+            socket.emit('player-order', { code: monCode, type, qte });
+            alert("Demande de virement envoyée à la caisse !");
+        }
+    </script>
+</body>
+</html>
