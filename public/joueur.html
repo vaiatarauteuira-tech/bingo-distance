@@ -1,94 +1,154 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Événementiel - Mon Espace</title>
-    <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; text-align: center; margin: 0; }
-        .container { max-width: 450px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .pions-box { display: flex; gap: 10px; margin: 15px 0; }
-        .pion { flex: 1; background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #eee; }
-        .pion h3 { margin: 5px 0 0 0; font-size: 1.5rem; }
-        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 15px 0; background: #1a202c; padding: 8px; border-radius: 6px; }
-        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 1.1rem; }
-        .cell.marked { background: #48bb78; color: white; }
-    </style>
-</head>
-<body>
-    <div class="container" id="main-container">
-        <h3 id="p-name" style="margin-top:0; color:#28a745;">Connexion en cours...</h3>
-        <div style="background:#fff3cd; font-size:1.6rem; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:15px; color:#dc3545;">
-            📢 Numéro Tiré : <span id="live-ball">-</span>
-        </div>
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
 
-        <h4>🎒 Vos Pions Disponibles :</h4>
-        <div class="pions-box">
-            <div class="pion">Pions 20<h3 id="p20">0</h3></div>
-            <div class="pion">Pions 50<h3 id="p50">0</h3></div>
-            <div class="pion">Pions 100<h3 id="p100">0</h3></div>
-        </div>
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-        <h4>🎲 Votre Carton de Jeu :</h4>
-        <div class="board" id="bingo-board"></div>
+app.use(express.static(path.join(__dirname, 'public')));
 
-        <div style="background:#edf2f7; padding:12px; border-radius:6px; text-align:left;">
-            <h4 style="margin:0 0 8px 0;">💳 Boutique (Recharger par virement) :</h4>
-            <select id="b-type"><option value="p20">Pions de 20</option><option value="p50">Pions de 50</option><option value="p100">Pions de 100</option></select>
-            <input type="number" id="b-qte" value="5" min="1">
-            <button onclick="commander()" style="background:#dd6b20;">Envoyer la demande de virement</button>
-        </div>
-    </div>
+// Banque de données de la session
+let players = {};
+let pool = Array.from({length: 75}, (_, i) => i + 1);
+let drawnNumbers = [];
+let orders = [];
+let playerCount = 0;
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const monCode = sessionStorage.getItem('joueurCode');
+// Infos Événementielles modifiables dynamiquement ou fixes
+let tournoisInfos = [
+    { date: "Ce soir - 21h00", nom: "Grand Tournoi d'Ouverture", prix: "Pack 100 Pions + Multiplicateurs" },
+    { date: "Demain - 15h00", nom: "Bingo Flash du Samedi", prix: "Cagnotte Événementielle" },
+    { date: "Dimanche - 18h00", nom: "Méga Quine de Clôture", prix: "Statut VIP Argent" }
+];
+let tournoiActuel = { nom: "Tournoi Spécial Été 2026", statut: "Inscriptions Ouvertes", coût: 50 };
 
-        if(!monCode) {
-            window.location.href = '/';
-        } else {
-            socket.emit('player-login', monCode);
-        }
+io.on('connection', (socket) => {
+    
+    socket.on('admin-init', () => {
+        socket.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+    });
 
-        socket.on('login-success', (player) => {
-            document.getElementById('p-name').textContent = `👋 Table de : ${player.nom}`;
-            updatePionsView(player);
+    socket.on('admin-add-player', (nomJoueur) => {
+        playerCount++;
+        let nomNettoye = nomJoueur.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+        if (!nomNettoye) { nomNettoye = "JOUEUR"; }
+        const chiffresFormates = String(playerCount).padStart(3, '0');
+        const code = `${nomNettoye}${chiffresFormates}`;
+        const nomFinal = nomJoueur.trim() || `Joueur ${playerCount}`;
+
+        players[code] = {
+            nom: nomFinal,
+            code: code,
+            pions: 100, // Capital de départ par défaut
+            historiquePions: [
+                { date: "Inscription", description: "Crédit de bienvenue", montant: "+100" }
+            ],
+            tournoisInscrits: [],
+            grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
+            online: false,
+            socketId: null
+        };
+
+        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+    });
+
+    socket.on('player-login', (code) => {
+        const codeVerif = code.trim().toUpperCase();
+        if (players[codeVerif]) {
+            players[codeVerif].online = true;
+            players[codeVerif].socketId = socket.id;
             
-            const b = document.getElementById('bingo-board');
-            b.innerHTML = '';
-            player.grille.forEach((num, idx) => {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
-                else { c.textContent = num; c.onclick = () => c.classList.toggle('marked'); }
-                b.appendChild(c);
+            // Envoyer toutes les données nécessaires au Dashboard du joueur
+            socket.emit('login-success-dashboard', {
+                player: players[codeVerif],
+                tournoisInfos: tournoisInfos,
+                tournoiActuel: tournoiActuel,
+                liveHistory: drawnNumbers
             });
-        });
-
-        socket.on('login-error', () => {
-            alert("Accès refusé. Ce code n'existe pas ou la partie n'est pas initialisée.");
-            window.location.href = '/';
-        });
-
-        socket.on('new-ball', (data) => document.getElementById('live-ball').textContent = data.actuelle);
-        socket.on('update-pions', (player) => updatePionsView(player));
-        socket.on('game-reset', () => window.location.reload());
-
-        function updatePionsView(p) {
-            document.getElementById('p20').textContent = p.p20;
-            document.getElementById('p50').textContent = p.p50;
-            document.getElementById('p100').textContent = p.p100;
+            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+        } else {
+            socket.emit('login-error');
         }
+    });
 
-        function commander() {
-            const type = document.getElementById('b-type').value;
-            const qte = document.getElementById('b-qte').value;
-            socket.emit('player-order', { code: monCode, type, qte });
-            alert("Demande de virement envoyée à la caisse !");
+    // Inscription au tournoi en cours
+    socket.on('player-register-tournoi', (code) => {
+        if (players[code]) {
+            if (players[code].tournoisInscrits.includes(tournoiActuel.nom)) {
+                return socket.emit('notification', "Déjà inscrit à ce tournoi !");
+            }
+            if (players[code].pions >= tournoiActuel.coût) {
+                players[code].pions -= tournoiActuel.coût;
+                players[code].tournoisInscrits.push(tournoiActuel.nom);
+                players[code].historiquePions.unshift({
+                    date: "À l'instant",
+                    description: `Inscription : ${tournoiActuel.nom}`,
+                    montant: `-${tournoiActuel.coût}`
+                });
+                socket.emit('update-dashboard', players[code]);
+                socket.emit('notification', "🎉 Inscription validée avec succès !");
+                io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+            } else {
+                socket.emit('notification', "❌ Pions insuffisants pour ce tournoi.");
+            }
         }
-    </script>
-</body>
-</html>
+    });
+
+    socket.on('player-order', ({ code, type, qte }) => {
+        if (!players[code]) return;
+        const newOrder = { id: Date.now(), code, nom: players[code].nom, type, qte };
+        orders.push(newOrder);
+        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+    });
+
+    socket.on('admin-validate-order', (idOrder) => {
+        const idx = orders.findIndex(o => o.id === idOrder);
+        if (idx !== -1) {
+            const o = orders[idx];
+            if (players[o.code]) {
+                let gain = parseInt(o.qte);
+                players[o.code].pions += gain;
+                players[o.code].historiquePions.unshift({
+                    date: "Validé par Admin",
+                    description: `Achat Rechargement (${o.type})`,
+                    montant: `+${gain}`
+                });
+                if (players[o.code].socketId) {
+                    io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]);
+                }
+            }
+            orders.splice(idx, 1);
+            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+        }
+    });
+
+    socket.on('admin-draw', () => {
+        if (pool.length === 0) return;
+        const idx = Math.floor(Math.random() * pool.length);
+        const num = pool.splice(idx, 1)[0];
+        drawnNumbers.push(num);
+        io.emit('new-ball', { actuelle: num, historique: drawnNumbers });
+    });
+
+    socket.on('admin-reset-all', () => {
+        players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; playerCount = 0;
+        io.emit('game-reset');
+        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+    });
+
+    socket.on('disconnect', () => {
+        for (let code in players) {
+            if (players[code].socketId === socket.id) {
+                players[code].online = false;
+                players[code].socketId = null;
+                io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+                break;
+            }
+        }
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => { console.log(`Serveur actif port ${PORT}`); });
