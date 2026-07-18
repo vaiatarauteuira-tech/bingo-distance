@@ -3,102 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portail Bingo Événementiel</title>
+    <title>Ticket Bingo - Choisissez votre espace</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .portal-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 450px; width: 100%; text-align: center; }
-        h1 { color: #1a202c; margin-bottom: 25px; font-size: 1.8rem; }
-        .choice-box { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; text-align: left; }
-        .choice-box:hover { border-color: #007bff; background: #f0f7ff; }
-        .choice-box h3 { margin: 0 0 5px 0; color: #007bff; }
-        .choice-box p { margin: 0; font-size: 13px; color: #4a5568; }
-        input { width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ced4da; font-size: 16px; text-align: center; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .btn-back { background: #6c757d; margin-top: 8px; width: 100%; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; margin-bottom: 5px; }
-        .b-joueur { background: #28a745; } .b-orga { background: #fd7e14; } .b-admin { background: #dc3545; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #0b0c1e; /* Fond violet/noir très sombre de la capture */
+            color: #f8fafc; 
+            margin: 0; 
+            padding: 20px 10px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
+        }
+        
+        /* En-tête avec la boule 8 */
+        .header-zone {
+            text-align: center;
+            margin-bottom: 25px;
+            margin-top: 10px;
+        }
+        .ball-logo {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #4b5563, #111827, #030712);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            margin: 0 auto 15px auto;
+        }
+        .ball-inner {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        .main-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin: 0;
+            text-transform: uppercase;
+            color: white;
+        }
+        .subtitle {
+            color: #8b9bb4;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* Conteneurs de blocs d'espaces */
+        .space-card { 
+            background: #141733; /* Teinte violette foncée des compartiments */
+            border: 1px solid #222654;
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .space-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .title-joueur { color: #10b981; }
+        .title-orga { color: #f43f5e; }
+        .title-revendeur { color: #3b82f6; }
+        .title-admin { color: #f59e0b; }
+
+        /* Champs de saisie intégrés aux blocs */
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            background: #1c204d; 
+            border: 1px solid #2d337a; 
+            border-radius: 10px; 
+            color: white; 
+            box-sizing: border-box; 
+            margin-bottom: 12px; 
+            font-size: 15px; 
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        input::placeholder {
+            color: #5661a5;
+            text-transform: uppercase;
+        }
+
+        /* Boutons personnalisés calqués sur le modèle */
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 15px; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+        .btn-green { background: #10b981; color: white; } .btn-green:hover { background: #059669; }
+        .btn-purple { background: #6366f1; color: white; } .btn-purple:hover { background: #4f46e5; }
+        .btn-blue { background: #2563eb; color: white; }
+        .btn-orange { background: #f59e0b; color: white; }
+
+        /* Liens guides informatifs clairs sous les boutons */
+        .guide-link {
+            display: block;
+            text-align: center;
+            color: #10b981;
+            font-size: 13px;
+            text-decoration: underline;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+        .guide-orga { color: #3b82f6; }
     </style>
 </head>
 <body>
 
-    <!-- MENU PRINCIPAL -->
-    <div class="portal-card" id="portal-menu">
-        <h1>🎉 Bingo Événementiel</h1>
-        <p style="color: #6c757d; margin-bottom: 25px;">Bienvenue ! Veuillez choisir votre espace de connexion :</p>
-        
-        <div class="choice-box" onclick="showForm('joueur')">
-            <span class="badge b-joueur">PUBLIC</span>
-            <h3>👤 Éspace Joueur</h3>
-            <p>Accédez à votre carton de jeu et gérez vos pions.</p>
-        </div>
-
-        <div class="choice-box" onclick="showForm('organisateur')">
-            <span class="badge b-orga">RESTREINT</span>
-            <h3>🎙️ Éspace Organisateur / Animateur</h3>
-            <p>Canal micro et console de tirage des boules en direct.</p>
-        </div>
-
-        <div class="choice-box" onclick="showForm('admin')">
-            <span class="badge b-admin">SÉCURISÉ</span>
-            <h3>🛠️ Console Administrateur / Caisse</h3>
-            <p>Gestion des codes personnalisés et validation des virements.</p>
-        </div>
+    <!-- ZONE DE REPRODUCTION LOGO BOULE ET TITRE -->
+    <div class="header-zone">
+        <div class="ball-logo"><div class="ball-inner">8</div></div>
+        <h1 class="main-title">Ticket Bingo</h1>
+        <div class="subtitle">Choisissez votre espace</div>
     </div>
 
-    <!-- ZONE DE FORMULAIRES (Masqués au départ) -->
-    <div class="portal-card" id="zone-formulaire" style="display:none;">
-        <div id="contenu-joueur" style="display:none;">
-            <span class="badge b-joueur">ÉSPACE JOUEUR</span>
-            <h2>Connexion à la partie</h2>
-            <input type="text" id="code-joueur" placeholder="Entrez votre code (Ex: MARC001)">
-            <button onclick="loginJoueur()">Jouer maintenant 🚀</button>
-        </div>
+    <!-- MODULE JOUEUR -->
+    <div class="space-card">
+        <h3 class="space-title title-joueur">🎮 Espace Joueur</h3>
+        <input type="text" id="code-joueur" placeholder="VOTRE CODE TICKET">
+        <button class="btn-green" onclick="loginJoueur()">🎯 Jouer maintenant !</button>
+        <button class="btn-purple" onclick="redirigerAchatPions()">🪙 Commander des pions</button>
+        <span class="guide-link" onclick="alert('Ouverture du guide joueur...')">📖 Comment jouer ? Le guide en 2 minutes</span>
+    </div>
 
-        <div id="contenu-organisateur" style="display:none;">
-            <span class="badge b-orga">ÉSPACE ANIMATEUR</span>
-            <h2>Code Organisateur Requis</h2>
-            <input type="password" id="code-orga" placeholder="Mot de passe Animateur">
-            <button onclick="loginOrga()" style="background:#fd7e14;">Ouvrir le Boulier 🔮</button>
-        </div>
+    <!-- MODULE ORGANISATEUR -->
+    <div class="space-card">
+        <h3 class="space-title title-orga">🎪 Espace Organisateur</h3>
+        <input type="password" id="code-orga" placeholder="VOTRE CODE ORGANISATEUR">
+        <button class="btn-purple" onclick="loginOrga()">🎪 Accéder à mon espace</button>
+        <button class="btn-purple" style="background: #1e235a;" onclick="alert('Plages tarifaires d\'organisation standard')">💰 Nos prix</button>
+        <span class="guide-link guide-orga" style="margin-bottom: 5px;" onclick="alert('Formulaire de demande...')">📋 Demander un accès organisateur</span>
+        <span class="guide-link guide-orga" onclick="alert('Ouverture du guide animateur...')">📘 Comment organiser ? Le guide en 2 minutes</span>
+    </div>
 
-        <div id="contenu-admin" style="display:none;">
-            <span class="badge b-admin">DIRECTION</span>
-            <h2>Accès Maître Administrateur</h2>
-            <input type="password" id="code-admin" placeholder="Mot de passe Admin">
-            <button onclick="loginAdmin()" style="background:#dc3545;">Ouvrir la Caisse 🛠️</button>
-        </div>
+    <!-- MODULE REVENDEUR -->
+    <div class="space-card">
+        <h3 class="space-title title-revendeur">🛒 Espace Revendeur</h3>
+        <input type="password" id="code-revendeur" placeholder="VOTRE CODE REVENDEUR">
+        <button class="btn-blue" onclick="loginRevendeur()">🛒 Accéder à mon espace</button>
+    </div>
 
-        <button class="btn-back" onclick="hideAll()">⬅️ Retour au menu</button>
+    <!-- MODULE MAÎTRE ADMIN -->
+    <div class="space-card" style="margin-bottom: 5px;">
+        <h3 class="space-title title-admin">👑 Espace Admin</h3>
+        <input type="password" id="code-admin" placeholder="CODE ADMINISTRATEUR">
+        <button class="btn-orange" onclick="loginAdmin()">👑 Accéder à l'admin</button>
     </div>
 
     <script>
-        function showForm(type) {
-            // On cache le menu de sélection
-            document.getElementById('portal-menu').style.display = 'none';
-            // On montre le conteneur de formulaire
-            document.getElementById('zone-formulaire').style.display = 'block';
-            
-            // On cache d'abord les trois contenus pour éviter les mélanges
-            document.getElementById('contenu-joueur').style.display = 'none';
-            document.getElementById('contenu-organisateur').style.display = 'none';
-            document.getElementById('contenu-admin').style.display = 'none';
-            
-            // On affiche uniquement celui sur lequel on a cliqué
-            if(type === 'joueur') document.getElementById('contenu-joueur').style.display = 'block';
-            if(type === 'organisateur') document.getElementById('contenu-organisateur').style.display = 'block';
-            if(type === 'admin') document.getElementById('contenu-admin').style.display = 'block';
-        }
-
-        function hideAll() {
-            document.getElementById('zone-formulaire').style.display = 'none';
-            document.getElementById('portal-menu').style.display = 'block';
-        }
-
         function loginJoueur() {
             const code = document.getElementById('code-joueur').value.trim().toUpperCase();
-            if(!code) return alert("Veuillez entrer votre code.");
+            if(!code) return alert("Veuillez saisir votre code ticket.");
             sessionStorage.setItem('joueurCode', code);
             window.location.href = '/joueur.html';
+        }
+
+        function redirigerAchatPions() {
+            const code = document.getElementById('code-joueur').value.trim().toUpperCase();
+            if(!code) return alert("Veuillez d'abord inscrire votre code ticket dans la case ci-dessus pour commander.");
+            sessionStorage.setItem('joueurCode', code);
+            window.location.href = '/joueur.html'; // Redirige directement vers son relevé d'achat de pions
         }
 
         function loginOrga() {
@@ -111,13 +210,17 @@
             }
         }
 
+        function loginRevendeur() {
+            alert("Espace revendeur en cours de maintenance.");
+        }
+
         function loginAdmin() {
             const code = document.getElementById('code-admin').value.trim();
             if(code === "SUPERADMIN") {
                 sessionStorage.setItem('adminToken', 'valide');
                 window.location.href = '/admin.html';
             } else {
-                alert("Mot de passe Administrateur incorrect.");
+                alert("Code Administrateur incorrect.");
             }
         }
     </script>
