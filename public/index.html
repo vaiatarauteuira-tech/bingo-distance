@@ -2,95 +2,123 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bingo Événementiel - Joueur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Bingo Événementiel</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
-        .container { max-width: 450px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .pions-box { display: flex; gap: 10px; margin: 15px 0; }
-        .pion { flex: 1; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
-        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 15px 0; background: #1a202c; padding: 8px; border-radius: 6px; }
-        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        .cell.marked { background: #48bb78; color: white; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .portal-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 450px; width: 100%; text-align: center; }
+        h1 { color: #1a202c; margin-bottom: 25px; font-size: 1.8rem; }
+        .choice-box { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; text-align: left; }
+        .choice-box:hover { border-color: #007bff; background: #f0f7ff; }
+        .choice-box h3 { margin: 0 0 5px 0; color: #007bff; }
+        .choice-box p { margin: 0; font-size: 13px; color: #4a5568; }
+        .form-zone { display: none; margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ced4da; font-size: 16px; text-align: center; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-back { background: #6c757d; margin-top: 8px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; margin-bottom: 5px; }
+        .b-joueur { background: #28a745; } .b-orga { background: #fd7e14; } .b-admin { background: #dc3545; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>👤 Connexion Joueur</h2>
-        <div id="login-zone">
-            <input type="text" id="code-in" placeholder="Entrez votre code BINGO-XXXX">
-            <button onclick="login()">Rejoindre la Partie</button>
+
+    <div class="portal-card" id="portal-menu">
+        <h1>🎉 Bingo Événementiel</h1>
+        <p style="color: #6c757d; margin-bottom: 25px;">Bienvenue ! Veuillez choisir votre espace de connexion :</p>
+        
+        <div class="choice-box" onclick="showForm('joueur')">
+            <span class="badge b-joueur">PUBLIC</span>
+            <h3>👤 Éspace Joueur</h3>
+            <p>Accédez à votre carton de jeu et gérez vos pions.</p>
         </div>
 
-        <div id="game-zone" style="display:none;">
-            <h3 id="p-name">Joueur</h3>
-            <div style="background:#fff3cd; font-size:1.8rem; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:10px; color:#dc3545;">
-                📢 Numéro Tiré : <span id="live-ball">-</span>
-            </div>
-
-            <h4>🎒 Vos Pions :</h4>
-            <div class="pions-box">
-                <div class="pion">Pions 20<h3 id="p20">0</h3></div>
-                <div class="pion">Pions 50<h3 id="p50">0</h3></div>
-                <div class="pion">Pions 100<h3 id="p100">0</h3></div>
-            </div>
-
-            <div class="board" id="bingo-board"></div>
-
-            <div style="background:#edf2f7; padding:12px; border-radius:6px; text-align:left;">
-                <h4 style="margin:0 0 5px 0;">💳 Recharger par virement :</h4>
-                <select id="b-type"><option value="p20">Pions de 20</option><option value="p50">Pions de 50</option><option value="p100">Pions de 100</option></select>
-                <input type="number" id="b-qte" value="5" min="1">
-                <button onclick="commander()" style="background:#dd6b20;">Envoyer la demande</button>
-            </div>
+        <div class="choice-box" onclick="showForm('organisateur')">
+            <span class="badge b-orga">RESTREINT</span>
+            <h3>🎙️ Éspace Organisateur / Animateur</h3>
+            <p>Canal micro et console de tirage des boules en direct.</p>
         </div>
+
+        <div class="choice-box" onclick="showForm('admin')">
+            <span class="badge b-admin">SÉCURISÉ</span>
+            <h3>🛠️ Console Administrateur / Caisse</h3>
+            <p>Gestion des 50 codes, validation des virements et des gains.</p>
+        </div>
+    </div>
+
+    <!-- FORMULAIRE JOUEUR -->
+    <div class="portal-card id-zone" id="zone-joueur" style="display:none;">
+        <span class="badge b-joueur">ÉSPACE JOUEUR</span>
+        <h2>Connexion à la partie</h2>
+        <input type="text" id="code-joueur" placeholder="Entrez votre code BINGO-XXXX">
+        <button onclick="loginJoueur()">Jouer maintenant 🚀</button>
+        <button class="btn-back" onclick="hideAll()">Retour</button>
+    </div>
+
+    <!-- FORMULAIRE ORGANISATEUR -->
+    <div class="portal-card id-zone" id="zone-organisateur" style="display:none;">
+        <span class="badge b-orga">ÉSPACE ANIMATEUR</span>
+        <h2>Code Organisateur Requis</h2>
+        <input type="password" id="code-orga" placeholder="Entrez le code d'accès de l'événement">
+        <button onclick="loginOrga()" style="background:#fd7e14;">Ouvrir le Boulier 🔮</button>
+        <button class="btn-back" onclick="hideAll()">Retour</button>
+    </div>
+
+    <!-- FORMULAIRE ADMIN -->
+    <div class="portal-card id-zone" id="zone-admin" style="display:none;">
+        <span class="badge b-admin">DIRECTION</span>
+        <h2>Accès Maître Administrateur</h2>
+        <input type="password" id="code-admin" placeholder="Entrez le mot de passe Admin">
+        <button onclick="loginAdmin()" style="background:#dc3545;">Ouvrir la Caisse 🛠️</button>
+        <button class="btn-back" onclick="hideAll()">Retour</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let monCode = "";
 
-        function login() {
-            monCode = document.getElementById('code-in').value.trim().toUpperCase();
-            socket.emit('player-login', monCode);
+        function showForm(type) {
+            document.getElementById('portal-menu').style.display = 'none';
+            if(type === 'joueur') document.getElementById('zone-joueur').style.display = 'block';
+            if(type === 'organisateur') document.getElementById('zone-organisateur').style.display = 'block';
+            if(type === 'admin') document.getElementById('zone-admin').style.display = 'block';
         }
 
-        socket.on('login-success', (player) => {
-            document.getElementById('login-zone').style.display = 'none';
-            document.getElementById('game-zone').style.display = 'block';
-            document.getElementById('p-name').textContent = `👋 ${player.nom}`;
-            updatePionsView(player);
-            
-            // Grille
-            const b = document.getElementById('bingo-board');
-            b.innerHTML = '';
-            player.grille.forEach((num, idx) => {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
-                else { c.textContent = num; c.onclick = () => c.classList.toggle('marked'); }
-                b.appendChild(c);
-            });
-        });
-
-        socket.on('login-error', () => alert("Code invalide ! L'admin doit initialiser la partie."));
-        socket.on('new-ball', (data) => document.getElementById('live-ball').textContent = data.actuelle);
-        socket.on('update-pions', (player) => updatePionsView(player));
-        socket.on('game-reset', () => window.location.reload());
-
-        function updatePionsView(p) {
-            document.getElementById('p20').textContent = p.p20;
-            document.getElementById('p50').textContent = p.p50;
-            document.getElementById('p100').textContent = p.p100;
+        function hideAll() {
+            document.getElementById('zone-joueur').style.display = 'none';
+            document.getElementById('zone-organisateur').style.display = 'none';
+            document.getElementById('zone-admin').style.display = 'none';
+            document.getElementById('portal-menu').style.display = 'block';
         }
 
-        function commander() {
-            const type = document.getElementById('b-type').value;
-            const qte = document.getElementById('b-qte').value;
-            socket.emit('player-order', { code: monCode, type, qte });
-            alert("Demande envoyée !");
+        // REDIRECTIONS ET VÉRIFICATIONS
+        function loginJoueur() {
+            const code = document.getElementById('code-joueur').value.trim().toUpperCase();
+            if(!code) return alert("Veuillez entrer un code.");
+            // On stocke le code dans la mémoire du navigateur pour que la page suivante s'en rappelle
+            sessionStorage.setItem('joueurCode', code);
+            window.location.href = '/joueur.html';
+        }
+
+        function loginOrga() {
+            const code = document.getElementById('code-orga').value.trim();
+            // Code secret pour l'organisateur : "ORGA2026" (Modifiable ici)
+            if(code === "ORGA2026") {
+                sessionStorage.setItem('orgaToken', 'valide');
+                window.location.href = '/organisateur.html';
+            } else {
+                alert("Code Organisateur incorrect.");
+            }
+        }
+
+        function loginAdmin() {
+            const code = document.getElementById('code-admin').value.trim();
+            // Code secret pour toi l'admin : "SUPERADMIN" (Modifiable ici)
+            if(code === "SUPERADMIN") {
+                sessionStorage.setItem('adminToken', 'valide');
+                window.location.href = '/admin.html';
+            } else {
+                alert("Mot de passe Administrateur incorrect.");
+            }
         }
     </script>
 </body>
