@@ -50,7 +50,6 @@
         if(!monCode) {
             window.location.href = '/';
         } else {
-            // Se connecter automatiquement avec le code récupéré du portail d'accueil
             socket.emit('player-login', monCode);
         }
 
