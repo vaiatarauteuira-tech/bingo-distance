@@ -1,127 +1,296 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-let players = {};
-let pool = Array.from({length: 75}, (_, i) => i + 1);
-let drawnNumbers = [];
-let orders = [];
-let playerCount = 0;
-
-let tournoiActuel = { nom: "Session Bingo Live Pro", statut: "Ouvert", coût: 50 };
-
-io.on('connection', (socket) => {
-    
-    socket.on('admin-init', () => {
-        socket.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
-
-    socket.on('admin-add-player', (nomJoueur) => {
-        playerCount++;
-        let nomNettoye = nomJoueur.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-        if (!nomNettoye) { nomNettoye = "JOUEUR"; }
-        const chiffresFormates = String(playerCount).padStart(3, '0');
-        const code = `${nomNettoye}${chiffresFormates}`;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Premium - Bingo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; padding-bottom: 90px; } /* Marge réduite pour le bandeau compact */
+        .main-container { max-width: 900px; margin: 0 auto; }
         
-        players[code] = {
-            nom: nomJoueur.trim() || `Joueur ${playerCount}`,
-            code: code,
-            pions: 0,
-            nombreFiches: 1, // Commence avec 1 fiche par défaut à la création
-            historiquePions: [{ date: "Ouverture", description: "Dossier joueur créé", montant: "+0" }],
-            tournoisInscrits: [],
-            online: false,
-            socketId: null
-        };
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h3 { margin-top: 0; color: #38bdf8; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+        
+        .wallet-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px 20px; border-radius: 12px; border-bottom: 4px solid #06b6d4; margin-bottom: 15px; }
+        .wallet-info { font-size: 1.3rem; font-weight: bold; color: #06b6d4; }
+        
+        button { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        button.primary { background: #0284c7; color: white; } button.primary:hover { background: #0369a1; }
+        button.sec { background: #475569; color: white; } button.sec:hover { background: #334155; }
+        button.action-btn { background: #06b6d4; color: #0f172a; }
+        button.nav-btn { background: #f59e0b; color: white; padding: 6px 12px; }
 
-    socket.on('player-login', (code) => {
-        const codeVerif = code.trim().toUpperCase();
-        if (players[codeVerif]) {
-            players[codeVerif].online = true;
-            players[codeVerif].socketId = socket.id;
-            socket.emit('login-success-dashboard', {
-                player: players[codeVerif],
-                tournoiActuel: tournoiActuel,
-                liveHistory: drawnNumbers
-            });
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-        } else {
-            socket.emit('login-error');
+        /* Multi-Fiches */
+        .fiche-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #0f172a; padding: 8px; border-radius: 8px; }
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; background: #0f172a; padding: 8px; border-radius: 8px; }
+        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #334155; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.1rem; border: 1px solid #475569; }
+        .cell.marked { background: #0284c7; color: white; box-shadow: 0 0 8px rgba(2, 132, 199, 0.5); border-color: #38bdf8; }
+
+        /* Tableau de vérification complet (1 à 75) */
+        .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #0f172a; padding: 8px; border-radius: 8px; margin-top: 10px; }
+        @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
+        .verif-num { background: #1e293b; border: 1px solid #334155; text-align: center; font-size: 11px; padding: 4px 0; border-radius: 3px; color: #64748b; font-weight: bold; }
+        .verif-num.out { background: #ef4444; color: white; border-color: #f87171; box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); }
+
+        input[type="number"] { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 15px; }
+        .price-tag { background: #10b981; color: #0f172a; font-weight: bold; padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 10px; font-size: 14px; }
+
+        /* BANDEAU DES BOULES COMPACT TOUT EN BAS */
+        .bottom-live-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 3px solid #ef4444; padding: 8px 15px; display: flex; align-items: center; gap: 15px; z-index: 999; box-shadow: 0 -3px 10px rgba(0,0,0,0.3); height: 50px; }
+        .live-ball-circle { width: 44px; height: 44px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; }
+        .live-history-zone { overflow-x: auto; white-space: nowrap; font-size: 13px; color: #cbd5e1; font-weight: 500; }
+
+        /* POP-UP MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: #1e293b; border: 1px solid #475569; border-radius: 12px; padding: 20px; max-width: 550px; width: 100%; max-height: 80vh; overflow-y: auto; }
+        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
+        .statement-table th { background: #0f172a; padding: 8px; text-align: left; color: #94a3b8; }
+        .statement-table td { padding: 8px; border-bottom: 1px solid #334155; }
+        .pos { color: #4ade80; font-weight: bold; } .neg { color: #f87171; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- BARRE DE SOLDE & RELÈVE POPUP -->
+        <div class="wallet-bar">
+            <div>
+                <div style="font-size: 11px; color: #94a3b8;">MON PORTESOLDE</div>
+                <div class="wallet-info" id="solde-pions">0 Pions</div>
+            </div>
+            <button class="action-btn" onclick="ouvrirReleve()">📊 Mon Relevé</button>
+        </div>
+
+        <!-- ZONE DES CARTONS DE BINGO DYNAMIQUES -->
+        <div class="card">
+            <h3>🎲 Mes Cartons de Bingo commandés</h3>
+            <button class="primary" id="btn-ouvrir-fiches" onclick="ouvrirFichesZone()" style="width:100%;">🔍 Déplier mes fiches de jeu</button>
+            
+            <div id="fiches-zone" style="display:none; margin-top:10px;">
+                <div class="fiche-control">
+                    <button class="nav-btn" onclick="fichePrecedente()">⬅️ Précédent</button>
+                    <span id="fiche-index-label" style="font-weight:bold; color:#f59e0b;">Fiche 1 / 1</span>
+                    <button class="nav-btn" onclick="ficheSuivante()">Suivant ➡️</button>
+                </div>
+                <button class="sec" id="btn-auto" onclick="toggleAutoMode()" style="width:100%; margin-bottom:8px;">🤖 Coche Automatique : OFF</button>
+                <div class="board" id="bingo-board"></div>
+            </div>
+        </div>
+
+        <!-- TABLEAU DE VÉRIFICATION COMPLET DE 1 À 75 -->
+        <div class="card">
+            <h3>📋 Tableau Général de Vérification (1 à 75)</h3>
+            <p style="font-size:12px; color:#94a3b8; margin-top:-8px;">Vérifiez ici si vous avez oublié de cocher un numéro sorti.</p>
+            <div class="verif-grid" id="tableau-verification"></div>
+        </div>
+
+        <!-- INSCRIPTION TOURNOIS -->
+        <div class="card" style="border-color: #f59e0b;">
+            <h3>🏆 Partie en cours d'annonce</h3>
+            <h4 id="t-actuel-nom" style="margin:2px 0; color:#f59e0b;">En attente...</h4>
+            <p style="font-size:12px; color:#94a3b8; margin:0 0 10px 0;">Coût du ticket : <span id="t-actuel-cout">0</span> Pions</p>
+            <button class="primary" onclick="sInscrireTournoi()" style="background:#d97706; width:100%;">Participer au match</button>
+        </div>
+
+        <!-- ACHAT DE PIONS -->
+        <div class="card">
+            <h3>💳 Commander des Pions supplémentaires</h3>
+            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:4px;">Nombre de pions désirés (1 pion = 100fr) :</label>
+            <input type="number" id="achat-quantite" value="5" min="1" oninput="calculerPrixAchat()">
+            <div class="price-tag" id="prix-calcule">💵 Virement requis : 500 fr</div>
+            <button class="primary" onclick="envoyerRecharge()" style="background:#10b981; width:100%;">Valider la commande</button>
+        </div>
+
+    </div>
+
+    <!-- POP-UP RELEVÉ -->
+    <div class="modal" id="modal-releve">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #475569; padding-bottom:8px;">
+                <h3 style="margin:0;">📊 Relevé d'Opérations</h3>
+                <button onclick="fermerReleve()" style="background:#ef4444; color:white; padding:4px 8px;">X</button>
+            </div>
+            <table class="statement-table">
+                <thead><tr><th>Date</th><th>Description</th><th>Montant</th></tr></thead>
+                <tbody id="statement-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- BANDEAU ULTRA COMPACT EN BAS -->
+    <div class="bottom-live-bar">
+        <div class="live-ball-circle" id="live-ball">-</div>
+        <div class="live-history-zone" id="history">En attente du premier tirage...</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const monCode = sessionStorage.getItem('joueurCode');
+        let autoCoche = false;
+        
+        let fichesJoueur = []; 
+        let indexFicheActuelle = 0;
+        let totalFichesCommandees = 1; // Reçu dynamiquement du serveur
+
+        if(!monCode) { window.location.href = '/'; } 
+        else { socket.emit('player-login', monCode); }
+
+        function calculerPrixAchat() {
+            const qte = document.getElementById('achat-quantite').value || 0;
+            document.getElementById('prix-calcule').textContent = `💵 Virement requis : ${(qte * 100).toLocaleString()} fr`;
         }
-    });
 
-    socket.on('player-order', ({ code, type, qte }) => {
-        if (!players[code]) return;
-        const nbrPions = parseInt(qte);
-        const francs = nbrPions * 100;
-        
-        orders.push({ 
-            id: Date.now(), 
-            code, 
-            nom: players[code].nom, 
-            type: `Commande de fiches / virement de ${francs.toLocaleString()} fr`, 
-            qte: nbrPions 
-        });
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
+        // Initialiser le tableau complet de 1 à 75 au démarrage
+        function initialiserTableauVerif() {
+            const grid = document.getElementById('tableau-verification');
+            grid.innerHTML = '';
+            for(let i=1; i<=75; i++) {
+                const box = document.createElement('div');
+                box.className = 'verif-num';
+                box.id = `verif-${i}`;
+                box.textContent = i;
+                grid.appendChild(box);
+            }
+        }
 
-    socket.on('admin-validate-order', (idOrder) => {
-        const idx = orders.findIndex(o => o.id === idOrder);
-        if (idx !== -1) {
-            const o = orders[idx];
-            if (players[o.code]) {
-                players[o.code].pions += o.qte;
-                // On augmente aussi proportionnellement son quota de fiches utilisables si c'est une commande de fiches
-                players[o.code].nombreFiches += Math.floor(o.qte / 5) || 1; 
-                
-                players[o.code].historiquePions.unshift({
-                    date: "Caisse ok",
-                    description: `Recharge + Attribution Cartons`,
-                    montant: `+${o.qte}`
+        socket.on('login-success-dashboard', (data) => {
+            document.title = `Espace - ${data.player.nom}`;
+            totalFichesCommandees = data.player.nombreFiches || 1; // Récupère le nombre de fiches réel
+            refreshUI(data.player);
+            initialiserTableauVerif();
+            
+            document.getElementById('t-actuel-nom').textContent = data.tournoiActuel.nom;
+            document.getElementById('t-actuel-cout').textContent = data.tournoiActuel.coût;
+
+            // Génère le nombre exact de fiches commandées par le joueur
+            fichesJoueur = Array.from({length: totalFichesCommandees}, (_, idx) => ({
+                id: idx + 1,
+                numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
+                coches: new Array(25).fill(false)
+            }));
+            fichesJoueur.forEach(f => f.coches[12] = true); // Case FREE
+
+            // Marquer rétroactivement les boules déjà sorties si la partie tourne
+            if(data.liveHistory.length > 0) {
+                document.getElementById('live-ball').textContent = data.liveHistory[data.liveHistory.length - 1];
+                document.getElementById('history').textContent = "Historique : " + data.liveHistory.slice(-5).join(' - ');
+                data.liveHistory.forEach(b => {
+                    const el = document.getElementById(`verif-${b}`);
+                    if(el) el.classList.add('out');
                 });
-                if (players[o.code].socketId) {
-                    io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]);
+            }
+        });
+
+        socket.on('update-dashboard', (player) => { 
+            totalFichesCommandees = player.nombreFiches || 1;
+            refreshUI(player); 
+        });
+        
+        socket.on('notification', (msg) => { alert(msg); });
+
+        socket.on('new-ball', (data) => {
+            const boule = data.actuelle;
+            document.getElementById('live-ball').textContent = boule;
+            
+            // Affiche uniquement les 6 derniers numéros en bas pour rester compact
+            document.getElementById('history').textContent = "Derniers tirages : " + data.historique.slice(-6).join(' - ');
+            
+            // Allume la boule en rouge dans le tableau général de vérification
+            const el = document.getElementById(`verif-${boule}`);
+            if(el) el.classList.add('out');
+            
+            // Synthèse vocale
+            if ('speechSynthesis' in window) {
+                let utterance = new SpeechSynthesisUtterance(`Numéro ${boule}`);
+                utterance.lang = 'fr-FR';
+                window.speechSynthesis.speak(utterance);
+            }
+
+            if(autoCoche) {
+                fichesJoueur.forEach(f => {
+                    const idx = f.numeros.indexOf(boule);
+                    if(idx !== -1) f.coches[idx] = true;
+                });
+                renderCarton();
+            }
+        });
+
+        function ouvrirFichesZone() {
+            document.getElementById('btn-ouvrir-fiches').style.display = 'none';
+            document.getElementById('fiches-zone').style.display = 'block';
+            renderCarton();
+        }
+
+        function renderCarton() {
+            if(fichesJoueur.length === 0) return;
+            const currentFiche = fichesJoueur[indexFicheActuelle];
+            document.getElementById('fiche-index-label').textContent = `Fiche ${currentFiche.id} / ${fichesJoueur.length}`;
+            
+            const b = document.getElementById('bingo-board');
+            b.innerHTML = '';
+            currentFiche.numeros.forEach((num, idx) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                if(idx === 12) {
+                    c.textContent = "FREE";
+                    c.classList.add('marked');
+                } else {
+                    c.textContent = num;
+                    if(currentFiche.coches[idx]) c.classList.add('marked');
+                    c.onclick = () => {
+                        if(!autoCoche) {
+                            currentFiche.coches[idx] = !currentFiche.coches[idx];
+                            c.classList.toggle('marked');
+                        }
+                    };
                 }
-            }
-            orders.splice(idx, 1);
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+                b.appendChild(c);
+            });
         }
-    });
 
-    socket.on('admin-draw', () => {
-        if (pool.length === 0) return;
-        const idx = Math.floor(Math.random() * pool.length);
-        const num = pool.splice(idx, 1)[0];
-        drawnNumbers.push(num);
-        io.emit('new-ball', { actuelle: num, historique: drawnNumbers });
-    });
-
-    socket.on('admin-reset-all', () => {
-        players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; playerCount = 0;
-        io.emit('game-reset');
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
-
-    socket.on('disconnect', () => {
-        for (let code in players) {
-            if (players[code].socketId === socket.id) {
-                players[code].online = false;
-                players[code].socketId = null;
-                io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-                break;
+        function ficheSuivante() {
+            if(indexFicheActuelle < fichesJoueur.length - 1) {
+                indexFicheActuelle++;
+                renderCarton();
             }
         }
-    });
-});
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`Serveur prêt`); });
+        function fichePrecedente() {
+            if(indexFicheActuelle > 0) {
+                indexFicheActuelle--;
+                renderCarton();
+            }
+        }
+
+        function toggleAutoMode() {
+            autoCoche = !autoCoche;
+            const btn = document.getElementById('btn-auto');
+            btn.textContent = autoCoche ? "🤖 Coche Automatique : ACTIVÉ" : "🤖 Coche Automatique : OFF";
+            btn.style.background = autoCoche ? "#22c55e" : "#475569";
+        }
+
+        function refreshUI(player) {
+            document.getElementById('solde-pions').textContent = `${player.pions} Pions`;
+            const tbody = document.getElementById('statement-tbody');
+            tbody.innerHTML = '';
+            player.historiquePions.forEach(h => {
+                const cl = h.montant.startsWith('+') ? 'pos' : 'neg';
+                tbody.innerHTML += `<tr><td>${h.date}</td><td>${h.description}</td><td class="${cl}">${h.montant} Pions</td></tr>`;
+            });
+        }
+
+        function ouvrirReleve() { document.getElementById('modal-releve').style.display = 'flex'; }
+        function fermerReleve() { document.getElementById('modal-releve').style.display = 'none'; }
+        function sInscrireTournoi() { socket.emit('player-register-tournoi', monCode); }
+
+        function envoyerRecharge() {
+            const qte = document.getElementById('achat-quantite').value;
+            if(qte < 1) return alert("Quantité incorrecte.");
+            socket.emit('player-order', { code: monCode, type: "Achat Pions", qte: qte });
+            alert(`Notification envoyée à la caisse !`);
+        }
+    </script>
+</body>
+</html>
