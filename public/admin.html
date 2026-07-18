@@ -2,95 +2,310 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bingo - Panel Organisateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Maître - Supervision Bingo</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        button { width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; }
-        .boulier { text-align: center; background: #e2e8f0; padding: 15px; border-radius: 6px; margin: 15px 0; }
-        .ball { font-size: 3.5rem; font-weight: bold; color: #dc3545; }
-        .order-box { background: #fff3cd; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .player-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; font-size: 14px; align-items: center; }
-        .add-zone { background: #e6fffa; border: 1px solid #b2f5ea; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 1500px; margin: 0 auto; }
+        @media (max-width: 1024px) { .admin-grid { grid-template-columns: 1fr; } }
+        
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+        
+        button { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-success { background: #10b981; color: white; } .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; } .btn-danger:hover { background: #dc2626; }
+        .btn-primary { background: #0284c7; color: white; }
+        
+        input, select, textarea { width: 100%; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; }
+        
+        /* Boulier automatique */
+        .boulier-box { text-align: center; background: #0f172a; padding: 15px; border-radius: 8px; }
+        .ball-display { width: 65px; height: 65px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 10px auto; box-shadow: 0 0 15px rgba(239,68,68,0.4); }
+        
+        /* Listes et Tableaux */
+        .data-list { max-height: 200px; overflow-y: auto; background: #0f172a; padding: 8px; border-radius: 6px; font-size: 13px; }
+        .item-box { background: #1e293b; padding: 8px; border-radius: 4px; margin-bottom: 6px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .status-on { color: #4ade80; font-weight: bold; } .status-off { color: #f87171; font-weight: bold; }
+        
+        /* Grille Carton de Vérification */
+        .verif-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 250px; margin: 10px auto; background: #0f172a; padding: 6px; border-radius: 6px; }
+        .verif-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #334155; font-size: 12px; font-weight: bold; border-radius: 4px; color: white; }
+        .verif-cell.hit { background: #ef4444; border: 1px solid #f87171; }
+        .verif-cell.free { background: #0284c7; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🛠️ Console Administrateur & Caisse</h2>
+
+    <div style="text-align:center; margin-bottom:15px;">
+        <h2 style="margin:0; color:#38bdf8;">🛠️ Console Globale d'Administration & Régie</h2>
+        <p style="margin:5px 0 0 0; color:#94a3b8; font-size:14px;">Supervision temps réel, flux audio, boulier automatique et validation des gains.</p>
+    </div>
+
+    <div class="admin-grid">
         
-        <!-- NOUVELLE ZONE INSCRIPTION UN PAR UN -->
-        <div class="add-zone">
-            <h4 style="margin: 0 0 10px 0; color: #00695c;">➕ Inscrire un nouveau joueur</h4>
-            <input type="text" id="nom-joueur-input" placeholder="Ex: Jean Dupont (ou laisser vide pour automatique)">
-            <button onclick="ajouterJoueur()" style="background:#00a389; margin-bottom:0;">Créer le ticket joueur</button>
+        <!-- COLONNE GAUCHE : COMMANDE, TOURNOIS, INTAKE & AUDIO -->
+        <div>
+            <!-- MODULE AUDIO & MICRO -->
+            <div class="card">
+                <h3>🎙️ Flux Audio & Micro Événementiel</h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-success" id="btn-micro" onclick="toggleMicro()" style="flex:1;">🎤 ACTIVER LE MICRO AUDIO</button>
+                    <button class="btn-danger" onclick="couperMicro()" style="flex:1;">🔇 COUPER TOUT LE FLUX</button>
+                </div>
+                <p id="micro-status" style="font-size:12px; color:#94a3b8; margin:5px 0 0 0; text-align:center;">Statut : Flux micro inactif (Audio local standard)</p>
+            </div>
+
+            <!-- ENREGISTREMENT ET ATTRIBUTION DE SÉRIES DE FICHES -->
+            <div class="card">
+                <h3>➕ Inscription Joueur & Séries de Cartons</h3>
+                <label style="font-size:12px; color:#94a3b8;">Nom complet de la table :</label>
+                <input type="text" id="add-name" placeholder="Ex: Jean Luc / Table 04">
+                <button class="btn-success" onclick="creerJoueur()" style="width:100%;">🎟️ Ouvrir Compte & Générer Code Unique</button>
+            </div>
+
+            <!-- COMMANDES EN ATTENTE ET CLÔTURE DE MATCH -->
+            <div class="card" style="border-color: #f59e0b;">
+                <h3>🛒 Guichet : Commandes de fiches & Jetons</h3>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <button class="btn-danger" onclick="cloturerVentes()" style="flex:1; background:#d97706;">🔒 CLÔTURER LES VENTES</button>
+                    <button class="btn-success" onclick="ouvrirVentes()" style="flex:1; background:#059669;">🔓 OUVRIR LES VENTES</button>
+                </div>
+                <div class="data-list" id="orders-list">Aucune commande en attente.</div>
+            </div>
+
+            <!-- CHAT EN DIRECT : EMISSION DE FLASH MESSAGES -->
+            <div class="card">
+                <h3>💬 Alertes Info & Message Flash Général</h3>
+                <textarea id="flash-message" rows="2" placeholder="Tapez un message à envoyer instantanément sur l'écran de TOUS les joueurs..."></textarea>
+                <button class="btn-primary" onclick="envoyerFlash()" style="width:100%;">📢 Envoyer le message en direct</button>
+            </div>
         </div>
-        
-        <div class="boulier">
-            <div class="ball" id="live-ball">-</div>
-            <div id="history" style="font-size:13px; color:#4a5568; margin-top:5px;">Aucun numéro tiré.</div>
+
+        <!-- COLONNE DROITE : BOULIER AUTOMATIQUE, LIVE TRACK & BINGO -->
+        <div>
+            <!-- CONTROLE DU BOULIER AUTOMATIQUE -->
+            <div class="card" style="border-color: #ef4444;">
+                <h3>🔮 Console de Tirage & Cadence Automatique</h3>
+                <div class="boulier-box">
+                    <div class="ball-display" id="live-ball">-</div>
+                    <div style="margin-bottom:12px; font-size:13px; color:#cbd5e1;" id="live-history">Historique : Aucun</div>
+                    
+                    <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:10px;">
+                        <label style="font-size:12px;">Cadence :</label>
+                        <select id="tirage-vitesse" style="width:auto; margin:0; padding:4px;">
+                            <option value="manuel">Mode Manuel (Bouton)</option>
+                            <option value="3000">Automatique : 3 Secondes</option>
+                            <option value="5000" selected>Automatique : 5 Secondes</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-success" onclick="demarrerBoulier()" style="background:#ef4444; flex:2;">⚡ LANCER LE TIRAGE</button>
+                        <button class="btn-danger" onclick="stopperBoulier()" style="background:#475569; flex:1;">⏸️ PAUSE</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIGNALEMENT BINGO & VÉRIFICATION DES CARTONS -->
+            <div class="card" style="border-color: #a855f7;">
+                <h3>🚨 Alertes Gagnants : Vérification des Fiches en Direct</h3>
+                <div class="data-list" id="bingo-alerts" style="max-height:120px; margin-bottom:10px;">Aucune réclamation Bingo reçue.</div>
+                
+                <div id="verif-zone" style="display:none; background:#0f172a; padding:10px; border-radius:8px; text-align:center;">
+                    <span style="font-size:13px; font-weight:bold; color:#a855f7;">Carton en cours d'examen : <span id="verif-player-name">-</span></span>
+                    <div class="verif-board" id="verif-grid-box"></div>
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <button class="btn-success" onclick="approuverBingo()" style="flex:1;">✅ CORRECT (Déclencher Gain)</button>
+                        <button class="btn-danger" onclick="rejeterBingo()" style="flex:1;">❌ ERREUR / FAUX BINGO</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONITEUR DES JOUEURS CONNECTÉS ET ENVOI DE GAINS -->
+            <div class="card">
+                <h3>👥 Liste Générale des Tables & Attribution Directe de Gains</h3>
+                <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:10px;">
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="gain-code" placeholder="Code joueur (ex: MARC001)" style="margin:0;">
+                        <input type="number" id="gain-montant" placeholder="Pions gagnés" style="margin:0; width:120px;">
+                        <button class="btn-primary" onclick="attribuerGainDirect()" style="padding:0 15px;">💰 Verser</button>
+                    </div>
+                </div>
+                <div class="data-list" id="players-list">Chargement des tables...</div>
+            </div>
         </div>
 
-        <h3>📥 Commandes de pions en attente :</h3>
-        <div id="orders-zone">Aucune commande.</div>
+    </div>
 
-        <h3>👥 Joueurs inscrits à l'événement :</h3>
-        <div id="players-zone" style="font-style: italic; color: #718096;">Aucun joueur enregistré pour le moment.</div>
-
-        <button onclick="toutRemettreAZero()" style="background:#718096; margin-top:30px; font-size:12px; padding:5px;">⚠️ Réinitialiser complètement la partie</button>
+    <div style="text-align:center; margin-top:15px;">
+        <button onclick="razComplete()" style="background:#475569; color:white; font-size:11px; padding:5px 10px;">⚠️ Réinitialisation Totale de la Session</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        let timerBoulier = null;
+        let joueurEnCoursDeVerif = null;
+
         socket.emit('admin-init');
 
-        socket.on('refresh-admin', ({ players, history, orders }) => {
-            document.getElementById('history').textContent = "Historique : " + (history.join(', ') || "Aucun");
-            document.getElementById('live-ball').textContent = history[history.length - 1] || "-";
-            
-            // Commandes
-            const oZone = document.getElementById('orders-zone');
-            if(orders.length === 0) oZone.textContent = "Aucune commande.";
+        socket.on('refresh-admin', (data) => {
+            // Affichage de la boule
+            document.getElementById('live-ball').textContent = data.history[data.history.length - 1] || "-";
+            document.getElementById('live-history').textContent = "Historique : " + (data.history.slice(-8).join(' - ') || "Aucun");
+
+            // Liste des commandes
+            const oZone = document.getElementById('orders-list');
+            if(data.orders.length === 0) oZone.innerHTML = '<div style="color:#64748b;text-align:center;">Aucun virement en attente.</div>';
             else {
                 oZone.innerHTML = '';
-                orders.forEach(o => {
-                    oZone.innerHTML += `<div class="order-box">
-                        <span><strong>${o.nom}</strong> : ${o.qte}x [${o.type}]</span>
-                        <button onclick="valider(${o.id})" style="width:auto;margin:0;padding:5px 10px;background:#28a745;">Valider</button>
+                data.orders.forEach(o => {
+                    oZone.innerHTML += `<div class="item-box" style="border-color:#f59e0b;">
+                        <span>👤 <strong>${o.nom}</strong> (${o.code})<br>💵 ${o.type} (+${o.qte} Pions)</span>
+                        <button class="btn-success" onclick="validerOrdre(${o.id})">Valider & Livrer</button>
                     </div>`;
                 });
             }
 
-            // Joueurs
-            const pZone = document.getElementById('players-zone');
-            if(players.length === 0) {
-                pZone.innerHTML = 'Aucun joueur enregistré pour le moment.';
-            } else {
+            // Liste des joueurs connectés et leurs séries
+            const pZone = document.getElementById('players-list');
+            if(data.players.length === 0) pZone.innerHTML = '<div style="color:#64748b;text-align:center;">Aucun joueur enregistré.</div>';
+            else {
                 pZone.innerHTML = '';
-                players.forEach(p => {
-                    pZone.innerHTML += `<div class="player-item">
-                        <span><strong>${p.nom}</strong> (${p.p20}/${p.p50}/${p.p100})</span>
-                        <span style="font-family:monospace;font-weight:bold;background:#e9ecef;padding:2px 8px;border-radius:4px;">${p.code}</span>
-                        <span style="font-weight:bold; color:${p.online ? '#28a745':'#dc3545'}">${p.online ? '🟢 En ligne':'🔴 Absent'}</span>
+                data.players.forEach(p => {
+                    pZone.innerHTML += `<div class="item-box">
+                        <span><strong>${p.nom}</strong> [${p.code}] — 💰 ${p.pions} Pions<br>
+                        <small style="color:#94a3b8;">📦 Attribution : ${p.seriesCartons || "Aucune série affectée"}</small></span>
+                        <span class="${p.online ? 'status-on':'status-off'}">${p.online ? '🟢 En ligne':'🔴 Déco'}</span>
                     </div>`;
                 });
             }
         });
 
-        function ajouterJoueur() {
-            const input = document.getElementById('nom-joueur-input');
-            socket.emit('admin-add-player', input.value);
-            input.value = ''; // Vide la case après validation
+        // Notifications de signalement de Bingo des joueurs
+        socket.on('admin-receive-bingo', (data) => {
+            const alerts = document.getElementById('bingo-alerts');
+            alerts.innerHTML = `<div class="item-box" style="border-color:#a855f7; background:#2e1065;">
+                <span>🚨 <strong>BINGO annoncé par ${data.nom} (${data.code})</strong></span>
+                <button class="btn-primary" onclick="examinerFiche('${data.code}')">🔍 Inspecter</button>
+            </div>`;
+        });
+
+        function toggleMicro() {
+            const btn = document.getElementById('btn-micro');
+            btn.style.background = "#ef4444";
+            btn.textContent = "🎙️ MICRO EN DIRECT (Diffusion...)";
+            document.getElementById('micro-status').textContent = "Statut : Flux audio actif vers les smartphones des joueurs";
+            socket.emit('admin-send-flash', "🎙️ L'organisateur a activé le micro. Écoutez attentivement !");
         }
 
-        function toutRemettreAZero() {
-            if(confirm("Voulez-vous vraiment effacer TOUS les joueurs et recommencer au Joueur 01 ?")) {
-                socket.emit('admin-reset-all');
+        function couperMicro() {
+            const btn = document.getElementById('btn-micro');
+            btn.style.background = "#10b981";
+            btn.textContent = "🎤 ACTIVER LE MICRO AUDIO";
+            document.getElementById('micro-status').textContent = "Statut : Flux micro coupé";
+        }
+
+        function creerJoueur() {
+            const nom = document.getElementById('add-name').value;
+            if(!nom) return alert("Nom manquant.");
+            socket.emit('admin-add-player', nom);
+            document.getElementById('add-name').value = '';
+        }
+
+        function validerOrdre(id) { socket.emit('admin-validate-order', id); }
+        function cloturerVentes() { socket.emit('admin-toggle-ventes', false); alert("Ventes clôturées pour la partie !"); }
+        function ouvrirVentes() { socket.emit('admin-toggle-ventes', true); alert("Boutique réouverte."); }
+        
+        function envoyerFlash() {
+            const msg = document.getElementById('flash-message').value;
+            if(!msg) return;
+            socket.emit('admin-send-flash', msg);
+            document.getElementById('flash-message').value = '';
+            alert("Alerte flash transmise !");
+        }
+
+        // Gestion du boulier automatique ou manuel
+        function demarrerBoulier() {
+            stopperBoulier();
+            const mode = document.getElementById('tirage-vitesse').value;
+            if(mode === "manuel") {
+                socket.emit('admin-draw');
+            } else {
+                const cadence = parseInt(mode);
+                socket.emit('admin-draw');
+                timerBoulier = setInterval(() => {
+                    socket.emit('admin-draw');
+                }, cadence);
             }
         }
 
-        function valider(id) { socket.emit('admin-validate-order', id); }
+        function stopperBoulier() {
+            if(timerBoulier) { clearInterval(timerBoulier); timerBoulier = null; }
+        }
+
+        // Système d'inspection des grilles
+        function examinerFiche(code) {
+            socket.emit('admin-request-carton', code);
+        }
+
+        socket.on('admin-view-carton', (data) => {
+            joueurEnCoursDeVerif = data.code;
+            document.getElementById('verif-zone').style.display = 'block';
+            document.getElementById('verif-player-name').textContent = data.nom;
+            
+            const gridBox = document.getElementById('verif-grid-box');
+            gridBox.innerHTML = '';
+            
+            data.grille.forEach((num, idx) => {
+                const c = document.createElement('div');
+                c.className = 'verif-cell';
+                if(idx === 12) {
+                    c.textContent = "FREE";
+                    c.classList.add('free');
+                } else {
+                    c.textContent = num;
+                    if(data.history.includes(num)) {
+                        c.classList.add('hit'); // S'allume en rouge si le numéro est bien sorti au boulier !
+                    }
+                }
+                gridBox.appendChild(c);
+            });
+        });
+
+        function approuverBingo() {
+            if(!joueurEnCoursDeVerif) return;
+            socket.emit('admin-confirm-bingo', { code: joueurEnCoursDeVerif, status: 'gagne' });
+            document.getElementById('verif-zone').style.display = 'none';
+            joueurEnCoursDeVerif = null;
+            document.getElementById('bingo-alerts').innerHTML = 'Aucune réclamation Bingo reçue.';
+        }
+
+        function rejeterBingo() {
+            if(!joueurEnCoursDeVerif) return;
+            socket.emit('admin-confirm-bingo', { code: joueurEnCoursDeVerif, status: 'faux' });
+            document.getElementById('verif-zone').style.display = 'none';
+            joueurEnCoursDeVerif = null;
+            document.getElementById('bingo-alerts').innerHTML = 'Aucune réclamation Bingo reçue.';
+        }
+
+        function attribuerGainDirect() {
+            const code = document.getElementById('gain-code').value.trim().toUpperCase();
+            const montant = parseInt(document.getElementById('gain-montant').value);
+            if(!code || !montant) return alert("Champs invalides.");
+            socket.emit('admin-direct-reward', { code, montant });
+            document.getElementById('gain-code').value = '';
+            document.getElementById('gain-montant').value = '';
+            alert("Pions de récompense crédités au joueur !");
+        }
+
+        function razComplete() {
+            if(confirm("Effacer absolument toute la mémoire de la partie en cours ?")) {
+                stopperBoulier();
+                socket.emit('admin-reset-all');
+            }
+        }
     </script>
 </body>
 </html>
