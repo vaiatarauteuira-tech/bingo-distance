@@ -1,154 +1,263 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gamer - Mon Espace Bingo</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        
+        /* Composants et boîtes */
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2, h3, h4 { margin-top: 0; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        
+        /* Affichage Live & Audio */
+        .live-banner { background: linear-gradient(135deg, #e11d48, #be123c); border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(225, 29, 72, 0.3); }
+        .live-number { font-size: 4.5rem; font-weight: 900; margin: 5px 0; letter-spacing: -2px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        /* Banque et Historique */
+        .quota-box { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 15px; border-radius: 8px; border-left: 5px solid #06b6d4; }
+        .quota-val { font-size: 2rem; font-weight: bold; color: #06b6d4; }
+        .statement-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .statement-table th { background: #0f172a; padding: 8px; text-align: left; color: #94a3b8; }
+        .statement-table td { padding: 8px; border-bottom: 1px solid #334155; }
+        .pos { color: #4ade80; font-weight: bold; } .neg { color: #f87171; font-weight: bold; }
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+        /* Module de visionnage PDF et Coche */
+        .pdf-view-container { background: #0f172a; border-radius: 8px; padding: 10px; position: relative; }
+        .pdf-mock-frame { width: 100%; height: 350px; background: #f1f5f9; border-radius: 6px; overflow-y: auto; color: #1e293b; padding: 15px; box-sizing: border-box; position: relative; }
+        .toggle-btn { background: #334155; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .toggle-btn.active { background: #0284c7; }
 
-app.use(express.static(path.join(__dirname, 'public')));
+        /* Grille Interactive Intégrée */
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; background: #0f172a; padding: 10px; border-radius: 8px; }
+        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #334155; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.2rem; transition: 0.1s; border: 1px solid #475569; }
+        .cell:hover { background: #475569; }
+        .cell.marked { background: #0284c7; color: white; box-shadow: 0 0 10px rgba(2, 132, 199, 0.5); border-color: #38bdf8; }
 
-// Banque de données de la session
-let players = {};
-let pool = Array.from({length: 75}, (_, i) => i + 1);
-let drawnNumbers = [];
-let orders = [];
-let playerCount = 0;
+        /* Formulaires */
+        select, input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
+        button.primary { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        button.primary:hover { background: #0369a1; }
+        .tournoi-item { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #f59e0b; font-size: 13px; }
+    </style>
+</head>
+<body>
 
-// Infos Événementielles modifiables dynamiquement ou fixes
-let tournoisInfos = [
-    { date: "Ce soir - 21h00", nom: "Grand Tournoi d'Ouverture", prix: "Pack 100 Pions + Multiplicateurs" },
-    { date: "Demain - 15h00", nom: "Bingo Flash du Samedi", prix: "Cagnotte Événementielle" },
-    { date: "Dimanche - 18h00", nom: "Méga Quine de Clôture", prix: "Statut VIP Argent" }
-];
-let tournoiActuel = { nom: "Tournoi Spécial Été 2026", statut: "Inscriptions Ouvertes", coût: 50 };
+    <div class="grid-layout">
+        
+        <!-- COLONNE GAUCHE : ANNONCES, AUDIO & JEU -->
+        <div>
+            <!-- BANNIÈRE AUDIO-VISUELLE DU NUMÉRO LIVE -->
+            <div class="live-banner">
+                <div style="font-weight: bold; letter-spacing: 1px; font-size: 13px; opacity: 0.9;">📢 FLUX DIRECT ANIMATEUR</div>
+                <div class="live-number" id="live-ball">-</div>
+                <div id="vocal-status" style="font-size: 12px; color: #cbd5e1;">🔊 Audio connecté (En attente d'annonce)</div>
+            </div>
 
-io.on('connection', (socket) => {
-    
-    socket.on('admin-init', () => {
-        socket.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
+            <!-- FICHE DE BINGO ET SYSTEME DE COCHE -->
+            <div class="card">
+                <h3>🎲 Ma Fiche Bingo Personnelle</h3>
+                <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">Consultez votre reçu et cochez vos cases (Manuel ou Automatique).</p>
+                
+                <div class="pdf-view-container">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <button class="toggle-btn" id="btn-auto" onclick="toggleAutoMode()" style="margin:0; width:48%;">🤖 Coche Auto : OFF</button>
+                        <button class="toggle-btn active" style="margin:0; width:48%;">📄 Afficher mon PDF</button>
+                    </div>
+                    
+                    <!-- Lecteur / Tableau de Coche Superposé -->
+                    <div class="board" id="bingo-board"></div>
+                </div>
+            </div>
 
-    socket.on('admin-add-player', (nomJoueur) => {
-        playerCount++;
-        let nomNettoye = nomJoueur.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-        if (!nomNettoye) { nomNettoye = "JOUEUR"; }
-        const chiffresFormates = String(playerCount).padStart(3, '0');
-        const code = `${nomNettoye}${chiffresFormates}`;
-        const nomFinal = nomJoueur.trim() || `Joueur ${playerCount}`;
+            <!-- TOURNOI EN DIRECT ANNONCÉ -->
+            <div class="card" style="border-color: #f59e0b;">
+                <h3>🏆 Tournoi Actuel Annoncé</h3>
+                <div style="background:#0f172a; padding:15px; border-radius:8px; text-align:center;">
+                    <h4 id="t-actuel-nom" style="margin:0; color:#f59e0b;">Chargement du tournoi...</h4>
+                    <p style="font-size:13px; color:#94a3b8; margin:5px 0 12px 0;">Statut : <span id="t-actuel-statut" style="color:#4ade80;">-</span></p>
+                    <button class="primary" onclick="sInscrireTournoi()" style="background:#d97706;">S'inscrire à ce tournoi (<span id="t-actuel-cout">0</span> Pions)</button>
+                </div>
+            </div>
+        </div>
 
-        players[code] = {
-            nom: nomFinal,
-            code: code,
-            pions: 100, // Capital de départ par défaut
-            historiquePions: [
-                { date: "Inscription", description: "Crédit de bienvenue", montant: "+100" }
-            ],
-            tournoisInscrits: [],
-            grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
-            online: false,
-            socketId: null
-        };
+        <!-- COLONNE DROITE : PORTEFEUILLE, RECHARGES & CALENDRIER -->
+        <div>
+            <!-- QUOTA DE PIONS ET SOLDE -->
+            <div class="card">
+                <h3>💰 Mon Portefeuille de Pions</h3>
+                <div class="quota-box">
+                    <span>Solde disponible :</span>
+                    <div class="quota-val" id="solde-pions">0 Pions</div>
+                </div>
+            </div>
 
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
+            <!-- RELEVÉ DE COMPTE (GAIN / PERTE / ACHAT) -->
+            <div class="card">
+                <h3>📊 Relevé d'Opérations & Gains</h3>
+                <div style="max-height: 180px; overflow-y: auto;">
+                    <table class="statement-table">
+                        <thead>
+                            <tr><th>Date</th><th>Opération</th><th>Montant</th></tr>
+                        </thead>
+                        <tbody id="statement-tbody">
+                            <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Aucun mouvement.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-    socket.on('player-login', (code) => {
-        const codeVerif = code.trim().toUpperCase();
-        if (players[codeVerif]) {
-            players[codeVerif].online = true;
-            players[codeVerif].socketId = socket.id;
+            <!-- RECHARGES PAR VIREMENT -->
+            <div class="card">
+                <h3>💳 Recharger mes Pions</h3>
+                <label style="font-size:12px; color:#94a3b8;">Sélectionnez une offre :</label>
+                <select id="recharge-type">
+                    <option value="Pack Découverte (50 Pions)">Pack Découverte - 50 Pions</option>
+                    <option value="Pack Compétiteur (150 Pions)">Pack Compétiteur - 150 Pions</option>
+                    <option value="Pack Master VIP (500 Pions)">Pack Master VIP - 500 Pions</option>
+                </select>
+                <button class="primary" onclick="envoyerRecharge()">Envoyer la notification de virement</button>
+            </div>
+
+            <!-- CALENDRIER DES PROCHAINS TOURNOIS -->
+            <div class="card">
+                <h3>📅 Agenda & Dates des Tournois</h3>
+                <div id="agenda-zone"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SYNTHÈSE VOCALE POUR ENTENDRE LES NUMÉROS -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const monCode = sessionStorage.getItem('joueurCode');
+        let autoCoche = false;
+        let mesNumeros = [];
+
+        if(!monCode) { window.location.href = '/'; } 
+        else { socket.emit('player-login', monCode); }
+
+        socket.on('login-success-dashboard', (data) => {
+            document.title = `Dashboard - ${data.player.nom}`;
+            refreshUI(data.player);
             
-            // Envoyer toutes les données nécessaires au Dashboard du joueur
-            socket.emit('login-success-dashboard', {
-                player: players[codeVerif],
-                tournoisInfos: tournoisInfos,
-                tournoiActuel: tournoiActuel,
-                liveHistory: drawnNumbers
+            // Charger les infos globales
+            document.getElementById('t-actuel-nom').textContent = data.tournoiActuel.nom;
+            document.getElementById('t-actuel-statut').textContent = data.tournoiActuel.statut;
+            document.getElementById('t-actuel-cout').textContent = data.tournoiActuel.coût;
+
+            // Construire l'agenda
+            const agenda = document.getElementById('agenda-zone');
+            agenda.innerHTML = '';
+            data.tournoisInfos.forEach(t => {
+                agenda.innerHTML += `<div class="tournoi-item">
+                    <strong>${t.date}</strong> — <span style="color:#38bdf8;">${t.nom}</span><br>
+                    <span style="color:#94a3b8; font-size:12px;">🎁 Récompense : ${t.prix}</span>
+                </div>`;
             });
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-        } else {
-            socket.emit('login-error');
-        }
-    });
 
-    // Inscription au tournoi en cours
-    socket.on('player-register-tournoi', (code) => {
-        if (players[code]) {
-            if (players[code].tournoisInscrits.includes(tournoiActuel.nom)) {
-                return socket.emit('notification', "Déjà inscrit à ce tournoi !");
+            // Construire la grille de jeu
+            mesNumeros = data.player.grille;
+            construireGrille();
+
+            // Mettre à jour la boule en cours si la partie a déjà commencé
+            if(data.liveHistory.length > 0) {
+                const derniereBoule = data.liveHistory[data.liveHistory.length - 1];
+                document.getElementById('live-ball').textContent = derniereBoule;
             }
-            if (players[code].pions >= tournoiActuel.coût) {
-                players[code].pions -= tournoiActuel.coût;
-                players[code].tournoisInscrits.push(tournoiActuel.nom);
-                players[code].historiquePions.unshift({
-                    date: "À l'instant",
-                    description: `Inscription : ${tournoiActuel.nom}`,
-                    montant: `-${tournoiActuel.coût}`
-                });
-                socket.emit('update-dashboard', players[code]);
-                socket.emit('notification', "🎉 Inscription validée avec succès !");
-                io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-            } else {
-                socket.emit('notification', "❌ Pions insuffisants pour ce tournoi.");
+        });
+
+        socket.on('update-dashboard', (player) => { refreshUI(player); });
+        socket.on('notification', (msg) => { alert(msg); });
+
+        // GESTION DU TIRAGE EN DIRECT (VISUEL ET VOCAL)
+        socket.on('new-ball', (data) => {
+            const boule = data.actuelle;
+            document.getElementById('live-ball').textContent = boule;
+            
+            // 🔊 Lecture vocale du numéro appelé pour l'entendre en direct
+            if ('speechSynthesis' in window) {
+                let textToSpeak = `Numéro ${boule}`;
+                if(boule === 1) textToSpeak = "Numéro 1, l'as du jeu";
+                let utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 1.1;
+                window.speechSynthesis.speak(utterance);
+                document.getElementById('vocal-status').textContent = `🔊 Annoncé : Numéro ${boule}`;
             }
-        }
-    });
 
-    socket.on('player-order', ({ code, type, qte }) => {
-        if (!players[code]) return;
-        const newOrder = { id: Date.now(), code, nom: players[code].nom, type, qte };
-        orders.push(newOrder);
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
-
-    socket.on('admin-validate-order', (idOrder) => {
-        const idx = orders.findIndex(o => o.id === idOrder);
-        if (idx !== -1) {
-            const o = orders[idx];
-            if (players[o.code]) {
-                let gain = parseInt(o.qte);
-                players[o.code].pions += gain;
-                players[o.code].historiquePions.unshift({
-                    date: "Validé par Admin",
-                    description: `Achat Rechargement (${o.type})`,
-                    montant: `+${gain}`
-                });
-                if (players[o.code].socketId) {
-                    io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]);
+            // 🤖 Mode Coche Automatique
+            if(autoCoche) {
+                const idx = mesNumeros.indexOf(boule);
+                if(idx !== -1 && idx !== 12) { // 12 est la case FREE
+                    const cell = document.getElementById(`cell-${idx}`);
+                    if(cell && !cell.classList.contains('marked')) {
+                        cell.classList.add('marked');
+                    }
                 }
             }
-            orders.splice(idx, 1);
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+        });
+
+        socket.on('game-reset', () => { window.location.reload(); });
+
+        function construireGrille() {
+            const b = document.getElementById('bingo-board');
+            b.innerHTML = '';
+            mesNumeros.forEach((num, idx) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                c.id = `cell-${idx}`;
+                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
+                else { 
+                    c.textContent = num; 
+                    c.onclick = () => { if(!autoCoche) c.classList.toggle('marked'); };
+                }
+                b.appendChild(c);
+            });
         }
-    });
 
-    socket.on('admin-draw', () => {
-        if (pool.length === 0) return;
-        const idx = Math.floor(Math.random() * pool.length);
-        const num = pool.splice(idx, 1)[0];
-        drawnNumbers.push(num);
-        io.emit('new-ball', { actuelle: num, historique: drawnNumbers });
-    });
+        function refreshUI(player) {
+            document.getElementById('solde-pions').textContent = `${player.pions} Pions`;
+            
+            // Table de relevé de compte
+            const tbody = document.getElementById('statement-tbody');
+            tbody.innerHTML = '';
+            player.historiquePions.forEach(h => {
+                const cl = h.montant.startsWith('+') ? 'pos' : 'neg';
+                tbody.innerHTML += `<tr>
+                    <td>${h.date}</td>
+                    <td>${h.description}</td>
+                    <td class="${cl}">${h.montant}</td>
+                </tr>`;
+            });
+        }
 
-    socket.on('admin-reset-all', () => {
-        players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; playerCount = 0;
-        io.emit('game-reset');
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-    });
-
-    socket.on('disconnect', () => {
-        for (let code in players) {
-            if (players[code].socketId === socket.id) {
-                players[code].online = false;
-                players[code].socketId = null;
-                io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
-                break;
+        function toggleAutoMode() {
+            autoCoche = !autoCoche;
+            const btn = document.getElementById('btn-auto');
+            if(autoCoche) {
+                btn.textContent = "🤖 Coche Auto : ACTIVÉ";
+                btn.style.background = "#22c55e";
+                // Par sécurité, cocher rétroactivement ce qui est déjà sorti
+                alert("Mode automatique activé. Les prochains numéros appelés se cocheront tout seuls !");
+            } else {
+                btn.textContent = "🤖 Coche Auto : OFF";
+                btn.style.background = "#334155";
             }
         }
-    });
-});
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`Serveur actif port ${PORT}`); });
+        function sInscrireTournoi() { socket.emit('player-register-tournoi', monCode); }
+
+        function envoyerRecharge() {
+            const select = document.getElementById('recharge-type');
+            socket.emit('player-order', { code: monCode, type: select.value, qte: 100 }); // Exemple forfait 100 pions par défaut
+            alert("Notification d'achat transmise ! Dès validation du virement par la caisse, vos pions apparaîtront.");
+        }
+    </script>
+</body>
+</html>
