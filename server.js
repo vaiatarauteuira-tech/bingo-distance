@@ -5,9 +5,7 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
+const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -15,6 +13,7 @@ let players = {};
 let pool = Array.from({length: 75}, (_, i) => i + 1);
 let drawnNumbers = [];
 let orders = [];
+let playerCount = 0; // Compteur pour donner les codes dans l'ordre (01, 02, 03...)
 
 io.on('connection', (socket) => {
     
@@ -22,16 +21,30 @@ io.on('connection', (socket) => {
         socket.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
     });
 
-    socket.on('admin-generate-players', () => {
-        players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = [];
-        for (let i = 1; i <= 50; i++) {
-            const code = `BINGO-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-            players[code] = {
-                nom: `Joueur ${i}`, code: code, p20: 0, p50: 0, p100: 0,
-                grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
-                online: false, socketId: null
-            };
-        }
+    // Remplace la génération automatique par une création UN PAR UN
+    socket.on('admin-add-player', (nomJoueur) => {
+        playerCount++;
+        const numeroFormate = String(playerCount).padStart(2, '0');
+        const code = `BINGO-${numeroFormate}`;
+        
+        // Sécurité si le nom est vide
+        const nomFinal = nomJoueur.trim() || `Joueur ${playerCount}`;
+
+        players[code] = {
+            nom: nomFinal,
+            code: code,
+            p20: 0, p50: 0, p100: 0,
+            grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
+            online: false,
+            socketId: null
+        };
+
+        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
+    });
+
+    // Bouton pour tout remettre à zéro si besoin
+    socket.on('admin-reset-all', () => {
+        players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; playerCount = 0;
         io.emit('game-reset');
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
     });
