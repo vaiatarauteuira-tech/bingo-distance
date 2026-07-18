@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Espace Bingo - Portail Officiel</title>
+    <title>BingoHome - Portail Officiel</title>
     <style>
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; 
-            background: #05050a; /* Noir de jais pur, fini le violet concurrent */
+            background: #05050a; 
             color: #f1f5f9; 
             margin: 0; 
             padding: 25px 15px; 
@@ -18,7 +18,7 @@
             box-sizing: border-box;
         }
         
-        /* En-tête Impérial (Changement complet de style) */
+        /* En-tête BingoHome Officiel */
         .header-zone {
             text-align: center;
             margin-bottom: 30px;
@@ -26,32 +26,33 @@
         }
         .crown-icon {
             font-size: 2.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             display: inline-block;
             filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.4));
         }
         .main-title {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: 1px;
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
             margin: 0;
             background: linear-gradient(to right, #f59e0b, #38bdf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
         }
         .subtitle {
             color: #64748b;
-            font-size: 13px;
+            font-size: 12px;
             margin-top: 6px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
-        /* Boîtes de sections au design épuré et asymétrique */
+        /* Cartes d'espaces */
         .space-card { 
-            background: #12131a; /* Gris anthracite premium */
+            background: #12131a; 
             border: 1px solid #222530;
-            border-radius: 12px; /* Coins plus fermés pour un look plus pro */
+            border-radius: 12px; 
             padding: 22px; 
             margin-bottom: 18px; 
             width: 100%;
@@ -62,7 +63,6 @@
             overflow: hidden;
         }
         
-        /* Ligne de couleur sur le côté plutôt qu'un titre coloré au milieu */
         .space-card::before {
             content: '';
             position: absolute;
@@ -86,7 +86,6 @@
             color: #94a3b8;
         }
 
-        /* Champs de saisie */
         input { 
             width: 100%; 
             padding: 12px; 
@@ -99,12 +98,7 @@
             font-size: 15px; 
             text-align: center;
         }
-        input:focus {
-            outline: none;
-            border-color: #64748b;
-        }
 
-        /* Boutons avec notre nouvelle charte Or & Cyan */
         button { 
             width: 100%; 
             padding: 12px; 
@@ -140,7 +134,6 @@
         }
         .btn-dark:hover { color: white; background: #222533; }
 
-        /* Liens d'aide discrets */
         .meta-link {
             display: block;
             text-align: center;
@@ -155,20 +148,20 @@
 </head>
 <body>
 
-    <!-- LOGO ET ENTÊTE SOUVERAINE -->
+    <!-- MARQUE OFFICIELLE BINGOHOME -->
     <div class="header-zone">
-        <span class="crown-icon">👑</span>
-        <h1 class="main-title">Espace Gaming Bingo</h1>
-        <div class="subtitle">Portail d'accès sécurisé</div>
+        <span class="crown-icon">🏠</span>
+        <h1 class="main-title">BingoHome</h1>
+        <div class="subtitle">Espace d'accès sécurisé</div>
     </div>
 
     <!-- CODE JOUEUR -->
     <div class="space-card card-joueur">
-        <div class="space-title">👤 Session Joueur</div>
+        <div class="space-title">👤 Salon Joueur</div>
         <input type="text" id="code-joueur" placeholder="Saisir votre code d'accès">
-        <button class="btn-gold" onclick="loginJoueur()">🎯 Valider et Rejoindre</button>
+        <button class="btn-gold" onclick="loginJoueur()">🎯 Rejoindre la table</button>
         <button class="btn-dark" onclick="redirigerAchatPions()">🪙 Demande de rechargement</button>
-        <a class="meta-link" href="#" onclick="alert('Guide de démarrage rapide disponible en salle.')">Consulter les règles du jeu</a>
+        <a class="meta-link" href="#" onclick="alert('Guide de démarrage BingoHome disponible en salle.')">Consulter les règles du jeu</a>
     </div>
 
     <!-- CODE ORGANISATEUR -->
@@ -176,7 +169,7 @@
         <div class="space-title">🎙️ Régie Animateur</div>
         <input type="password" id="code-orga" placeholder="Clé d'activation organisateur">
         <button class="btn-cyan" onclick="loginOrga()">🎙️ Ouvrir la console de tirage</button>
-        <button class="btn-dark" onclick="alert('Grille tarifaire disponible auprès de l\'administrateur principal.')">Consulter les barèmes</button>
+        <button class="btn-dark" onclick="alert('Grille disponible auprès de la caisse.')">Consulter les barèmes</button>
     </div>
 
     <!-- CODE REVENDEUR -->
