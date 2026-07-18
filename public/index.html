@@ -12,16 +12,16 @@
         .choice-box:hover { border-color: #007bff; background: #f0f7ff; }
         .choice-box h3 { margin: 0 0 5px 0; color: #007bff; }
         .choice-box p { margin: 0; font-size: 13px; color: #4a5568; }
-        .form-zone { display: none; margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 20px; }
         input { width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ced4da; font-size: 16px; text-align: center; }
         button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .btn-back { background: #6c757d; margin-top: 8px; }
+        .btn-back { background: #6c757d; margin-top: 8px; width: 100%; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; margin-bottom: 5px; }
         .b-joueur { background: #28a745; } .b-orga { background: #fd7e14; } .b-admin { background: #dc3545; }
     </style>
 </head>
 <body>
 
+    <!-- MENU PRINCIPAL -->
     <div class="portal-card" id="portal-menu">
         <h1>🎉 Bingo Événementiel</h1>
         <p style="color: #6c757d; margin-bottom: 25px;">Bienvenue ! Veuillez choisir votre espace de connexion :</p>
@@ -41,55 +41,59 @@
         <div class="choice-box" onclick="showForm('admin')">
             <span class="badge b-admin">SÉCURISÉ</span>
             <h3>🛠️ Console Administrateur / Caisse</h3>
-            <p>Gestion des 50 codes, validation des virements et des gains.</p>
+            <p>Gestion des codes personnalisés et validation des virements.</p>
         </div>
     </div>
 
-    <!-- FORMULAIRE JOUEUR -->
-    <div class="portal-card id-zone" id="zone-joueur" style="display:none;">
-        <span class="badge b-joueur">ÉSPACE JOUEUR</span>
-        <h2>Connexion à la partie</h2>
-        <input type="text" id="code-joueur" placeholder="Entrez votre code BINGO-XXXX">
-        <button onclick="loginJoueur()">Jouer maintenant 🚀</button>
-        <button class="btn-back" onclick="hideAll()">Retour</button>
+    <!-- ZONE DE FORMULAIRES (Masqués au départ) -->
+    <div class="portal-card" id="zone-formulaire" style="display:none;">
+        <div id="contenu-joueur" style="display:none;">
+            <span class="badge b-joueur">ÉSPACE JOUEUR</span>
+            <h2>Connexion à la partie</h2>
+            <input type="text" id="code-joueur" placeholder="Entrez votre code (Ex: MARC001)">
+            <button onclick="loginJoueur()">Jouer maintenant 🚀</button>
+        </div>
+
+        <div id="contenu-organisateur" style="display:none;">
+            <span class="badge b-orga">ÉSPACE ANIMATEUR</span>
+            <h2>Code Organisateur Requis</h2>
+            <input type="password" id="code-orga" placeholder="Mot de passe Animateur">
+            <button onclick="loginOrga()" style="background:#fd7e14;">Ouvrir le Boulier 🔮</button>
+        </div>
+
+        <div id="contenu-admin" style="display:none;">
+            <span class="badge b-admin">DIRECTION</span>
+            <h2>Accès Maître Administrateur</h2>
+            <input type="password" id="code-admin" placeholder="Mot de passe Admin">
+            <button onclick="loginAdmin()" style="background:#dc3545;">Ouvrir la Caisse 🛠️</button>
+        </div>
+
+        <button class="btn-back" onclick="hideAll()">⬅️ Retour au menu</button>
     </div>
 
-    <!-- FORMULAIRE ORGANISATEUR -->
-    <div class="portal-card id-zone" id="zone-organisateur" style="display:none;">
-        <span class="badge b-orga">ÉSPACE ANIMATEUR</span>
-        <h2>Code Organisateur Requis</h2>
-        <input type="password" id="code-orga" placeholder="Entrez le code d'accès de l'événement">
-        <button onclick="loginOrga()" style="background:#fd7e14;">Ouvrir le Boulier 🔮</button>
-        <button class="btn-back" onclick="hideAll()">Retour</button>
-    </div>
-
-    <!-- FORMULAIRE ADMIN -->
-    <div class="portal-card id-zone" id="zone-admin" style="display:none;">
-        <span class="badge b-admin">DIRECTION</span>
-        <h2>Accès Maître Administrateur</h2>
-        <input type="password" id="code-admin" placeholder="Entrez le mot de passe Admin">
-        <button onclick="loginAdmin()" style="background:#dc3545;">Ouvrir la Caisse 🛠️</button>
-        <button class="btn-back" onclick="hideAll()">Retour</button>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-
         function showForm(type) {
+            // On cache le menu de sélection
             document.getElementById('portal-menu').style.display = 'none';
-            if(type === 'joueur') document.getElementById('zone-joueur').style.display = 'block';
-            if(type === 'organisateur') document.getElementById('zone-organisateur').style.display = 'block';
-            if(type === 'admin') document.getElementById('zone-admin').style.display = 'block';
+            // On montre le conteneur de formulaire
+            document.getElementById('zone-formulaire').style.display = 'block';
+            
+            // On cache d'abord les trois contenus pour éviter les mélanges
+            document.getElementById('contenu-joueur').style.display = 'none';
+            document.getElementById('contenu-organisateur').style.display = 'none';
+            document.getElementById('contenu-admin').style.display = 'none';
+            
+            // On affiche uniquement celui sur lequel on a cliqué
+            if(type === 'joueur') document.getElementById('contenu-joueur').style.display = 'block';
+            if(type === 'organisateur') document.getElementById('contenu-organisateur').style.display = 'block';
+            if(type === 'admin') document.getElementById('contenu-admin').style.display = 'block';
         }
 
         function hideAll() {
-            document.getElementById('zone-joueur').style.display = 'none';
-            document.getElementById('zone-organisateur').style.display = 'none';
-            document.getElementById('zone-admin').style.display = 'none';
+            document.getElementById('zone-formulaire').style.display = 'none';
             document.getElementById('portal-menu').style.display = 'block';
         }
-// REDIRECTIONS ET VÉRIFICATIONS
+
         function loginJoueur() {
             const code = document.getElementById('code-joueur').value.trim().toUpperCase();
             if(!code) return alert("Veuillez entrer votre code.");
@@ -99,7 +103,6 @@
 
         function loginOrga() {
             const code = document.getElementById('code-orga').value.trim();
-            // Code de l'Animateur : ORGA2026
             if(code === "ORGA2026") {
                 sessionStorage.setItem('orgaToken', 'valide');
                 window.location.href = '/organisateur.html';
@@ -110,11 +113,13 @@
 
         function loginAdmin() {
             const code = document.getElementById('code-admin').value.trim();
-            // Ton code Administrateur : SUPERADMIN
             if(code === "SUPERADMIN") {
                 sessionStorage.setItem('adminToken', 'valide');
                 window.location.href = '/admin.html';
             } else {
-                alert("Mot de passe Administrateur incorrect. Vérifiez les majuscules.");
+                alert("Mot de passe Administrateur incorrect.");
             }
         }
+    </script>
+</body>
+</html>
