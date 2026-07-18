@@ -15,7 +15,7 @@ let drawnNumbers = [];
 let orders = [];
 let playerCount = 0;
 
-let tournoiActuel = { nom: "Grand Match de l'Événement", statut: "Ouvert", coût: 50 };
+let tournoiActuel = { nom: "Session Bingo Live Pro", statut: "Ouvert", coût: 50 };
 
 io.on('connection', (socket) => {
     
@@ -34,7 +34,8 @@ io.on('connection', (socket) => {
             nom: nomJoueur.trim() || `Joueur ${playerCount}`,
             code: code,
             pions: 0,
-            historiquePions: [{ date: "Ouverture", description: "Création du compte", montant: "+0" }],
+            nombreFiches: 1, // Commence avec 1 fiche par défaut à la création
+            historiquePions: [{ date: "Ouverture", description: "Dossier joueur créé", montant: "+0" }],
             tournoisInscrits: [],
             online: false,
             socketId: null
@@ -67,7 +68,7 @@ io.on('connection', (socket) => {
             id: Date.now(), 
             code, 
             nom: players[code].nom, 
-            type: `Virement de ${francs.toLocaleString()} fr`, 
+            type: `Commande de fiches / virement de ${francs.toLocaleString()} fr`, 
             qte: nbrPions 
         });
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
@@ -79,9 +80,12 @@ io.on('connection', (socket) => {
             const o = orders[idx];
             if (players[o.code]) {
                 players[o.code].pions += o.qte;
+                // On augmente aussi proportionnellement son quota de fiches utilisables si c'est une commande de fiches
+                players[o.code].nombreFiches += Math.floor(o.qte / 5) || 1; 
+                
                 players[o.code].historiquePions.unshift({
                     date: "Caisse ok",
-                    description: `Recharge validée (${o.qte} Pions)`,
+                    description: `Recharge + Attribution Cartons`,
                     montant: `+${o.qte}`
                 });
                 if (players[o.code].socketId) {
@@ -120,4 +124,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`Serveur en ligne`); });
+server.listen(PORT, () => { console.log(`Serveur prêt`); });
