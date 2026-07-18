@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Premium - Bingo</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; padding-bottom: 90px; } /* Marge réduite pour le bandeau compact */
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; padding-bottom: 90px; }
         .main-container { max-width: 900px; margin: 0 auto; }
         
         .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -20,27 +20,23 @@
         button.action-btn { background: #06b6d4; color: #0f172a; }
         button.nav-btn { background: #f59e0b; color: white; padding: 6px 12px; }
 
-        /* Multi-Fiches */
         .fiche-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #0f172a; padding: 8px; border-radius: 8px; }
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; background: #0f172a; padding: 8px; border-radius: 8px; }
         .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #334155; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.1rem; border: 1px solid #475569; }
         .cell.marked { background: #0284c7; color: white; box-shadow: 0 0 8px rgba(2, 132, 199, 0.5); border-color: #38bdf8; }
 
-        /* Tableau de vérification complet (1 à 75) */
         .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #0f172a; padding: 8px; border-radius: 8px; margin-top: 10px; }
         @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
         .verif-num { background: #1e293b; border: 1px solid #334155; text-align: center; font-size: 11px; padding: 4px 0; border-radius: 3px; color: #64748b; font-weight: bold; }
         .verif-num.out { background: #ef4444; color: white; border-color: #f87171; box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); }
 
-        input[type="number"] { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 15px; }
+        input[type="number"], select { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 15px; }
         .price-tag { background: #10b981; color: #0f172a; font-weight: bold; padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 10px; font-size: 14px; }
 
-        /* BANDEAU DES BOULES COMPACT TOUT EN BAS */
         .bottom-live-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 3px solid #ef4444; padding: 8px 15px; display: flex; align-items: center; gap: 15px; z-index: 999; box-shadow: 0 -3px 10px rgba(0,0,0,0.3); height: 50px; }
         .live-ball-circle { width: 44px; height: 44px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; }
         .live-history-zone { overflow-x: auto; white-space: nowrap; font-size: 13px; color: #cbd5e1; font-weight: 500; }
 
-        /* POP-UP MODAL */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
         .modal-content { background: #1e293b; border: 1px solid #475569; border-radius: 12px; padding: 20px; max-width: 550px; width: 100%; max-height: 80vh; overflow-y: auto; }
         .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
@@ -53,7 +49,6 @@
 
     <div class="main-container">
         
-        <!-- BARRE DE SOLDE & RELÈVE POPUP -->
         <div class="wallet-bar">
             <div>
                 <div style="font-size: 11px; color: #94a3b8;">MON PORTESOLDE</div>
@@ -62,7 +57,6 @@
             <button class="action-btn" onclick="ouvrirReleve()">📊 Mon Relevé</button>
         </div>
 
-        <!-- ZONE DES CARTONS DE BINGO DYNAMIQUES -->
         <div class="card">
             <h3>🎲 Mes Cartons de Bingo commandés</h3>
             <button class="primary" id="btn-ouvrir-fiches" onclick="ouvrirFichesZone()" style="width:100%;">🔍 Déplier mes fiches de jeu</button>
@@ -78,33 +72,30 @@
             </div>
         </div>
 
-        <!-- TABLEAU DE VÉRIFICATION COMPLET DE 1 À 75 -->
         <div class="card">
             <h3>📋 Tableau Général de Vérification (1 à 75)</h3>
-            <p style="font-size:12px; color:#94a3b8; margin-top:-8px;">Vérifiez ici si vous avez oublié de cocher un numéro sorti.</p>
             <div class="verif-grid" id="tableau-verification"></div>
         </div>
 
-        <!-- INSCRIPTION TOURNOIS -->
-        <div class="card" style="border-color: #f59e0b;">
-            <h3>🏆 Partie en cours d'annonce</h3>
-            <h4 id="t-actuel-nom" style="margin:2px 0; color:#f59e0b;">En attente...</h4>
-            <p style="font-size:12px; color:#94a3b8; margin:0 0 10px 0;">Coût du ticket : <span id="t-actuel-cout">0</span> Pions</p>
-            <button class="primary" onclick="sInscrireTournoi()" style="background:#d97706; width:100%;">Participer au match</button>
-        </div>
-
-        <!-- ACHAT DE PIONS -->
+        <!-- MODE DE RECHARGE : VIREMENT OU DÉBLOCAGE DIRECT -->
         <div class="card">
-            <h3>💳 Commander des Pions supplémentaires</h3>
-            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:4px;">Nombre de pions désirés (1 pion = 100fr) :</label>
+            <h3>💳 Demande de Pions / Déblocage Caisse</h3>
+            
+            <label style="font-size:12px; color:#94a3b8;">Méthode de paiement :</label>
+            <select id="achat-methode">
+                <option value="Déblocage direct (Espèces Caisse)">Déblocage direct auprès de l'Orga/Admin ⚡</option>
+                <option value="Virement Bancaire en ligne">Virement bancaire classique 🏦</option>
+            </select>
+
+            <label style="font-size:12px; color:#94a3b8; display:block; margin-top:5px; margin-bottom:4px;">Nombre de pions (1 pion = 100fr) :</label>
             <input type="number" id="achat-quantite" value="5" min="1" oninput="calculerPrixAchat()">
-            <div class="price-tag" id="prix-calcule">💵 Virement requis : 500 fr</div>
-            <button class="primary" onclick="envoyerRecharge()" style="background:#10b981; width:100%;">Valider la commande</button>
+            
+            <div class="price-tag" id="prix-calcule">💵 Valeur : 500 fr</div>
+            <button class="primary" onclick="envoyerRecharge()" style="background:#10b981; width:100%;">Envoyer la demande de validation</button>
         </div>
 
     </div>
 
-    <!-- POP-UP RELEVÉ -->
     <div class="modal" id="modal-releve">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #475569; padding-bottom:8px;">
@@ -118,7 +109,6 @@
         </div>
     </div>
 
-    <!-- BANDEAU ULTRA COMPACT EN BAS -->
     <div class="bottom-live-bar">
         <div class="live-ball-circle" id="live-ball">-</div>
         <div class="live-history-zone" id="history">En attente du premier tirage...</div>
@@ -129,20 +119,18 @@
         const socket = io();
         const monCode = sessionStorage.getItem('joueurCode');
         let autoCoche = false;
-        
         let fichesJoueur = []; 
         let indexFicheActuelle = 0;
-        let totalFichesCommandees = 1; // Reçu dynamiquement du serveur
+        let totalFichesCommandees = 1;
 
         if(!monCode) { window.location.href = '/'; } 
         else { socket.emit('player-login', monCode); }
 
         function calculerPrixAchat() {
             const qte = document.getElementById('achat-quantite').value || 0;
-            document.getElementById('prix-calcule').textContent = `💵 Virement requis : ${(qte * 100).toLocaleString()} fr`;
+            document.getElementById('prix-calcule').textContent = `💵 Valeur : ${(qte * 100).toLocaleString()} fr`;
         }
 
-        // Initialiser le tableau complet de 1 à 75 au démarrage
         function initialiserTableauVerif() {
             const grid = document.getElementById('tableau-verification');
             grid.innerHTML = '';
@@ -157,25 +145,20 @@
 
         socket.on('login-success-dashboard', (data) => {
             document.title = `Espace - ${data.player.nom}`;
-            totalFichesCommandees = data.player.nombreFiches || 1; // Récupère le nombre de fiches réel
+            totalFichesCommandees = data.player.nombreFiches || 1;
             refreshUI(data.player);
             initialiserTableauVerif();
-            
-            document.getElementById('t-actuel-nom').textContent = data.tournoiActuel.nom;
-            document.getElementById('t-actuel-cout').textContent = data.tournoiActuel.coût;
 
-            // Génère le nombre exact de fiches commandées par le joueur
             fichesJoueur = Array.from({length: totalFichesCommandees}, (_, idx) => ({
                 id: idx + 1,
                 numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
                 coches: new Array(25).fill(false)
             }));
-            fichesJoueur.forEach(f => f.coches[12] = true); // Case FREE
+            fichesJoueur.forEach(f => f.coches[12] = true);
 
-            // Marquer rétroactivement les boules déjà sorties si la partie tourne
             if(data.liveHistory.length > 0) {
                 document.getElementById('live-ball').textContent = data.liveHistory[data.liveHistory.length - 1];
-                document.getElementById('history').textContent = "Historique : " + data.liveHistory.slice(-5).join(' - ');
+                document.getElementById('history').textContent = "Derniers tirages : " + data.liveHistory.slice(-5).join(' - ');
                 data.liveHistory.forEach(b => {
                     const el = document.getElementById(`verif-${b}`);
                     if(el) el.classList.add('out');
@@ -185,7 +168,21 @@
 
         socket.on('update-dashboard', (player) => { 
             totalFichesCommandees = player.nombreFiches || 1;
+            
+            // Mettre à jour la liste des fiches de manière à ne pas effacer les cases déjà cochées par le joueur
+            while(fichesJoueur.length < totalFichesCommandees) {
+                const newId = fichesJoueur.length + 1;
+                const newFiche = {
+                    id: newId,
+                    numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
+                    coches: new Array(25).fill(false)
+                };
+                newFiche.coches[12] = true;
+                fichesJoueur.push(newFiche);
+            }
+            
             refreshUI(player); 
+            renderCarton();
         });
         
         socket.on('notification', (msg) => { alert(msg); });
@@ -193,15 +190,11 @@
         socket.on('new-ball', (data) => {
             const boule = data.actuelle;
             document.getElementById('live-ball').textContent = boule;
-            
-            // Affiche uniquement les 6 derniers numéros en bas pour rester compact
             document.getElementById('history').textContent = "Derniers tirages : " + data.historique.slice(-6).join(' - ');
             
-            // Allume la boule en rouge dans le tableau général de vérification
             const el = document.getElementById(`verif-${boule}`);
             if(el) el.classList.add('out');
             
-            // Synthèse vocale
             if ('speechSynthesis' in window) {
                 let utterance = new SpeechSynthesisUtterance(`Numéro ${boule}`);
                 utterance.lang = 'fr-FR';
@@ -283,13 +276,14 @@
 
         function ouvrirReleve() { document.getElementById('modal-releve').style.display = 'flex'; }
         function fermerReleve() { document.getElementById('modal-releve').style.display = 'none'; }
-        function sInscrireTournoi() { socket.emit('player-register-tournoi', monCode); }
 
         function envoyerRecharge() {
             const qte = document.getElementById('achat-quantite').value;
+            const methode = document.getElementById('achat-methode').value;
             if(qte < 1) return alert("Quantité incorrecte.");
-            socket.emit('player-order', { code: monCode, type: "Achat Pions", qte: qte });
-            alert(`Notification envoyée à la caisse !`);
+            
+            socket.emit('player-order', { code: monCode, type: methode, qte: qte });
+            alert(`Demande envoyée en Caisse ! Mode choisi : ${methode}`);
         }
     </script>
 </body>
