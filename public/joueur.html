@@ -9,15 +9,12 @@
         .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
         
-        /* Composants et boîtes */
         .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         h2, h3, h4 { margin-top: 0; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
         
-        /* Affichage Live & Audio */
         .live-banner { background: linear-gradient(135deg, #e11d48, #be123c); border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(225, 29, 72, 0.3); }
         .live-number { font-size: 4.5rem; font-weight: 900; margin: 5px 0; letter-spacing: -2px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        /* Banque et Historique */
         .quota-box { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 15px; border-radius: 8px; border-left: 5px solid #06b6d4; }
         .quota-val { font-size: 2rem; font-weight: bold; color: #06b6d4; }
         .statement-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
@@ -25,68 +22,57 @@
         .statement-table td { padding: 8px; border-bottom: 1px solid #334155; }
         .pos { color: #4ade80; font-weight: bold; } .neg { color: #f87171; font-weight: bold; }
 
-        /* Module de visionnage PDF et Coche */
         .pdf-view-container { background: #0f172a; border-radius: 8px; padding: 10px; position: relative; }
-        .pdf-mock-frame { width: 100%; height: 350px; background: #f1f5f9; border-radius: 6px; overflow-y: auto; color: #1e293b; padding: 15px; box-sizing: border-box; position: relative; }
         .toggle-btn { background: #334155; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .toggle-btn.active { background: #0284c7; }
 
-        /* Grille Interactive Intégrée */
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; background: #0f172a; padding: 10px; border-radius: 8px; }
         .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #334155; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.2rem; transition: 0.1s; border: 1px solid #475569; }
         .cell:hover { background: #475569; }
         .cell.marked { background: #0284c7; color: white; box-shadow: 0 0 10px rgba(2, 132, 199, 0.5); border-color: #38bdf8; }
 
-        /* Formulaires */
         select, input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
         button.primary { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
         button.primary:hover { background: #0369a1; }
         .tournoi-item { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #f59e0b; font-size: 13px; }
+        .info-prix { background: #1e293b; color: #e2e8f0; font-weight: bold; padding: 8px; border-radius: 6px; display: inline-block; margin-bottom: 10px; border: 1px solid #06b6d4; width: 100%; box-sizing: border-box; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="grid-layout">
         
-        <!-- COLONNE GAUCHE : ANNONCES, AUDIO & JEU -->
+        <!-- COLONNE GAUCHE -->
         <div>
-            <!-- BANNIÈRE AUDIO-VISUELLE DU NUMÉRO LIVE -->
             <div class="live-banner">
                 <div style="font-weight: bold; letter-spacing: 1px; font-size: 13px; opacity: 0.9;">📢 FLUX DIRECT ANIMATEUR</div>
                 <div class="live-number" id="live-ball">-</div>
                 <div id="vocal-status" style="font-size: 12px; color: #cbd5e1;">🔊 Audio connecté (En attente d'annonce)</div>
             </div>
 
-            <!-- FICHE DE BINGO ET SYSTEME DE COCHE -->
             <div class="card">
                 <h3>🎲 Ma Fiche Bingo Personnelle</h3>
-                <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">Consultez votre reçu et cochez vos cases (Manuel ou Automatique).</p>
-                
                 <div class="pdf-view-container">
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                         <button class="toggle-btn" id="btn-auto" onclick="toggleAutoMode()" style="margin:0; width:48%;">🤖 Coche Auto : OFF</button>
                         <button class="toggle-btn active" style="margin:0; width:48%;">📄 Afficher mon PDF</button>
                     </div>
-                    
-                    <!-- Lecteur / Tableau de Coche Superposé -->
                     <div class="board" id="bingo-board"></div>
                 </div>
             </div>
 
-            <!-- TOURNOI EN DIRECT ANNONCÉ -->
             <div class="card" style="border-color: #f59e0b;">
-                <h3>🏆 Tournoi Actuel Annoncé</h3>
+                <h3>🏆 Prochain Jeu / Tournoi Annoncé</h3>
                 <div style="background:#0f172a; padding:15px; border-radius:8px; text-align:center;">
                     <h4 id="t-actuel-nom" style="margin:0; color:#f59e0b;">Chargement du tournoi...</h4>
                     <p style="font-size:13px; color:#94a3b8; margin:5px 0 12px 0;">Statut : <span id="t-actuel-statut" style="color:#4ade80;">-</span></p>
-                    <button class="primary" onclick="sInscrireTournoi()" style="background:#d97706;">S'inscrire à ce tournoi (<span id="t-actuel-cout">0</span> Pions)</button>
+                    <button class="primary" onclick="sInscrireTournoi()" style="background:#d97706;">S'inscrire à ce jeu (<span id="t-actuel-cout">0</span> Pions)</button>
                 </div>
             </div>
         </div>
 
-        <!-- COLONNE DROITE : PORTEFEUILLE, RECHARGES & CALENDRIER -->
+        <!-- COLONNE DROITE -->
         <div>
-            <!-- QUOTA DE PIONS ET SOLDE -->
             <div class="card">
                 <h3>💰 Mon Portefeuille de Pions</h3>
                 <div class="quota-box">
@@ -95,13 +81,12 @@
                 </div>
             </div>
 
-            <!-- RELEVÉ DE COMPTE (GAIN / PERTE / ACHAT) -->
             <div class="card">
                 <h3>📊 Relevé d'Opérations & Gains</h3>
                 <div style="max-height: 180px; overflow-y: auto;">
                     <table class="statement-table">
                         <thead>
-                            <tr><th>Date</th><th>Opération</th><th>Montant</th></tr>
+                            <tr><th>Date</th><th>Opération</th><th>Montant (Pions)</th></tr>
                         </thead>
                         <tbody id="statement-tbody">
                             <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Aucun mouvement.</td></tr>
@@ -110,28 +95,34 @@
                 </div>
             </div>
 
-            <!-- RECHARGES PAR VIREMENT -->
+            <!-- BOUTIQUE AJUSTÉE AVEC CALCUL EN FRANC (1 PION = 100F) -->
             <div class="card">
-                <h3>💳 Recharger mes Pions</h3>
-                <label style="font-size:12px; color:#94a3b8;">Sélectionnez une offre :</label>
-                <select id="recharge-type">
-                    <option value="Pack Découverte (50 Pions)">Pack Découverte - 50 Pions</option>
-                    <option value="Pack Compétiteur (150 Pions)">Pack Compétiteur - 150 Pions</option>
-                    <option value="Pack Master VIP (500 Pions)">Pack Master VIP - 500 Pions</option>
+                <h3>💳 Acheter / Recharger des Pions</h3>
+                <label style="font-size:12px; color:#94a3b8;">Combien de pions voulez-vous ?</label>
+                <select id="recharge-pions" onchange="calculerFrancs()">
+                    <option value="10">10 Pions</option>
+                    <option value="50">50 Pions (Accès Jeu 50)</option>
+                    <option value="100" selected>100 Pions (Accès Jeu 100)</option>
+                    <option value="200">200 Pions</option>
+                    <option value="500">500 Pions (Accès Jeu 500)</option>
+                    <option value="1000">1000 Pions</option>
                 </select>
+                
+                <div class="info-prix" id="affichage-prix-franc">
+                    💰 Montant du virement à faire : 10 000 f
+                </div>
+                
                 <button class="primary" onclick="envoyerRecharge()">Envoyer la notification de virement</button>
             </div>
 
-            <!-- CALENDRIER DES PROCHAINS TOURNOIS -->
             <div class="card">
-                <h3>📅 Agenda & Dates des Tournois</h3>
+                <h3>📅 Grille des Coûts & Dates des Jeux</h3>
                 <div id="agenda-zone"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- SYNTHÈSE VOCALE POUR ENTENDRE LES NUMÉROS -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -142,30 +133,33 @@
         if(!monCode) { window.location.href = '/'; } 
         else { socket.emit('player-login', monCode); }
 
+        function calculerFrancs() {
+            const pions = document.getElementById('recharge-pions').value;
+            const francs = pions * 100;
+            document.getElementById('affichage-prix-franc').textContent = `💰 Montant du virement à faire : ${francs.toLocaleString()} f`;
+        }
+
         socket.on('login-success-dashboard', (data) => {
             document.title = `Dashboard - ${data.player.nom}`;
             refreshUI(data.player);
+            calculerFrancs();
             
-            // Charger les infos globales
             document.getElementById('t-actuel-nom').textContent = data.tournoiActuel.nom;
             document.getElementById('t-actuel-statut').textContent = data.tournoiActuel.statut;
             document.getElementById('t-actuel-cout').textContent = data.tournoiActuel.coût;
 
-            // Construire l'agenda
             const agenda = document.getElementById('agenda-zone');
             agenda.innerHTML = '';
             data.tournoisInfos.forEach(t => {
                 agenda.innerHTML += `<div class="tournoi-item">
                     <strong>${t.date}</strong> — <span style="color:#38bdf8;">${t.nom}</span><br>
-                    <span style="color:#94a3b8; font-size:12px;">🎁 Récompense : ${t.prix}</span>
+                    <span style="color:#f59e0b; font-size:12px;">🎟️ Ticket d'entrée : ${t.coutPions} Pions (${(t.coutPions*100).toLocaleString()} f)</span>
                 </div>`;
             });
 
-            // Construire la grille de jeu
             mesNumeros = data.player.grille;
             construireGrille();
 
-            // Mettre à jour la boule en cours si la partie a déjà commencé
             if(data.liveHistory.length > 0) {
                 const derniereBoule = data.liveHistory[data.liveHistory.length - 1];
                 document.getElementById('live-ball').textContent = derniereBoule;
@@ -175,15 +169,12 @@
         socket.on('update-dashboard', (player) => { refreshUI(player); });
         socket.on('notification', (msg) => { alert(msg); });
 
-        // GESTION DU TIRAGE EN DIRECT (VISUEL ET VOCAL)
         socket.on('new-ball', (data) => {
             const boule = data.actuelle;
             document.getElementById('live-ball').textContent = boule;
             
-            // 🔊 Lecture vocale du numéro appelé pour l'entendre en direct
             if ('speechSynthesis' in window) {
                 let textToSpeak = `Numéro ${boule}`;
-                if(boule === 1) textToSpeak = "Numéro 1, l'as du jeu";
                 let utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.lang = 'fr-FR';
                 utterance.rate = 1.1;
@@ -191,10 +182,9 @@
                 document.getElementById('vocal-status').textContent = `🔊 Annoncé : Numéro ${boule}`;
             }
 
-            // 🤖 Mode Coche Automatique
             if(autoCoche) {
                 const idx = mesNumeros.indexOf(boule);
-                if(idx !== -1 && idx !== 12) { // 12 est la case FREE
+                if(idx !== -1 && idx !== 12) {
                     const cell = document.getElementById(`cell-${idx}`);
                     if(cell && !cell.classList.contains('marked')) {
                         cell.classList.add('marked');
@@ -224,7 +214,6 @@
         function refreshUI(player) {
             document.getElementById('solde-pions').textContent = `${player.pions} Pions`;
             
-            // Table de relevé de compte
             const tbody = document.getElementById('statement-tbody');
             tbody.innerHTML = '';
             player.historiquePions.forEach(h => {
@@ -232,7 +221,7 @@
                 tbody.innerHTML += `<tr>
                     <td>${h.date}</td>
                     <td>${h.description}</td>
-                    <td class="${cl}">${h.montant}</td>
+                    <td class="${cl}">${h.montant} Pions</td>
                 </tr>`;
             });
         }
@@ -243,8 +232,7 @@
             if(autoCoche) {
                 btn.textContent = "🤖 Coche Auto : ACTIVÉ";
                 btn.style.background = "#22c55e";
-                // Par sécurité, cocher rétroactivement ce qui est déjà sorti
-                alert("Mode automatique activé. Les prochains numéros appelés se cocheront tout seuls !");
+                alert("Mode automatique activé ! Les numéros se cocheront tout seuls.");
             } else {
                 btn.textContent = "🤖 Coche Auto : OFF";
                 btn.style.background = "#334155";
@@ -254,9 +242,9 @@
         function sInscrireTournoi() { socket.emit('player-register-tournoi', monCode); }
 
         function envoyerRecharge() {
-            const select = document.getElementById('recharge-type');
-            socket.emit('player-order', { code: monCode, type: select.value, qte: 100 }); // Exemple forfait 100 pions par défaut
-            alert("Notification d'achat transmise ! Dès validation du virement par la caisse, vos pions apparaîtront.");
+            const pions = document.getElementById('recharge-pions').value;
+            socket.emit('player-order', { code: monCode, type: "Demande d'achat", qte: pions });
+            alert(`Notification envoyée ! Dès réception de votre virement de ${(pions*100).toLocaleString()} f, l'admin validera vos ${pions} pions.`);
         }
     </script>
 </body>
