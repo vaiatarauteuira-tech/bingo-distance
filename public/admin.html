@@ -7,28 +7,37 @@
         body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         button { width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; }
         .boulier { text-align: center; background: #e2e8f0; padding: 15px; border-radius: 6px; margin: 15px 0; }
         .ball { font-size: 3.5rem; font-weight: bold; color: #dc3545; }
         .order-box { background: #fff3cd; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .player-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .player-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; font-size: 14px; align-items: center; }
+        .add-zone { background: #e6fffa; border: 1px solid #b2f5ea; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🛠️ Console Organisateur (Tirage)</h2>
-        <button onclick="generer()" style="background:#4a5568;">1. Initialiser la partie (50 Joueurs)</button>
+        <h2>🛠️ Console Administrateur & Caisse</h2>
+        
+        <!-- NOUVELLE ZONE INSCRIPTION UN PAR UN -->
+        <div class="add-zone">
+            <h4 style="margin: 0 0 10px 0; color: #00695c;">➕ Inscrire un nouveau joueur</h4>
+            <input type="text" id="nom-joueur-input" placeholder="Ex: Jean Dupont (ou laisser vide pour automatique)">
+            <button onclick="ajouterJoueur()" style="background:#00a389; margin-bottom:0;">Créer le ticket joueur</button>
+        </div>
         
         <div class="boulier">
-            <button onclick="tirer()" style="background:#dc3545;">🔮 Tirer un numéro</button>
             <div class="ball" id="live-ball">-</div>
             <div id="history" style="font-size:13px; color:#4a5568; margin-top:5px;">Aucun numéro tiré.</div>
         </div>
 
-        <h3>📥 Commandes en attente :</h3>
+        <h3>📥 Commandes de pions en attente :</h3>
         <div id="orders-zone">Aucune commande.</div>
 
-        <h3>👥 Liste des codes d'accès :</h3>
-        <div id="players-zone">Cliquez sur Initialiser.</div>
+        <h3>👥 Joueurs inscrits à l'événement :</h3>
+        <div id="players-zone" style="font-style: italic; color: #718096;">Aucun joueur enregistré pour le moment.</div>
+
+        <button onclick="toutRemettreAZero()" style="background:#718096; margin-top:30px; font-size:12px; padding:5px;">⚠️ Réinitialiser complètement la partie</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -55,18 +64,32 @@
 
             // Joueurs
             const pZone = document.getElementById('players-zone');
-            pZone.innerHTML = '';
-            players.forEach(p => {
-                pZone.innerHTML += `<div class="player-item">
-                    <span><strong>${p.nom}</strong> (${p.p20}/${p.p50}/${p.p100})</span>
-                    <span style="font-family:monospace;font-weight:bold;background:#e9ecef;padding:2px 5px;">${p.code}</span>
-                    <span style="color:${p.online ? '#28a745':'#dc3545'}">${p.online ? 'En ligne':'Absent'}</span>
-                </div>`;
-            });
+            if(players.length === 0) {
+                pZone.innerHTML = 'Aucun joueur enregistré pour le moment.';
+            } else {
+                pZone.innerHTML = '';
+                players.forEach(p => {
+                    pZone.innerHTML += `<div class="player-item">
+                        <span><strong>${p.nom}</strong> (${p.p20}/${p.p50}/${p.p100})</span>
+                        <span style="font-family:monospace;font-weight:bold;background:#e9ecef;padding:2px 8px;border-radius:4px;">${p.code}</span>
+                        <span style="font-weight:bold; color:${p.online ? '#28a745':'#dc3545'}">${p.online ? '🟢 En ligne':'🔴 Absent'}</span>
+                    </div>`;
+                });
+            }
         });
 
-        function generer() { socket.emit('admin-generate-players'); }
-        function tirer() { socket.emit('admin-draw'); }
+        function ajouterJoueur() {
+            const input = document.getElementById('nom-joueur-input');
+            socket.emit('admin-add-player', input.value);
+            input.value = ''; // Vide la case après validation
+        }
+
+        function toutRemettreAZero() {
+            if(confirm("Voulez-vous vraiment effacer TOUS les joueurs et recommencer au Joueur 01 ?")) {
+                socket.emit('admin-reset-all');
+            }
+        }
+
         function valider(id) { socket.emit('admin-validate-order', id); }
     </script>
 </body>
