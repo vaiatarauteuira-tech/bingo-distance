@@ -19,6 +19,13 @@
         button.sec { background: #475569; color: white; } button.sec:hover { background: #334155; }
         button.action-btn { background: #06b6d4; color: #0f172a; }
         button.nav-btn { background: #f59e0b; color: white; padding: 6px 12px; }
+        button.bingo-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; font-size: 1.3rem; padding: 15px; letter-spacing: 1px; animation: pulse 2s infinite; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
 
         .fiche-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #0f172a; padding: 8px; border-radius: 8px; }
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; background: #0f172a; padding: 8px; border-radius: 8px; }
@@ -57,6 +64,11 @@
             <button class="action-btn" onclick="ouvrirReleve()">📊 Mon Relevé</button>
         </div>
 
+        <!-- LE GROS BOUTON DE SIGNALEMENT BINGO POUR LE JOUEUR -->
+        <div style="margin-bottom: 15px;">
+            <button class="bingo-btn" onclick="annoncerBingoDirect()" style="width:100%;">🚨 ANNONCER BINGO ! 🚨</button>
+        </div>
+
         <div class="card">
             <h3>🎲 Mes Cartons de Bingo commandés</h3>
             <button class="primary" id="btn-ouvrir-fiches" onclick="ouvrirFichesZone()" style="width:100%;">🔍 Déplier mes fiches de jeu</button>
@@ -72,26 +84,34 @@
             </div>
         </div>
 
+        <!-- COMMANDE DE FICHES BINGO (SOUMIS À CLÔTURE) -->
+        <div class="card" style="border: 2px solid #38bdf8;">
+            <h3>📄 Commander des Fiches Bingo pour le Match</h3>
+            <p style="font-size:12px; color:#94a3b8; margin-top:-8px;">Achetez vos fiches avant le début du tirage (Clôture par l'administration).</p>
+            <label style="font-size:12px; color:#94a3b8;">Nombre de fiches désirées :</label>
+            <input type="number" id="fiche-quantite" value="1" min="1" oninput="calculerPrixFiches()">
+            <div class="price-tag" id="fiche-prix-calcule" style="background:#0284c7;">💵 Prix : 5 Pions (500 fr)</div>
+            <button class="primary" onclick="envoyerCommandeFiches()" style="width:100%; background:#38bdf8; color:#0f172a;">Acheter les fiches de jeu</button>
+        </div>
+
+        <!-- RECHARGE DE PIONS CASH / VIREMENT (TOUJOURS OUVERT) -->
+        <div class="card" style="border: 1px solid #10b981;">
+            <h3>💳 Acheter / Recharger des Pions (Caisse)</h3>
+            <p style="font-size:12px; color:#94a3b8; margin-top:-8px;">Alimentez votre portefeuille de pions à tout moment auprès de la régie.</p>
+            <label style="font-size:12px; color:#94a3b8;">Méthode :</label>
+            <select id="pion-methode">
+                <option value="Espèces à l'accueil">Déblocage direct (Espèces Caisse)</option>
+                <option value="Virement en ligne">Virement Mobile / Banque</option>
+            </select>
+            <label style="font-size:12px; color:#94a3b8; display:block; margin-top:5px;">Nombre de pions (1 pion = 100fr) :</label>
+            <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPrixPions()">
+            <div class="price-tag" id="pion-prix-calcule" style="background:#10b981;">💵 Valeur : 1 000 fr</div>
+            <button class="primary" onclick="envoyerRechargePions()" style="background:#10b981; width:100%;">Demander l'approvisionnement</button>
+        </div>
+
         <div class="card">
             <h3>📋 Tableau Général de Vérification (1 à 75)</h3>
             <div class="verif-grid" id="tableau-verification"></div>
-        </div>
-
-        <!-- MODE DE RECHARGE : VIREMENT OU DÉBLOCAGE DIRECT -->
-        <div class="card">
-            <h3>💳 Demande de Pions / Déblocage Caisse</h3>
-            
-            <label style="font-size:12px; color:#94a3b8;">Méthode de paiement :</label>
-            <select id="achat-methode">
-                <option value="Déblocage direct (Espèces Caisse)">Déblocage direct auprès de l'Orga/Admin ⚡</option>
-                <option value="Virement Bancaire en ligne">Virement bancaire classique 🏦</option>
-            </select>
-
-            <label style="font-size:12px; color:#94a3b8; display:block; margin-top:5px; margin-bottom:4px;">Nombre de pions (1 pion = 100fr) :</label>
-            <input type="number" id="achat-quantite" value="5" min="1" oninput="calculerPrixAchat()">
-            
-            <div class="price-tag" id="prix-calcule">💵 Valeur : 500 fr</div>
-            <button class="primary" onclick="envoyerRecharge()" style="background:#10b981; width:100%;">Envoyer la demande de validation</button>
         </div>
 
     </div>
@@ -117,18 +137,24 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const monCode = sessionStorage.getItem('joueurCode');
+        let monCode = sessionStorage.getItem('joueurCode');
+        let monNom = "";
         let autoCoche = false;
         let fichesJoueur = []; 
         let indexFicheActuelle = 0;
-        let totalFichesCommandees = 1;
 
         if(!monCode) { window.location.href = '/'; } 
         else { socket.emit('player-login', monCode); }
 
-        function calculerPrixAchat() {
-            const qte = document.getElementById('achat-quantite').value || 0;
-            document.getElementById('prix-calcule').textContent = `💵 Valeur : ${(qte * 100).toLocaleString()} fr`;
+        function calculerPrixFiches() {
+            const qte = document.getElementById('fiche-quantite').value || 0;
+            const pions = qte * 5; // Supposons qu'une fiche coûte 5 pions
+            document.getElementById('fiche-prix-calcule').textContent = `💵 Prix : ${pions} Pions (${(pions*100).toLocaleString()} fr)`;
+        }
+
+        function calculerPrixPions() {
+            const qte = document.getElementById('pion-quantite').value || 0;
+            document.getElementById('pion-prix-calcule').textContent = `💵 Valeur : ${(qte * 100).toLocaleString()} fr`;
         }
 
         function initialiserTableauVerif() {
@@ -144,12 +170,15 @@
         }
 
         socket.on('login-success-dashboard', (data) => {
-            document.title = `Espace - ${data.player.nom}`;
-            totalFichesCommandees = data.player.nombreFiches || 1;
+            monNom = data.player.nom;
+            document.title = `Espace - ${monNom}`;
             refreshUI(data.player);
             initialiserTableauVerif();
+            calculerPrixFiches();
+            calculerPrixPions();
 
-            fichesJoueur = Array.from({length: totalFichesCommandees}, (_, idx) => ({
+            // Génère les fiches réelles possédées par le joueur
+            fichesJoueur = Array.from({length: data.player.nombreFiches || 0}, (_, idx) => ({
                 id: idx + 1,
                 numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
                 coches: new Array(25).fill(false)
@@ -167,20 +196,17 @@
         });
 
         socket.on('update-dashboard', (player) => { 
-            totalFichesCommandees = player.nombreFiches || 1;
-            
-            // Mettre à jour la liste des fiches de manière à ne pas effacer les cases déjà cochées par le joueur
-            while(fichesJoueur.length < totalFichesCommandees) {
-                const newId = fichesJoueur.length + 1;
-                const newFiche = {
-                    id: newId,
+            // Complète la liste des fiches sans écraser les anciennes
+            const cible = player.nombreFiches || 0;
+            while(fichesJoueur.length < cible) {
+                const newF = {
+                    id: fichesJoueur.length + 1,
                     numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
                     coches: new Array(25).fill(false)
                 };
-                newFiche.coches[12] = true;
-                fichesJoueur.push(newFiche);
+                newF.coches[12] = true;
+                fichesJoueur.push(newF);
             }
-            
             refreshUI(player); 
             renderCarton();
         });
@@ -194,12 +220,6 @@
             
             const el = document.getElementById(`verif-${boule}`);
             if(el) el.classList.add('out');
-            
-            if ('speechSynthesis' in window) {
-                let utterance = new SpeechSynthesisUtterance(`Numéro ${boule}`);
-                utterance.lang = 'fr-FR';
-                window.speechSynthesis.speak(utterance);
-            }
 
             if(autoCoche) {
                 fichesJoueur.forEach(f => {
@@ -211,6 +231,7 @@
         });
 
         function ouvrirFichesZone() {
+            if(fichesJoueur.length === 0) return alert("Vous n'avez pas encore de fiches de jeu pour ce match.");
             document.getElementById('btn-ouvrir-fiches').style.display = 'none';
             document.getElementById('fiches-zone').style.display = 'block';
             renderCarton();
@@ -232,36 +253,19 @@
                 } else {
                     c.textContent = num;
                     if(currentFiche.coches[idx]) c.classList.add('marked');
-                    c.onclick = () => {
-                        if(!autoCoche) {
-                            currentFiche.coches[idx] = !currentFiche.coches[idx];
-                            c.classList.toggle('marked');
-                        }
-                    };
+                    c.onclick = () => { if(!autoCoche) { currentFiche.coches[idx] = !currentFiche.coches[idx]; c.classList.toggle('marked'); } };
                 }
                 b.appendChild(c);
             });
         }
 
-        function ficheSuivante() {
-            if(indexFicheActuelle < fichesJoueur.length - 1) {
-                indexFicheActuelle++;
-                renderCarton();
-            }
-        }
-
-        function fichePrecedente() {
-            if(indexFicheActuelle > 0) {
-                indexFicheActuelle--;
-                renderCarton();
-            }
-        }
+        function ficheSuivante() { if(indexFicheActuelle < fichesJoueur.length - 1) { indexFicheActuelle++; renderCarton(); } }
+        function fichePrecedente() { if(indexFicheActuelle > 0) { indexFicheActuelle--; renderCarton(); } }
 
         function toggleAutoMode() {
             autoCoche = !autoCoche;
-            const btn = document.getElementById('btn-auto');
-            btn.textContent = autoCoche ? "🤖 Coche Automatique : ACTIVÉ" : "🤖 Coche Automatique : OFF";
-            btn.style.background = autoCoche ? "#22c55e" : "#475569";
+            document.getElementById('btn-auto').textContent = autoCoche ? "🤖 Coche Automatique : ACTIVÉ" : "🤖 Coche Automatique : OFF";
+            document.getElementById('btn-auto').style.background = autoCoche ? "#22c55e" : "#475569";
         }
 
         function refreshUI(player) {
@@ -274,17 +278,29 @@
             });
         }
 
+        function envoyerCommandeFiches() {
+            const qte = document.getElementById('fiche-quantite').value;
+            if(qte < 1) return alert("Quantité incorrecte.");
+            socket.emit('player-buy-fiches', { code: monCode, qte: parseInt(qte) });
+        }
+
+        function envoyerRechargePions() {
+            const qte = document.getElementById('pion-quantite').value;
+            const methode = document.getElementById('pion-methode').value;
+            if(qte < 1) return alert("Quantité incorrecte.");
+            socket.emit('player-order', { code: monCode, type: methode, qte: qte });
+            alert("Demande de rechargement envoyée à la caisse.");
+        }
+
+        function annoncerBingoDirect() {
+            if(confirm("🚨 Alerter la régie et crier BINGO ?")) {
+                socket.emit('player-announce-bingo', { code: monCode, nom: monNom });
+                alert("Votre annonce de BINGO a été envoyée ! Le tirage se fige pour examen.");
+            }
+        }
+
         function ouvrirReleve() { document.getElementById('modal-releve').style.display = 'flex'; }
         function fermerReleve() { document.getElementById('modal-releve').style.display = 'none'; }
-
-        function envoyerRecharge() {
-            const qte = document.getElementById('achat-quantite').value;
-            const methode = document.getElementById('achat-methode').value;
-            if(qte < 1) return alert("Quantité incorrecte.");
-            
-            socket.emit('player-order', { code: monCode, type: methode, qte: qte });
-            alert(`Demande envoyée en Caisse ! Mode choisi : ${methode}`);
-        }
     </script>
 </body>
 </html>
