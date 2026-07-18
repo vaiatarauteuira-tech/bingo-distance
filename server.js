@@ -34,9 +34,8 @@ io.on('connection', (socket) => {
             nom: nomJoueur.trim() || `Joueur ${playerCount}`,
             code: code,
             pions: 0,
-            nombreFiches: 1, // Commence avec 1 fiche par défaut à la création
+            nombreFiches: 1, 
             historiquePions: [{ date: "Ouverture", description: "Dossier joueur créé", montant: "+0" }],
-            tournoisInscrits: [],
             online: false,
             socketId: null
         };
@@ -64,11 +63,12 @@ io.on('connection', (socket) => {
         const nbrPions = parseInt(qte);
         const francs = nbrPions * 100;
         
+        // Le type contiendra soit "Déblocage direct", soit "Virement Bancaire"
         orders.push({ 
             id: Date.now(), 
             code, 
             nom: players[code].nom, 
-            type: `Commande de fiches / virement de ${francs.toLocaleString()} fr`, 
+            type: `${type} [Total: ${francs.toLocaleString()} fr]`, 
             qte: nbrPions 
         });
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders });
@@ -80,12 +80,12 @@ io.on('connection', (socket) => {
             const o = orders[idx];
             if (players[o.code]) {
                 players[o.code].pions += o.qte;
-                // On augmente aussi proportionnellement son quota de fiches utilisables si c'est une commande de fiches
+                // Donne des cartons supplémentaires proportionnellement à sa recharge
                 players[o.code].nombreFiches += Math.floor(o.qte / 5) || 1; 
                 
                 players[o.code].historiquePions.unshift({
-                    date: "Caisse ok",
-                    description: `Recharge + Attribution Cartons`,
+                    date: "Approuvé",
+                    description: `Recharge Caisse (${o.qte} Pions)`,
                     montant: `+${o.qte}`
                 });
                 if (players[o.code].socketId) {
