@@ -7,56 +7,46 @@
     <style>
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; 
-            background: #05050a; /* Notre noir de jais exclusif */
+            background: #05050a; 
             color: #f1f5f9; 
             margin: 0; 
             padding: 15px; 
-            padding-bottom: 85px; /* Espace pour notre barre de navigation basse */
+            padding-bottom: 85px; 
         }
         .main-container { max-width: 450px; margin: 0 auto; }
         
-        /* En-tête BingoHome Premium */
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #12131a; padding: 12px; border-radius: 10px; border: 1px solid #222530; }
         .brand-name { font-weight: 900; color: #f59e0b; letter-spacing: 0.5px; }
         .welcome-msg { font-size: 13px; color: #94a3b8; }
 
-        /* Bannières d'informations */
         .alert-banner { background: rgba(6, 182, 212, 0.1); border: 1px solid #06b6d4; color: #06b6d4; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; font-weight: 500; }
         
-        /* Onglets d'affichage (Gestion des vues) */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Boîtes et Cartes */
         .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         h3 { margin-top: 0; color: #38bdf8; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 
-        /* Boutons personnalisés Or et Cyan */
         button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         button.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; width: 100%; }
         button.btn-cyan { background: #06b6d4; color: #05050a; width: 100%; }
         button.btn-dark { background: #1a1c26; color: #94a3b8; border: 1px solid #2d3142; width: 100%; }
         button.nav-btn { background: #1a1c26; color: white; border: 1px solid #2d3142; padding: 8px 14px; }
         
-        /* 🔥 Le Gros bouton d'annonce de gain */
         button.bingo-alert-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; font-size: 1.3rem; font-weight: 900; padding: 14px; width: 100%; margin-bottom: 15px; box-shadow: 0 0 15px rgba(239,68,68,0.4); animation: shake 2.5s infinite; border-radius: 10px; }
         @keyframes shake { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
 
-        /* Sélecteurs rapides de valeur pour les pions */
         .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
         .value-option { background: #1a1c26; border: 1px solid #2d3142; padding: 12px 5px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .value-option.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 
-        /* Écrans superposés pour l'affichage des cartons */
         .fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05050a; z-index: 2000; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         
-        /* Grille des cartons BingoHome */
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1a1c26; padding: 10px; border-radius: 10px; border: 1px solid #2d3142; margin-top: 10px; }
         .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #222533; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.2rem; border: 1px solid #2d3142; }
         .cell.marked { background: linear-gradient(135deg, #06b6d4, #0284c7); color: white; border-color: #38bdf8; box-shadow: 0 0 8px rgba(6,182,212,0.4); }
 
-        /* Grille de contrôle 1-75 */
         .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #1a1c26; padding: 8px; border-radius: 8px; border: 1px solid #2d3142; }
         @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
         .verif-num { background: #12131a; border: 1px solid #222530; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 3px; color: #475569; font-weight: bold; }
@@ -64,13 +54,11 @@
 
         input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; }
 
-        /* BARRE DE NAVIGATION COMMUNE TOUT EN BAS */
         .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.4); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.2s; width: 45%; text-align: center; }
         .nav-item.active { color: #f59e0b; }
         .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
 
-        /* Interrupteur iOS */
         .switch-box { display: flex; justify-content: space-between; align-items: center; background: #1a1c26; padding: 12px; border-radius: 8px; border: 1px solid #2d3142; margin-bottom: 10px; }
         .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -84,93 +72,83 @@
 
     <div class="main-container">
         
-        <!-- EN-TÊTE DE SESSION UNIQUE -->
         <div class="app-header">
             <span class="brand-name">🏠 BINGOHOME</span>
             <span class="welcome-msg" id="player-welcome">Chargement...</span>
         </div>
 
-        <!-- ZONE INFOS FLASH EN DIRECT -->
         <div class="alert-banner" id="banner-message">
-            📢 Message Direction : Bienvenue dans votre salon BingoHome ! Restez attentifs aux annonces de tirage.
+            📢 Message Direction : Bienvenue dans votre salon BingoHome ! Restez attentifs.
         </div>
 
-        <!-- ================= ONGLET 1 : JOUER (SALON DE TIRAGE) ================= -->
+        <!-- ================= ONGLET : JOUER ================= -->
         <div id="view-jouer" class="tab-content active">
-            
             <button class="bingo-alert-btn" onclick="annoncerBingoDirect()">🚨 ANNONCER BINGO ! 🚨</button>
 
-            <!-- ACCÈS CARTONS SÉCURISÉ -->
             <div class="card" style="border-left: 4px solid #38bdf8;">
                 <h3>🎲 Vos Cartons de Session</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="series-label">Séries affectées : En attente de livraison...</p>
-                <button class="btn-cyan" onclick="ouvrirFichesPleinEcran()">🔍 Déployer mes fiches de jeu</button>
+                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="series-label">Séries affectées : En attente...</p>
+                <button class="btn-cyan" onclick="ouvrirFichesPlekEcran()">🔍 Déplier mes fiches de jeu</button>
             </div>
 
-            <!-- BOULIER DIRECT EN TEMPS RÉEL -->
             <div class="card" style="border-left: 4px solid #ef4444;">
-                <h3>🎰 Boules tirées en direct (Auto 5s)</h3>
+                <h3>🎰 Numéro en cours</h3>
                 <div style="display:flex; align-items:center; gap:15px; background:#1a1c26; padding:12px; border-radius:10px; border:1px solid #2d3142;">
-                    <div style="width:50px; height:50px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:bold; box-shadow:0 0 10px rgba(239,68,68,0.4);" id="live-ball">-</div>
+                    <div style="width:50px; height:50px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:bold;" id="live-ball">-</div>
                     <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">Aucun numéro sorti.</div>
                 </div>
             </div>
 
-            <!-- FIL DE CONTRÔLE GÉNÉRAL -->
             <div class="card">
-                <h3>📋 Tableau Général de Vérification (1 à 75)</h3>
+                <h3>📋 Grille Générale (1 à 75)</h3>
                 <div class="verif-grid" id="tableau-verification"></div>
             </div>
         </div>
 
-        <!-- ================= ONGLET 2 : PORTEMONNAIE & COMMANDES ================= -->
+        <!-- ================= ONGLET : PIONS ================= -->
         <div id="view-pions" class="tab-content">
-            
-            <!-- BLOC SOLDE FLUIDE (Style ton relevé) -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
-                <h3>💰 Mon Portefeuille BingoHome</h3>
+                <h3>💰 Mon Portefeuille</h3>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px;">
                     <span style="font-size:14px; color:#94a3b8;">Solde Disponible :</span>
                     <span style="font-size:1.5rem; font-weight:bold; color:#f59e0b;" id="solde-pions">0 Pions</span>
                 </div>
             </div>
 
-            <!-- ACHETER DES FICHES DE MATCH (SOUMIS À CLÔTURE) -->
             <div class="card" style="border: 1px solid #2d3142;">
-                <h3>📄 Réserver des fiches de Match</h3>
-                <label style="font-size:12px; color:#94a3b8;">Nombre de fiches désirées :</label>
+                <h3>📄 Réserver des fiches</h3>
+                <label style="font-size:12px; color:#94a3b8;">Nombre de fiches :</label>
                 <input type="number" id="fiche-quantite" value="1" min="1" oninput="calculerFiches()">
                 <div id="fiche-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#38bdf8;">Coût : 5 Pions (500 XPF)</div>
-                <button class="btn-cyan" onclick="acheterFichesMatch()">Acheter les fiches de match</button>
+                <button class="btn-cyan" onclick="acheterFichesMatch()">Valider l'achat de fiches</button>
             </div>
 
-            <!-- COMMANDER DES PIONS (TOUJOURS OUVERT SANS RESTRICTION) -->
             <div class="card" style="border: 1px solid #10b981;">
-                <h3>💳 Demande d'approvisionnement Caisse</h3>
-                <label style="font-size:12px; color:#94a3b8;">Sélectionner la valeur du pion :</label>
+                <h3>💳 Recharger mon solde</h3>
+                <label style="font-size:12px; color:#94a3b8;">Valeur par pion :</label>
                 <div class="value-grid">
                     <div class="value-option selected" id="val-20" onclick="selectValeurPion(20)">🪙 20<br><small>XPF</small></div>
                     <div class="value-option" id="val-50" onclick="selectValeurPion(50)">🪙 50<br><small>XPF</small></div>
                     <div class="value-option" id="val-100" onclick="selectValeurPion(100)">🪙 100<br><small>XPF</small></div>
                 </div>
                 
-                <label style="font-size:12px; color:#94a3b8;">Nombre de pions souhaités :</label>
+                <label style="font-size:12px; color:#94a3b8;">Quantité souhaitée :</label>
                 <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
                 
-                <label style="font-size:12px; color:#94a3b8;">Méthode d'envoi :</label>
+                <label style="font-size:12px; color:#94a3b8;">Méthode :</label>
                 <select id="pion-methode">
-                    <option value="Espèces Direct Caisse">Espèces au guichet (Déblocage direct)</option>
+                    <option value="Espèces Direct Caisse">Espèces au guichet</option>
                     <option value="Virement Bancaire / Mobile">Virement à distance</option>
                 </select>
                 
                 <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Valeur totale : 200 XPF</div>
-                <button class="btn-gold" onclick="demanderPionsCaisse()">Transmettre l'ordre d'achat</button>
+                <button class="btn-gold" onclick="demanderPionsCaisse()">Envoyer la commande</button>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= MODAL DE SUPERPOSITION : CARTONS PLEIN ÉCRAN ================= -->
+    <!-- PANEAU PLEIN ÉCRAN POUR CARTONS -->
     <div class="fullscreen-overlay" id="overlay-cartons">
         <div class="overlay-header">
             <span style="font-weight:bold; color:#06b6d4;" id="fiche-index-label">Fiche 1 / 1</span>
@@ -183,7 +161,7 @@
         </div>
 
         <div class="switch-box">
-            <span style="font-size:13px; font-weight:bold; color:#94a3b8;">🤖 Mode Pointage Automatique :</span>
+            <span style="font-size:13px; font-weight:bold; color:#94a3b8;">🤖 Coche Auto :</span>
             <label class="switch">
                 <input type="checkbox" id="chk-auto" onchange="toggleAutoMode()">
                 <span class="slider"></span>
@@ -193,7 +171,7 @@
         <div class="board" id="bingo-board"></div>
     </div>
 
-    <!-- BARRE DE NAVIGATION COMMUNE TOUT EN BAS -->
+    <!-- BAS DE NAVIGATION PAR ONGLETS -->
     <div class="bottom-nav-bar">
         <div class="nav-item active" id="nav-jouer" onclick="switchTab('joueur')">
             <div class="nav-icon">🎮</div>
@@ -307,8 +285,8 @@
 
         socket.on('notification', (msg) => { alert(msg); });
 
-        function ouvrirFichesPleinEcran() {
-            if(fichesJoueur.length === 0) return alert("Vous n'avez aucune fiche active pour ce match.");
+        function ouvrirFichesPlekEcran() {
+            if(fichesJoueur.length === 0) return alert("Vous n'avez aucune fiche active.");
             document.getElementById('overlay-cartons').style.display = 'block';
             renderCarton();
         }
@@ -339,7 +317,6 @@
         function toggleAutoMode() {
             autoCoche = document.getElementById('chk-auto').checked;
             if(autoCoche) {
-                // Pointage rétroactif instantané
                 fichesJoueur.forEach(f => {
                     f.numeros.forEach((num, idx) => {
                         const el = document.getElementById(`verif-${num}`);
@@ -362,12 +339,12 @@
         function demanderPionsCaisse() {
             const qte = document.getElementById('pion-quantite').value;
             const methode = document.getElementById('pion-methode').value;
-            socket.emit('player-order', { code: monCode, type: `${methode} (Pions de ${valeurPionSelectionne} XPF)`, qte: qte });
-            alert("Notification transmise à la caisse.");
+            socket.emit('player-order', { code: monCode, type: `${methode} (${valeurPionSelectionne} XPF)`, qte: qte });
+            alert("Ordre envoyé.");
         }
 
         function annoncerBingoDirect() {
-            if(confirm("🚨 Alerter immédiatement la régie pour BINGO ?")) {
+            if(confirm("🚨 Alerter la régie pour BINGO ?")) {
                 socket.emit('player-announce-bingo', { code: monCode, nom: monNom });
             }
         }
