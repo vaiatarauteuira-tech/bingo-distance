@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bingo - Panel Organisateur</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .boulier { text-align: center; background: #e2e8f0; padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .ball { font-size: 3.5rem; font-weight: bold; color: #dc3545; }
+        .order-box { background: #fff3cd; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .player-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🛠️ Console Organisateur (Tirage)</h2>
+        <button onclick="generer()" style="background:#4a5568;">1. Initialiser la partie (50 Joueurs)</button>
+        
+        <div class="boulier">
+            <button onclick="tirer()" style="background:#dc3545;">🔮 Tirer un numéro</button>
+            <div class="ball" id="live-ball">-</div>
+            <div id="history" style="font-size:13px; color:#4a5568; margin-top:5px;">Aucun numéro tiré.</div>
+        </div>
+
+        <h3>📥 Commandes en attente :</h3>
+        <div id="orders-zone">Aucune commande.</div>
+
+        <h3>👥 Liste des codes d'accès :</h3>
+        <div id="players-zone">Cliquez sur Initialiser.</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.emit('admin-init');
+
+        socket.on('refresh-admin', ({ players, history, orders }) => {
+            document.getElementById('history').textContent = "Historique : " + (history.join(', ') || "Aucun");
+            document.getElementById('live-ball').textContent = history[history.length - 1] || "-";
+            
+            // Commandes
+            const oZone = document.getElementById('orders-zone');
+            if(orders.length === 0) oZone.textContent = "Aucune commande.";
+            else {
+                oZone.innerHTML = '';
+                orders.forEach(o => {
+                    oZone.innerHTML += `<div class="order-box">
+                        <span><strong>${o.nom}</strong> : ${o.qte}x [${o.type}]</span>
+                        <button onclick="valider(${o.id})" style="width:auto;margin:0;padding:5px 10px;background:#28a745;">Valider</button>
+                    </div>`;
+                });
+            }
+
+            // Joueurs
+            const pZone = document.getElementById('players-zone');
+            pZone.innerHTML = '';
+            players.forEach(p => {
+                pZone.innerHTML += `<div class="player-item">
+                    <span><strong>${p.nom}</strong> (${p.p20}/${p.p50}/${p.p100})</span>
+                    <span style="font-family:monospace;font-weight:bold;background:#e9ecef;padding:2px 5px;">${p.code}</span>
+                    <span style="color:${p.online ? '#28a745':'#dc3545'}">${p.online ? 'En ligne':'Absent'}</span>
+                </div>`;
+            });
+        });
+
+        function generer() { socket.emit('admin-generate-players'); }
+        function tirer() { socket.emit('admin-draw'); }
+        function valider(id) { socket.emit('admin-validate-order', id); }
+    </script>
+</body>
+</html>
