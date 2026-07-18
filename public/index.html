@@ -5,224 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BingoHome - Portail Officiel</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            background: #05050a; 
-            color: #f1f5f9; 
-            margin: 0; 
-            padding: 25px 15px; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            min-height: 100vh; 
-            box-sizing: border-box;
-        }
-        
-        /* En-tête BingoHome Officiel */
-        .header-zone {
-            text-align: center;
-            margin-bottom: 30px;
-            margin-top: 10px;
-        }
-        .crown-icon {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-            display: inline-block;
-            filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.4));
-        }
-        .main-title {
-            font-size: 2.4rem;
-            font-weight: 900;
-            letter-spacing: 1.5px;
-            margin: 0;
-            background: linear-gradient(to right, #f59e0b, #38bdf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-        }
-        .subtitle {
-            color: #64748b;
-            font-size: 12px;
-            margin-top: 6px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 25px 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .header-zone { text-align: center; margin-bottom: 25px; }
+        .main-title { font-size: 2.4rem; font-weight: 900; background: linear-gradient(to right, #f59e0b, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; margin: 0; }
+        .subtitle { color: #64748b; font-size: 12px; margin-top: 6px; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Cartes d'espaces */
-        .space-card { 
-            background: #12131a; 
-            border: 1px solid #222530;
-            border-radius: 12px; 
-            padding: 22px; 
-            margin-bottom: 18px; 
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .space-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-        }
+        .space-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 22px; margin-bottom: 18px; width: 100%; max-width: 400px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
+        .space-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
         .card-joueur::before { background: #38bdf8; }
         .card-orga::before { background: #a855f7; }
-        .card-revendeur::before { background: #06b6d4; }
         .card-admin::before { background: #f59e0b; }
+        .space-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #94a3b8; }
 
-        .space-title {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #94a3b8;
-        }
-
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            background: #1a1c26; 
-            border: 1px solid #2d3142; 
-            border-radius: 8px; 
-            color: white; 
-            box-sizing: border-box; 
-            margin-bottom: 12px; 
-            font-size: 15px; 
-            text-align: center;
-        }
-
-        button { 
-            width: 100%; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            font-size: 14px; 
-            cursor: pointer; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            transition: all 0.2s;
-        }
+        input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
         
-        .btn-gold { 
-            background: linear-gradient(135deg, #f59e0b, #d97706); 
-            color: #05050a; 
-        }
-        .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
-        
-        .btn-cyan { 
-            background: #06b6d4; 
-            color: #05050a; 
-        }
-        .btn-cyan:hover { background: #0891b2; }
-
-        .btn-dark { 
-            background: #1a1c26; 
-            color: #94a3b8;
-            border: 1px solid #2d3142;
-        }
-        .btn-dark:hover { color: white; background: #222533; }
-
-        .meta-link {
-            display: block;
-            text-align: center;
-            color: #64748b;
-            font-size: 12px;
-            text-decoration: none;
-            margin-top: 10px;
-            font-weight: 500;
-        }
-        .meta-link:hover { color: #38bdf8; text-decoration: underline; }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
+        .btn-cyan { background: #06b6d4; color: #05050a; }
+        .btn-dark { background: #1a1c26; color: #94a3b8; border: 1px solid #2d3142; }
     </style>
 </head>
 <body>
 
-    <!-- MARQUE OFFICIELLE BINGOHOME -->
     <div class="header-zone">
-        <span class="crown-icon">🏠</span>
+        <span style="font-size:2.5rem;">🏠</span>
         <h1 class="main-title">BingoHome</h1>
-        <div class="subtitle">Espace d'accès sécurisé</div>
+        <div class="subtitle">Accès Vérifié & Sécurisé</div>
     </div>
 
-    <!-- CODE JOUEUR -->
+    <!-- 👤 SALON JOUEUR COMPLET -->
     <div class="space-card card-joueur">
-        <div class="space-title">👤 Salon Joueur</div>
-        <input type="text" id="code-joueur" placeholder="Saisir votre code d'accès">
-        <button class="btn-gold" onclick="loginJoueur()">🎯 Rejoindre la table</button>
-        <button class="btn-dark" onclick="redirigerAchatPions()">🪙 Demande de rechargement</button>
-        <a class="meta-link" href="#" onclick="alert('Guide de démarrage BingoHome disponible en salle.')">Consulter les règles du jeu</a>
+        <div class="space-title">👤 Espace Joueurs</div>
+        
+        <!-- ÉTAPE A : DEMANDE D'INSCRIPTION -->
+        <div id="zone-inscription">
+            <p style="font-size:12px; color:#94a3b8; margin-top:0;">Étape 1 : Demandez votre accès à la caisse.</p>
+            <input type="text" id="reg-nom" placeholder="Votre nom complet">
+            <input type="tel" id="reg-tel" placeholder="Votre n° de téléphone">
+            <button class="btn-cyan" onclick="demanderInscription()">Soumettre ma demande d'accès</button>
+            <p id="reg-status" style="font-size:12px; color:#f59e0b; text-align:center; margin:5px 0 0 0; display:none;"></p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #222530; margin: 15px 0;">
+
+        <!-- ÉTAPE B : CONNEXION PAR CODE CLÉ UNIQUE -->
+        <div id="zone-connexion">
+            <p style="font-size:12px; color:#94a3b8; margin-top:0;">Étape 2 : Entrez le code clé validé par l'admin.</p>
+            <input type="text" id="login-code" placeholder="Ex: BH-1234">
+            <button class="btn-gold" onclick="connexionCodeSecurise()">🎯 Entrer dans le salon de jeu</button>
+        </div>
     </div>
 
-    <!-- CODE ORGANISATEUR -->
+    <!-- 🎙️ ANIMATEUR -->
     <div class="space-card card-orga">
         <div class="space-title">🎙️ Régie Animateur</div>
         <input type="password" id="code-orga" placeholder="Clé d'activation organisateur">
-        <button class="btn-cyan" onclick="loginOrga()">🎙️ Ouvrir la console de tirage</button>
-        <button class="btn-dark" onclick="alert('Grille disponible auprès de la caisse.')">Consulter les barèmes</button>
+        <button class="btn-cyan" onclick="loginOrga()">Ouvrir la console de tirage</button>
     </div>
 
-    <!-- CODE REVENDEUR -->
-    <div class="space-card card-revendeur">
-        <div class="space-title">🛒 Guichet Revendeur</div>
-        <input type="password" id="code-revendeur" placeholder="Code accréditation revendeur">
-        <button class="btn-dark" style="width: 100%; color: white; background:#2563eb; border:none;" onclick="loginRevendeur()">Se connecter au guichet</button>
-    </div>
-
-    <!-- CODE ADMIN -->
+    <!-- 🛠️ CAISSE GENERALE -->
     <div class="space-card card-admin">
         <div class="space-title">🛠️ Direction / Caisse Générale</div>
         <input type="password" id="code-admin" placeholder="Mot de passe Maître">
         <button class="btn-gold" style="background: linear-gradient(135deg, #ec4899, #be185d); color: white;" onclick="loginAdmin()">Ouvrir le coffre-fort</button>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        function loginJoueur() {
-            const code = document.getElementById('code-joueur').value.trim().toUpperCase();
-            if(!code) return alert("Veuillez inscrire votre code d'accès.");
-            sessionStorage.setItem('joueurCode', code);
-            window.location.href = '/joueur.html';
+        const socket = io();
+
+        function demanderInscription() {
+            const nom = document.getElementById('reg-nom').value.trim();
+            const tel = document.getElementById('reg-tel').value.trim();
+            if(!nom || !tel) return alert("Veuillez remplir votre nom et votre numéro de téléphone.");
+
+            socket.emit('player-request-registration', { nom, tel });
         }
 
-        function redirigerAchatPions() {
-            const code = document.getElementById('code-joueur').value.trim().toUpperCase();
-            if(!code) return alert("Veuillez saisir votre code d'accès ci-dessus pour ouvrir votre historique.");
+        socket.on('registration-status', (data) => {
+            const statusEl = document.getElementById('reg-status');
+            statusEl.style.display = 'block';
+            if(data.status === 'submitted') {
+                statusEl.textContent = "⏳ Demande envoyée ! Attendez que l'admin valide votre fiche.";
+                statusEl.style.color = "#38bdf8";
+            } else if(data.status === 'pending') {
+                statusEl.textContent = "⏳ Une demande pour ce numéro est déjà en attente de validation.";
+                statusEl.style.color = "#f59e0b";
+            }
+        });
+
+        socket.on('registration-approved', (data) => {
+            const statusEl = document.getElementById('reg-status');
+            statusEl.innerHTML = `✅ Validé ! Votre code secret est : <strong style="font-size:1.1rem; color:#4ade80;">${data.code}</strong>. Recopiez-le ci-dessous.`;
+            document.getElementById('login-code').value = data.code;
+        });
+
+        function connexionCodeSecurise() {
+            const code = document.getElementById('login-code').value.trim().toUpperCase();
+            if(!code) return alert("Veuillez entrer votre code clé sécurisé.");
             sessionStorage.setItem('joueurCode', code);
             window.location.href = '/joueur.html';
         }
 
         function loginOrga() {
-            const code = document.getElementById('code-orga').value.trim();
-            if(code === "ORGA2026") {
-                sessionStorage.setItem('orgaToken', 'valide');
-                window.location.href = '/organisateur.html';
-            } else {
-                alert("Clé animateur invalide.");
-            }
-        }
-
-        function loginRevendeur() {
-            alert("Accès revendeur désactivé pour cette session.");
+            if(document.getElementById('code-orga').value.trim() === "ORGA2026") {
+                sessionStorage.setItem('orgaToken', 'valide'); window.location.href = '/organisateur.html';
+            } else alert("Clé invalide.");
         }
 
         function loginAdmin() {
-            const code = document.getElementById('code-admin').value.trim();
-            if(code === "SUPERADMIN") {
-                sessionStorage.setItem('adminToken', 'valide');
-                window.location.href = '/admin.html';
-            } else {
-                alert("Code Administrateur incorrect.");
-            }
+            if(document.getElementById('code-admin').value.trim() === "SUPERADMIN") {
+                sessionStorage.setItem('adminToken', 'valide'); window.location.href = '/admin.html';
+            } else alert("Mot de passe incorrect.");
         }
     </script>
 </body>
