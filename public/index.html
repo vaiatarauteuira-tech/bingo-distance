@@ -89,19 +89,17 @@
             document.getElementById('zone-admin').style.display = 'none';
             document.getElementById('portal-menu').style.display = 'block';
         }
-
-        // REDIRECTIONS ET VÉRIFICATIONS
+// REDIRECTIONS ET VÉRIFICATIONS
         function loginJoueur() {
             const code = document.getElementById('code-joueur').value.trim().toUpperCase();
-            if(!code) return alert("Veuillez entrer un code.");
-            // On stocke le code dans la mémoire du navigateur pour que la page suivante s'en rappelle
+            if(!code) return alert("Veuillez entrer votre code.");
             sessionStorage.setItem('joueurCode', code);
             window.location.href = '/joueur.html';
         }
 
         function loginOrga() {
             const code = document.getElementById('code-orga').value.trim();
-            // Code secret pour l'organisateur : "ORGA2026" (Modifiable ici)
+            // Code de l'Animateur : ORGA2026
             if(code === "ORGA2026") {
                 sessionStorage.setItem('orgaToken', 'valide');
                 window.location.href = '/organisateur.html';
@@ -112,14 +110,11 @@
 
         function loginAdmin() {
             const code = document.getElementById('code-admin').value.trim();
-            // Code secret pour toi l'admin : "SUPERADMIN" (Modifiable ici)
+            // Ton code Administrateur : SUPERADMIN
             if(code === "SUPERADMIN") {
                 sessionStorage.setItem('adminToken', 'valide');
                 window.location.href = '/admin.html';
             } else {
-                alert("Mot de passe Administrateur incorrect.");
+                alert("Mot de passe Administrateur incorrect. Vérifiez les majuscules.");
             }
         }
-    </script>
-</body>
-</html>
