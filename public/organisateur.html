@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BingoHome - Console Admin Tournoi</title>
+    <title>BingoHome - Console Organisateur</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,114 +22,167 @@
 </head>
 <body class="bg-bgNight text-white min-h-screen font-sans">
 
-    <header class="border-b border-gray-800 bg-opacity-50 bg-black p-4 flex justify-between items-center">
+    <header class="border-b border-gray-800 bg-black bg-opacity-40 p-4 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
         <div class="flex items-center space-x-3">
             <span class="text-2xl">🔮</span>
-            <h1 class="text-xl font-bold tracking-wider">BingoHome <span class="text-purpleTiare text-sm font-normal">[Console Organisateur]</span></h1>
+            <h1 class="text-xl font-bold tracking-wider">BingoHome <span class="text-purpleTiare text-xs font-semibold px-2 py-0.5 bg-purpleTiare bg-opacity-10 rounded border border-purpleTiare border-opacity-30">ORGANISATEUR</span></h1>
         </div>
         <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-400">Tournoi Actif : <strong class="text-white">PROMO OHANA 75</strong></span>
-            <button class="bg-roseCoral hover:bg-opacity-80 px-3 py-1 rounded text-xs font-semibold">Fermer la session</button>
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-bold">VAHINE</p>
+                <p class="text-xs text-gray-400">ID: #OR987</p>
+            </div>
+            <button class="bg-roseCoral hover:bg-opacity-80 px-4 py-2 rounded-lg text-xs font-bold transition">Déconnexion</button>
         </div>
     </header>
 
-    <main class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div id="withdrawalAlert" class="bg-roseCoral bg-opacity-20 border-b border-roseCoral border-opacity-40 p-3 text-center text-sm font-bold text-roseCoral flex justify-center items-center space-x-2 animate-pulse">
+        <span>🚨 1 Demande de retrait d'argent en attente de validation</span>
+        <button onclick="ouvrirRetraits()" class="bg-roseCoral text-white px-3 py-1 rounded text-xs ml-3 hover:bg-opacity-90">Gérer</button>
+    </div>
+
+    <main class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
         
         <div class="lg:col-span-2 space-y-6">
             
-            <div class="grid grid-cols-3 gap-4">
-                <div class="bg-black bg-opacity-40 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs text-gray-400 uppercase font-semibold">Tickets Vendus</p>
-                    <p class="text-2xl font-bold text-purpleTiare">142 fiches</p>
+            <section class="bg-black bg-opacity-20 border border-gray-800 rounded-2xl p-4">
+                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Mon Stock de Pions</h2>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
+                        <span class="text-purpleTiare text-xs font-bold block mb-1">🪙 20 XPF</span>
+                        <span class="text-xl font-black text-white">189</span> <span class="text-gray-500 text-xs">restants</span>
+                    </div>
+                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
+                        <span class="text-yellow-500 text-xs font-bold block mb-1">🪙 50 XPF</span>
+                        <span class="text-xl font-black text-white">55</span> <span class="text-gray-500 text-xs">restants</span>
+                    </div>
+                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
+                        <span class="text-greenLagon text-xs font-bold block mb-1">🪙 100 XPF</span>
+                        <span class="text-xl font-black text-white">810</span> <span class="text-gray-500 text-xs">restants</span>
+                    </div>
                 </div>
-                <div class="bg-black bg-opacity-40 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs text-gray-400 uppercase font-semibold">Encaisse (Recettes)</p>
-                    <p class="text-2xl font-bold text-greenLagon">+54 700 XPF</p>
-                </div>
-                <div class="bg-black bg-opacity-40 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs text-gray-400 uppercase font-semibold">Joueurs en Ligne</p>
-                    <p class="text-2xl font-bold text-blue-400">18 actifs</p>
-                </div>
-            </div>
+                <button onclick="ouvrirPopUpTransfert()" class="w-full mt-3 bg-purpleTiare hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg flex justify-center items-center space-x-2">
+                    <span>⚡ Transférer des pions à un joueur</span>
+                </button>
+            </section>
 
-            <div class="bg-black bg-opacity-30 p-6 rounded-2xl border border-gray-800 text-center relative overflow-hidden">
-                <h3 class="text-gray-400 text-sm font-semibold mb-4 uppercase tracking-wider">Contrôle du Tirage</h3>
+            <section class="bg-gradient-to-br from-black to-gray-950 bg-opacity-40 border border-gray-800 p-6 rounded-2xl text-center relative overflow-hidden">
+                <div class="absolute top-3 right-3 flex items-center space-x-1.5 bg-greenLagon bg-opacity-10 text-greenLagon border border-greenLagon border-opacity-20 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                    <span class="h-1.5 w-1.5 rounded-full bg-greenLagon animate-ping"></span>
+                    <span>Session Prête</span>
+                </div>
+                
+                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Console du Tournoi</h2>
                 
                 <div class="my-6 flex justify-center items-center">
-                    <div class="w-36 h-36 bg-gradient-to-tr from-purpleTiare to-indigo-900 rounded-full flex flex-col justify-center items-center shadow-xl border-4 border-white border-opacity-20 animate-pulse">
-                        <span class="text-xs uppercase tracking-widest text-purple-200">Dernier Numéro</span>
-                        <span class="text-5xl font-black mt-1" id="currentBall">G-52</span>
+                    <div class="w-32 h-32 bg-bgNight rounded-full flex flex-col justify-center items-center shadow-2xl border-2 border-gray-800 relative">
+                        <span class="text-[10px] uppercase tracking-widest text-gray-500">Dernier tirage</span>
+                        <span class="text-4xl font-black mt-1 text-white" id="boulierDisplay">--</span>
                     </div>
                 </div>
 
-                <button onclick="tirerNouvelleBoule()" class="w-full bg-purpleTiare hover:bg-opacity-90 text-white font-bold py-4 px-6 rounded-xl text-xl shadow-lg transition duration-200 transform active:scale-95">
-                    🎰 TIRER LA BOULE SUIVANTE
-                </button>
-            </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="tirerUneBoule()" class="bg-purpleTiare hover:bg-opacity-90 text-white font-bold py-3.5 rounded-xl transition text-sm">
+                        🎰 TIRER UNE BOULE
+                    </button>
+                    <button class="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white font-bold py-3.5 rounded-xl transition text-sm">
+                        🏆 VALIDER BINGO
+                    </button>
+                </div>
+            </section>
 
         </div>
 
         <div class="space-y-6">
             
-            <div class="bg-roseCoral bg-opacity-10 border border-roseCoral border-opacity-30 p-4 rounded-xl">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <span class="animate-ping inline-flex h-2 w-2 rounded-full bg-roseCoral"></span>
-                        <h4 class="font-bold text-roseCoral text-sm uppercase">Alerte Réclamation Gain</h4>
-                    </div>
-                    <span class="text-xs bg-roseCoral text-white px-2 py-0.5 rounded font-bold">1 EN ATTENTE</span>
-                </div>
-                <div class="mt-3 bg-black bg-opacity-40 p-3 rounded border border-roseCoral border-opacity-20 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-sm">Moana (ID: #MO44)</p>
-                        <p class="text-xs text-gray-400">Revendique un BINGO !</p>
-                    </div>
-                    <button class="bg-greenLagon hover:bg-opacity-90 text-xs px-3 py-1.5 rounded font-bold">Vérifier sa grille</button>
-                </div>
-            </div>
-
-            <div class="bg-black bg-opacity-40 p-4 rounded-xl border border-gray-800 h-[400px] flex flex-col">
-                <h3 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider flex justify-between">
-                    <span>Activité des Joueurs</span>
-                    <span class="text-xs text-gray-500 font-normal">Flux Live</span>
-                </h3>
+            <section class="bg-black bg-opacity-20 border border-gray-800 rounded-2xl p-4">
+                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Santé Financière du Tournoi</h2>
                 
-                <div class="space-y-2 overflow-y-auto flex-1 pr-2 text-xs" id="adminLogs">
-                    <div class="p-2 bg-gray-900 bg-opacity-50 rounded border-l-2 border-purpleTiare flex justify-between">
-                        <span>👤 <strong>Teva</strong> a acheté 3 cartons</span>
-                        <span class="text-gray-500">16:31</span>
+                <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg">
+                        <span class="text-[10px] text-gray-400 block uppercase">Achats</span>
+                        <span class="text-xs font-bold text-roseCoral">-800k F</span>
                     </div>
-                    <div class="p-2 bg-gray-900 bg-opacity-50 rounded border-l-2 border-greenLagon flex justify-between">
-                        <span>🪙 <strong>Vahine</strong> a rechargé 2 000 XPF de pions</span>
-                        <span class="text-gray-500">16:30</span>
+                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg">
+                        <span class="text-[10px] text-gray-400 block uppercase">Ventes</span>
+                        <span class="text-xs font-bold text-greenLagon">+54.7k F</span>
                     </div>
-                    <div class="p-2 bg-gray-900 bg-opacity-50 rounded border-l-2 border-blue-500 flex justify-between">
-                        <span>🔌 <strong>Hinatea</strong> s'est connectée à la salle</span>
-                        <span class="text-gray-500">16:28</span>
+                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg bg-opacity-50 border border-gray-800">
+                        <span class="text-[10px] text-gray-400 block uppercase">Marge</span>
+                        <span class="text-xs font-bold text-white">-745.3k F</span>
                     </div>
                 </div>
-            </div>
+
+                <div class="space-y-2 max-h-[220px] overflow-y-auto pr-1 text-xs">
+                    <div class="p-2.5 bg-gray-950 bg-opacity-60 rounded-lg border-l-2 border-purpleTiare flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">Vente pions — Moana</p>
+                            <p class="text-[10px] text-gray-500">Aujourd'hui, 16:30 • Espèces</p>
+                        </div>
+                        <span class="font-bold text-greenLagon">+2 000 XPF</span>
+                    </div>
+                    <div class="p-2.5 bg-gray-950 bg-opacity-60 rounded-lg border-l-2 border-roseCoral flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">Achat Fiches Loto Admin</p>
+                            <p class="text-[10px] text-gray-500">29 Juin • Compte Appli</p>
+                        </div>
+                        <span class="font-bold text-white">-80 000 XPF</span>
+                    </div>
+                </div>
+            </section>
 
         </div>
-
     </main>
 
+    <div id="transferModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-bgNight border border-gray-800 w-full sm:max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">⚡ Donner des pions</h3>
+                <button onclick="fermerPopUpTransfert()" class="text-gray-400 text-xl font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">Code Unique de la Joueuse</label>
+                    <input type="text" placeholder="Ex: AB12CD" class="w-full bg-black bg-opacity-40 border border-gray-800 rounded-xl p-3 text-white placeholder-gray-600 focus:outline-none focus:border-purpleTiare text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">Valeur du pion</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="border border-purpleTiare bg-purpleTiare bg-opacity-10 py-2 rounded-lg text-xs font-bold">20 XPF</button>
+                        <button class="border border-gray-800 py-2 rounded-lg text-xs font-bold text-gray-400">50 XPF</button>
+                        <button class="border border-gray-800 py-2 rounded-lg text-xs font-bold text-gray-400">100 XPF</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">Nombre de pions</label>
+                    <input type="number" value="10" class="w-full bg-black bg-opacity-40 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-purpleTiare text-sm">
+                </div>
+            </div>
+
+            <button onclick="fermerPopUpTransfert()" class="w-full bg-greenLagon hover:bg-opacity-90 text-white font-bold py-3 rounded-xl text-sm transition">
+                Confirmer le transfert
+            </button>
+        </div>
+    </div>
+
     <script>
-        function tirerNouvelleBoule() {
-            // C'est ici que tu brancheras ton code WebSocket ou ton API Fetch
-            // Exemple visuel temporaire :
+        function ouvrirPopUpTransfert() {
+            document.getElementById('transferModal').classList.remove('hidden');
+        }
+        function fermerPopUpTransfert() {
+            document.getElementById('transferModal').classList.add('hidden');
+        }
+        function ouvrirRetraits() {
+            alert("Ouverture du panneau des demandes de retraits joueuses...");
+        }
+
+        // Simulation du tirage de boule
+        function tirerUneBoule() {
             const lettres = ['B', 'I', 'N', 'G', 'O'];
             const randomLettre = lettres[Math.floor(Math.random() * lettres.length)];
             const randomNum = Math.floor(Math.random() * 75) + 1;
-            
-            document.getElementById('currentBall').innerText = `${randomLettre}-${randomNum}`;
-            
-            // Ajouter un log automatique
-            const logBox = document.getElementById('adminLogs');
-            const newLog = document.createElement('div');
-            newLog.className = "p-2 bg-gray-900 bg-opacity-50 rounded border-l-2 border-gray-600 flex justify-between animate-fade-in";
-            newLog.innerHTML = `<span>🎰 Boule <strong>${randomLettre}-${randomNum}</strong> tirée par l'admin</span> <span class="text-gray-500">À l'instant</span>`;
-            logBox.insertBefore(newLog, logBox.firstChild);
+            document.getElementById('boulierDisplay').innerText = `${randomLettre}-${randomNum}`;
         }
     </script>
 </body>
