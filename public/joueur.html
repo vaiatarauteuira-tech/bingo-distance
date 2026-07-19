@@ -1,9 +1,367 @@
-            <!-- ACHETER DES FICHES DE MATCH (SOUMIS À LA BOUTIQUE DE L'ORGANISATEUR) -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Joueur - BingoHome</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: #05050a; 
+            color: #f1f5f9; 
+            margin: 0; 
+            padding: 15px; 
+            padding-bottom: 85px; 
+        }
+        .main-container { max-width: 450px; margin: 0 auto; }
+        
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #12131a; padding: 12px; border-radius: 10px; border: 1px solid #222530; }
+        .brand-name { font-weight: 900; color: #f59e0b; letter-spacing: 0.5px; }
+        .welcome-msg { font-size: 13px; color: #94a3b8; }
+
+        .alert-banner { background: rgba(6, 182, 212, 0.1); border: 1px solid #06b6d4; color: #06b6d4; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; font-weight: 500; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+        button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        button.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; width: 100%; }
+        button.btn-cyan { background: #06b6d4; color: #05050a; width: 100%; }
+        button.btn-dark { background: #1a1c26; color: #94a3b8; border: 1px solid #2d3142; width: 100%; }
+        button.nav-btn { background: #1a1c26; color: white; border: 1px solid #2d3142; padding: 8px 14px; }
+        
+        button.bingo-alert-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; font-size: 1.3rem; font-weight: 900; padding: 14px; width: 100%; margin-bottom: 15px; box-shadow: 0 0 15px rgba(239,68,68,0.4); animation: shake 2.5s infinite; border-radius: 10px; }
+        @keyframes shake { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+
+        .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+        .value-option { background: #1a1c26; border: 1px solid #2d3142; padding: 12px 5px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .value-option.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+        .fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05050a; z-index: 2000; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1a1c26; padding: 10px; border-radius: 10px; border: 1px solid #2d3142; margin-top: 10px; }
+        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #222533; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.2rem; border: 1px solid #2d3142; }
+        .cell.marked { background: linear-gradient(135deg, #06b6d4, #0284c7); color: white; border-color: #38bdf8; box-shadow: 0 0 8px rgba(6,182,212,0.4); }
+
+        .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #1a1c26; padding: 8px; border-radius: 8px; border: 1px solid #2d3142; }
+        @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
+        .verif-num { background: #12131a; border: 1px solid #222530; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 3px; color: #475569; font-weight: bold; }
+        .verif-num.out { background: #ef4444; color: white; border-color: #f87171; }
+
+        input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; }
+
+        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.4); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.2s; width: 45%; text-align: center; }
+        .nav-item.active { color: #f59e0b; }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+
+        .switch-box { display: flex; justify-content: space-between; align-items: center; background: #1a1c26; padding: 12px; border-radius: 8px; border: 1px solid #2d3142; margin-bottom: 10px; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3142; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #06b6d4; }
+        input:checked + .slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- BARRE DE TITRE -->
+        <div class="app-header">
+            <span class="brand-name">🏠 BINGOHOME</span>
+            <span class="welcome-msg" id="player-welcome">Connexion...</span>
+        </div>
+
+        <div class="alert-banner" id="banner-message">
+            📢 Direction : Bienvenue dans votre salon BingoHome ! Restez attentifs aux boules.
+        </div>
+
+        <!-- ================= ONGLET 1 : JOUER ================= -->
+        <div id="view-jouer" class="tab-content active">
+            <button class="bingo-alert-btn" onclick="annoncerBingoDirect()">🚨 ANNONCER BINGO ! 🚨</button>
+
+            <!-- CARTONS DE JEU -->
+            <div class="card" style="border-left: 4px solid #38bdf8;">
+                <h3>🎲 Vos Cartons de Match</h3>
+                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="series-label">Attribution : En attente de fiches...</p>
+                <button class="btn-cyan" onclick="ouvrirFichesPleinEcran()">🔍 Déplier mes fiches de jeu</button>
+            </div>
+
+            <!-- BOULIER LIVE -->
+            <div class="card" style="border-left: 4px solid #ef4444;">
+                <h3>🎰 Tirage en direct</h3>
+                <div style="display:flex; align-items:center; gap:15px; background:#1a1c26; padding:12px; border-radius:10px; border:1px solid #2d3142;">
+                    <div style="width:50px; height:50px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:bold;" id="live-ball">-</div>
+                    <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">En attente de la première boule...</div>
+                </div>
+            </div>
+
+            <!-- PANNEAU 1-75 -->
+            <div class="card">
+                <h3>📋 Grille de Contrôle Générale (1 à 75)</h3>
+                <div class="verif-grid" id="tableau-verification"></div>
+            </div>
+        </div>
+
+        <!-- ================= ONGLET 2 : MES PIONS & BOUTIQUE ================= -->
+        <div id="view-pions" class="tab-content">
+            <!-- PORTEMONNAIE -->
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3>💰 Mon Portefeuille</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px;">
+                    <span style="font-size:14px; color:#94a3b8;">Solde Disponible :</span>
+                    <span style="font-size:1.5rem; font-weight:bold; color:#f59e0b;" id="solde-pions">0 Pions</span>
+                </div>
+            </div>
+
+            <!-- 🎟️ BOUTIQUE DE L'ANIMATEUR (LA NOUVELLE COMMANDE DE FICHES CONNECTÉE !) -->
             <div class="card" style="border: 2px solid #38bdf8;">
                 <h3>📄 Boutique de l'Animateur : Acheter des fiches</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="boutique-orga-info">Fiches disponibles : 0 | Prix : --</p>
+                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="boutique-orga-info">Ventes fermées ou aucun stock dispo.</p>
                 <label style="font-size:12px; color:#94a3b8;">Nombre de fiches à acquérir :</label>
                 <input type="number" id="fiche-quantite" value="1" min="1" oninput="calculerFiches()">
-                <div id="fiche-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#38bdf8;">Coût : 5 Pions</div>
+                <div id="fiche-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#38bdf8;">Coût : -- Pions</div>
                 <button class="btn-cyan" onclick="acheterFichesMatch()">Confirmer mon achat de fiches</button>
             </div>
+
+            <!-- APPROVISIONNEMENT CASH CAISSE -->
+            <div class="card" style="border: 1px solid #10b981;">
+                <h3>💳 Demande de Pions (Caisse / Accueil)</h3>
+                <label style="font-size:12px; color:#94a3b8;">Valeur par pion :</label>
+                <div class="value-grid">
+                    <div class="value-option selected" id="val-20" onclick="selectValeurPion(20)">🪙 20<br><small>XPF</small></div>
+                    <div class="value-option" id="val-50" onclick="selectValeurPion(50)">🪙 50<br><small>XPF</small></div>
+                    <div class="value-option" id="val-100" onclick="selectValeurPion(100)">🪙 100<br><small>XPF</small></div>
+                </div>
+                
+                <label style="font-size:12px; color:#94a3b8;">Quantité souhaitée :</label>
+                <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
+                
+                <label style="font-size:12px; color:#94a3b8;">Méthode :</label>
+                <select id="pion-methode">
+                    <option value="Espèces Direct Caisse">Espèces au guichet</option>
+                    <option value="Virement Bancaire / Mobile">Virement à distance</option>
+                </select>
+                
+                <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Valeur totale : 200 XPF</div>
+                <button class="btn-gold" onclick="demanderPionsCaisse()">Transmettre l'ordre d'achat</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PANEAU PLEIN ÉCRAN POUR EXAMEN DES CARTONS -->
+    <div class="fullscreen-overlay" id="overlay-cartons">
+        <div class="overlay-header">
+            <span style="font-weight:bold; color:#06b6d4;" id="fiche-index-label">Fiche 1 / 1</span>
+            <button style="background:#ef4444; color:white; padding:6px 12px; font-weight:bold;" onclick="fermerFichesPleinEcran()">✕ Fermer</button>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <button class="nav-btn" onclick="fichePrecedente()">⬅️ Précédent</button>
+            <button class="nav-btn" onclick="ficheSuivante()">Suivant ➡️</button>
+        </div>
+
+        <div class="switch-box">
+            <span style="font-size:13px; font-weight:bold; color:#94a3b8;">🤖 Mode Pointage Automatique :</span>
+            <label class="switch">
+                <input type="checkbox" id="chk-auto" onchange="toggleAutoMode()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="board" id="bingo-board"></div>
+    </div>
+
+    <!-- FIXE TOUT EN BAS : NAVIGATION PAR ONGLETS -->
+    <div class="bottom-nav-bar">
+        <div class="nav-item active" id="nav-jouer" onclick="switchTab('joueur')">
+            <div class="nav-icon">🎮</div>
+            <span>Jouer</span>
+        </div>
+        <div class="nav-item" id="nav-pions" onclick="switchTab('pions')">
+            <div class="nav-icon">🪙</div>
+            <span>Mes Pions</span>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const monCode = sessionStorage.getItem('joueurCode');
+        let monNom = "";
+        let autoCoche = false;
+        let fichesJoueur = []; 
+        let indexFicheActuelle = 0;
+        let valeurPionSelectionne = 20;
+        let valeurBoutiquePrixFiche = 5; // Récupéré de l'organisateur en temps réel
+
+        if(!monCode) { window.location.href = '/'; } 
+        else { socket.emit('player-login', monCode); }
+
+        function switchTab(onglet) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(onglet === 'joueur') {
+                document.getElementById('view-jouer').classList.add('active');
+                document.getElementById('nav-jouer').classList.add('active');
+            } else {
+                document.getElementById('view-pions').classList.add('active');
+                document.getElementById('nav-pions').classList.add('active');
+            }
+        }
+
+        function selectValeurPion(val) {
+            valeurPionSelectionne = val;
+            document.querySelectorAll('.value-option').forEach(el => el.classList.remove('selected'));
+            if(val === 20) document.getElementById('val-20').classList.add('selected');
+            if(val === 50) document.getElementById('val-50').classList.add('selected');
+            if(val === 100) document.getElementById('val-100').classList.add('selected');
+            calculerPions();
+        }
+
+        function calculerFiches() {
+            const qte = document.getElementById('fiche-quantite').value || 0;
+            const pions = qte * valeurBoutiquePrixFiche;
+            document.getElementById('fiche-prix-calcule').textContent = `Coût : ${pions} Pions`;
+        }
+
+        function calculerPions() {
+            const qte = document.getElementById('pion-quantite').value || 0;
+            const total = qte * valeurPionSelectionne;
+            document.getElementById('pion-prix-calcule').textContent = `Valeur totale : ${total.toLocaleString()} XPF`;
+        }
+
+        function initialiserTableau() {
+            const grid = document.getElementById('tableau-verification');
+            grid.innerHTML = '';
+            for(let i=1; i<=75; i++) {
+                const box = document.createElement('div'); box.className = 'verif-num'; box.id = `verif-${i}`; box.textContent = i;
+                grid.appendChild(box);
+            }
+        }
+
+        socket.on('login-success-dashboard', (data) => {
+            monNom = data.player.nom;
+            document.getElementById('player-welcome').textContent = `${monNom} (${data.player.code})`;
+            document.getElementById('series-label').textContent = `Attribution : ${data.player.seriesCartons || 'Aucune fiche active'}`;
+            refreshUI(data.player);
+            initialiserTableau();
+
+            fichesJoueur = Array.from({length: data.player.nombreFiches || 0}, (_, idx) => ({
+                id: idx + 1,
+                numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1),
+                coches: new Array(25).fill(false)
+            }));
+            fichesJoueur.forEach(f => f.coches[12] = true);
+
+            if(data.liveHistory.length > 0) {
+                document.getElementById('live-ball').textContent = data.liveHistory[data.liveHistory.length - 1];
+                document.getElementById('history').textContent = "Historique : " + data.liveHistory.slice(-4).join(' - ');
+                data.liveHistory.forEach(b => {
+                    const el = document.getElementById(`verif-${b}`); if(el) el.classList.add('out');
+                });
+            }
+        });
+
+        socket.on('update-dashboard', (player) => { 
+            const cible = player.nombreFiches || 0;
+            document.getElementById('series-label').textContent = `Attribution : ${player.seriesCartons || 'Aucune fiche active'}`;
+            while(fichesJoueur.length < cible) {
+                const newF = { id: fichesJoueur.length + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) };
+                newF.coches[12] = true; fichesJoueur.push(newF);
+            }
+            refreshUI(player); renderCarton();
+        });
+
+        socket.on('new-ball', (data) => {
+            const boule = data.actuelle;
+            document.getElementById('live-ball').textContent = boule;
+            document.getElementById('history').textContent = "Historique : " + data.historique.slice(-4).join(' - ');
+            const el = document.getElementById(`verif-${boule}`); if(el) el.classList.add('out');
+
+            if(autoCoche) {
+                fichesJoueur.forEach(f => { const idx = f.numeros.indexOf(boule); if(idx !== -1) f.coches[idx] = true; });
+                renderCarton();
+            }
+        });
+
+        // ÉCOUTEUR DU CATALOGUE EN DIRECT DE L'ORGANISATEUR
+        socket.on('refresh-boutique-joueurs', (data) => {
+            document.getElementById('boutique-orga-info').innerHTML = `🎟️ Vitrine : <strong>${data.boutiqueOrgaFichesEnVente} fiches dispos</strong><br>💰 Tarif : <strong>${data.prixFichePourJoueur} Pions</strong> l'unité`;
+            valeurBoutiquePrixFiche = data.prixFichePourJoueur; 
+            calculerFiches();
+        });
+
+        socket.on('notification', (msg) => { alert(msg); });
+
+        function ouvrirFichesPleinEcran() {
+            if(fichesJoueur.length === 0) return alert("Vous n'avez aucune fiche active.");
+            document.getElementById('overlay-cartons').style.display = 'block';
+            renderCarton();
+        }
+
+        function fermerFichesPleinEcran() { document.getElementById('overlay-cartons').style.display = 'none'; }
+
+        function renderCarton() {
+            if(fichesJoueur.length === 0) return;
+            const currentFiche = fichesJoueur[indexFicheActuelle];
+            document.getElementById('fiche-index-label').textContent = `Fiche ${currentFiche.id} / ${fichesJoueur.length}`;
+            const b = document.getElementById('bingo-board'); b.innerHTML = '';
+            currentFiche.numeros.forEach((num, idx) => {
+                const c = document.createElement('div'); c.className = 'cell';
+                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
+                else {
+                    c.textContent = num; if(currentFiche.coches[idx]) c.classList.add('marked');
+                    c.onclick = () => { if(!autoCoche) { currentFiche.coches[idx] = !currentFiche.coches[idx]; c.classList.toggle('marked'); } };
+                }
+                b.appendChild(c);
+            });
+        }
+
+        function ficheSuivante() { if(indexFicheActuelle < fichesJoueur.length - 1) { indexFicheActuelle++; renderCarton(); } }
+        function fichePrecedente() { if(indexFicheActuelle > 0) { indexFicheActuelle--; renderCarton(); } }
+
+        function toggleAutoMode() {
+            autoCoche = document.getElementById('chk-auto').checked;
+            if(autoCoche) {
+                fichesJoueur.forEach(f => {
+                    f.numeros.forEach((num, idx) => {
+                        const el = document.getElementById(`verif-${num}`);
+                        if(el && el.classList.contains('out')) f.coches[idx] = true;
+                    });
+                });
+                renderCarton();
+            }
+        }
+
+        function refreshUI(player) {
+            document.getElementById('solde-pions').textContent = `${player.pions} Pions`;
+        }
+
+        function acheterFichesMatch() {
+            const qte = document.getElementById('fiche-quantite').value;
+            socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: parseInt(qte) });
+        }
+
+        function demanderPionsCaisse() {
+            const qte = document.getElementById('pion-quantite').value;
+            const methode = document.getElementById('pion-methode').value;
+            socket.emit('player-order', { code: monCode, type: `${methode} (${valeurPionSelectionne} XPF)`, qte: qte });
+            alert("Ordre de rechargement envoyé à la caisse.");
+        }
+
+        function annoncerBingoDirect() {
+            if(confirm("🚨 Alerter la régie et déclarer BINGO immédiatement ?")) {
+                socket.emit('player-announce-bingo', { code: monCode, nom: monNom });
+            }
+        }
+    </script>
+</body>
+</html>
