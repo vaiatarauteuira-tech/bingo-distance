@@ -3,190 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Joueur - BingoHome</title>
+    <title>BingoHome - Espace Joueur Officiel</title>
     <style>
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; 
             background: #05050a; 
             color: #f1f5f9; 
             margin: 0; 
-            padding: 15px; 
+            padding: 12px; 
             padding-bottom: 85px; 
         }
         .main-container { max-width: 450px; margin: 0 auto; }
         
-        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #12131a; padding: 12px; border-radius: 10px; border: 1px solid #222530; }
-        .brand-name { font-weight: 900; color: #f59e0b; letter-spacing: 0.5px; }
-        .welcome-msg { font-size: 13px; color: #94a3b8; }
-
-        .alert-banner { background: rgba(6, 182, 212, 0.1); border: 1px solid #06b6d4; color: #06b6d4; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; font-weight: 500; }
+        /* Cadre Message Admin / Infos Tournoi */
+        .admin-info-banner { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 2px solid #a855f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #e2e8f0; text-align: center; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2); }
         
+        /* Cadre Intitulé & Annonce du jeu en cours */
+        .game-title-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; position: relative; }
+        .game-announced-label { font-size: 1.3rem; font-weight: 900; color: #06b6d4; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 0.5px; }
+        .welcome-player-text { font-size: 14px; color: #a855f7; font-weight: bold; margin: 0; }
+
+        /* Cadre Intégré : Réception du PDF & Validation Feuillets */
+        .pdf-delivery-box { background: #1a1c26; border: 1px solid #2d3142; border-radius: 10px; padding: 12px; margin-top: 12px; display: none; }
+        .pdf-title { color: #f59e0b; font-weight: bold; font-size: 13px; margin-bottom: 6px; }
+        .pdf-pages-badge { background: #05050a; border: 1px solid #a855f7; color: #cbd5e1; padding: 4px 8px; border-radius: 5px; font-size: 12px; display: inline-block; font-weight: bold; margin-bottom: 8px; }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        h3 { margin-top: 0; color: #38bdf8; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 12px; }
 
         button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         button.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; width: 100%; }
         button.btn-cyan { background: #06b6d4; color: #05050a; width: 100%; }
+        button.btn-purple { background: #a855f7; color: white; width: 100%; }
         button.btn-dark { background: #1a1c26; color: #94a3b8; border: 1px solid #2d3142; width: 100%; }
-        button.nav-btn { background: #1a1c26; color: white; border: 1px solid #2d3142; padding: 8px 14px; }
+        button.nav-btn { background: #1a1c26; color: white; border: 1px solid #2d3142; padding: 8px 14px; width: 48%; }
         
-        button.bingo-alert-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; font-size: 1.3rem; font-weight: 900; padding: 14px; width: 100%; margin-bottom: 15px; box-shadow: 0 0 15px rgba(239,68,68,0.4); border-radius: 10px; }
+        /* Bouton Arrondi PAINA avec Effet Feux d'artifice */
+        button.paina-trigger-btn { background: linear-gradient(135deg, #ec4899, #ef4444); color: white; font-size: 1.6rem; font-weight: 900; padding: 16px; width: 100%; margin-bottom: 15px; border-radius: 50px; box-shadow: 0 0 20px rgba(236,72,153,0.5); text-transform: uppercase; border: 2px solid #fff; }
 
-        .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
-        .value-option { background: #1a1c26; border: 1px solid #2d3142; padding: 12px 5px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .value-option.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; }
 
-        /* MULTI-VIEW OVERLAY PLEIN ÉCRAN POUR COCHAGE SÉCURISÉ */
+        /* Interface d'Examen PDF en Plein Écran */
         .fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05050a; z-index: 2000; padding: 12px; box-sizing: border-box; overflow-y: auto; }
-        .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #12131a; padding: 10px; border-radius: 8px; border: 1px solid #222530; }
         
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1a1c26; padding: 10px; border-radius: 10px; border: 1px solid #2d3142; margin-top: 10px; }
-        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #222533; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1.2rem; border: 1px solid #2d3142; }
-        .cell.marked { background: linear-gradient(135deg, #06b6d4, #0284c7); color: white; border-color: #38bdf8; box-shadow: 0 0 8px rgba(6,182,212,0.4); }
+        
+        /* Pointage Mauve Transparent — Numéro Toujours Lisible */
+        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #222533; font-weight: bold; border-radius: 50%; cursor: pointer; font-size: 1.2rem; border: 1px solid #2d3142; position: relative; color: white; transition: 0.2s; }
+        .cell.marked { background: rgba(168, 85, 247, 0.6) !important; border-color: #c084fc; color: #fff; text-shadow: 0 0 5px #000; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
 
         .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #1a1c26; padding: 8px; border-radius: 8px; border: 1px solid #2d3142; }
         @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
         .verif-num { background: #12131a; border: 1px solid #222530; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 3px; color: #475569; font-weight: bold; }
         .verif-num.out { background: #ef4444; color: white; border-color: #f87171; }
 
-        input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; }
-
-        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.4); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.2s; width: 45%; text-align: center; }
+        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; width: 23%; text-align: center; }
         .nav-item.active { color: #f59e0b; }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
 
-        .switch-box { display: flex; justify-content: space-between; align-items: center; background: #1a1c26; padding: 10px; border-radius: 8px; border: 1px solid #2d3142; margin-bottom: 5px; }
+        .switch-box { display: flex; justify-content: space-between; align-items: center; background: #1a1c26; padding: 10px; border-radius: 8px; border: 1px solid #2d3142; margin-bottom: 10px; }
         .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3142; transition: .3s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #06b6d4; }
+        input:checked + .slider { background-color: #a855f7; }
         input:checked + .slider:before { transform: translateX(20px); }
+
+        .statement-row { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid #222530; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
         
-        <div class="app-header">
-            <span class="brand-name">🏠 BINGOHOME</span>
-            <span class="welcome-msg" id="player-welcome">Connexion...</span>
+        <!-- 📢 Cadre d'Informations du Tournoi de l'Admin -->
+        <div class="admin-info-banner" id="admin-info-box">
+            🏆 INFOS TOURNOI : Bienvenue sur BingoHome ! En attente d'annonces de la direction...
         </div>
 
-        <div class="alert-banner" id="banner-message">
-            📢 Direction : Restez attentifs aux boules !
+        <!-- 🎪 Cadre de l'Intitulé du Jeu en cours & Bienvenue -->
+        <div class="game-title-card">
+            <div class="game-announced-label" id="lbl-game-title">MATCH DE BIENVENUE</div>
+            <div class="welcome-player-text" id="lbl-welcome-player">BIENVENUE (JOUEUR)</div>
+            
+            <!-- Cadre votre ticket PDF Intégré -->
+            <div class="pdf-delivery-box" id="pdf-container-card">
+                <div class="pdf-title">📁 Votre Ticket PDF Disponible</div>
+                <div class="pdf-pages-badge" id="lbl-feuilles-count">Feuillet (1 à 1)</div>
+                <button class="btn-purple" style="padding: 6px 10px; font-size: 12px;" onclick="ouvrirFichesPleinEcran()">🎯 Entrer & Pointer la Fiche PDF</button>
+            </div>
         </div>
 
-        <!-- ================= ONGLET 1 : SALON GÉNÉRAL ================= -->
+        <!-- ================= PARTIE 1 : JOUER ================= -->
         <div id="view-jouer" class="tab-content active">
-            <button class="bingo-alert-btn" onclick="annoncerBingoDirect()">🚨 ANNONCER BINGO ! 🚨</button>
+            
+            <!-- BOUTON PAINA ARRONDI AVEC FEUX D'ARTIFICE -->
+            <button class="paina-trigger-btn" onclick="annoncerPainaDirect()">💥 PAINA ! 💥</button>
 
+            <!-- BOUTIQUE D'ACHAT DE TICKETS SUIVANT LES PIONS DU JOUEUR -->
             <div class="card" style="border-left: 4px solid #38bdf8;">
-                <h3>🎲 Vos Cartons de Match</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="series-label">Attribution : En attente...</p>
-                <button class="btn-cyan" onclick="ouvrirFichesPleinEcran()">🔍 Déplier mes fiches de jeu</button>
+                <h3>🎟️ Commander des Fiches de Jeu (1 x Tarif du Ticket)</h3>
+                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="boutique-orga-info">Ventes fermées ou aucun stock disponible.</p>
+                <label style="font-size:12px; color:#94a3b8;">Quantité souhaitée :</label>
+                <input type="number" id="fiche-quantite" value="1" min="1" oninput="calculerFiches()">
+                <div id="fiche-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#38bdf8;">Coût : -- Pions</div>
+                <button class="btn-cyan" onclick="acheterFichesMatch()">Valider ma commande de fiches</button>
             </div>
 
+            <!-- PARTIE BOULES TIRÉES EN DIRECT -->
             <div class="card" style="border-left: 4px solid #ef4444;">
-                <h3>🎰 Tirage général en direct</h3>
+                <h3>🎰 Boules tirées en direct</h3>
                 <div style="display:flex; align-items:center; gap:15px; background:#1a1c26; padding:12px; border-radius:10px; border:1px solid #2d3142;">
-                    <div class="live-ball-circle" style="width:50px; height:50px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:bold;" id="live-ball">-</div>
-                    <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">En attente du boulier...</div>
+                    <div style="width:55px; height:55px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold;" id="live-ball">-</div>
+                    <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">En attente de la première boule...</div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>📋 Grille de Contrôle (1 à 75)</h3>
+                <h3>📋 Grille de Contrôle Générale (1 à 75)</h3>
                 <div class="verif-grid" id="tableau-verification"></div>
             </div>
         </div>
 
-        <!-- ================= ONGLET 2 : BOUTIQUE / RECHARGES ================= -->
+        <!-- ================= PARTIE 2 : PIONS & COMMANDES ================= -->
         <div id="view-pions" class="tab-content">
+            <!-- CADRE DES PIONS ACTUELS AVEC VALEURS DE BASE -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
-                <h3>💰 Mon Portefeuille</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px;">
-                    <span style="font-size:14px; color:#94a3b8;">Solde Disponible :</span>
+                <h3>💰 Pions Actuels Disponibles</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px; margin-bottom:10px;">
+                    <span style="font-size:13px; color:#94a3b8;">Votre solde actuel :</span>
                     <span style="font-size:1.5rem; font-weight:bold; color:#f59e0b;" id="solde-pions">0 Pions</span>
                 </div>
+                <div style="font-size:11px; color:#64748b; text-align:center;">Base de calcul : Option 20fr, 50fr et 100fr selon vos recharges.</div>
             </div>
 
-            <div class="card" style="border: 2px solid #38bdf8;">
-                <h3>📄 Vitrine Animateur : Réserver des cartons</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;" id="boutique-orga-info">Aucun stock disponible.</p>
-                <label style="font-size:12px; color:#94a3b8;">Nombre de cartons :</label>
-                <input type="number" id="fiche-quantite" value="1" min="1" oninput="calculerFiches()">
-                <div id="fiche-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#38bdf8;">Coût : -- Pions</div>
-                <button class="btn-cyan" onclick="acheterFichesMatch()">Confirmer mon achat de fiches</button>
-            </div>
-
+            <!-- CADRE COMMANDE DE PIONS AVEC INTERVENANT (TAUX : 1 PION = 50FR OU 100FR) -->
             <div class="card" style="border: 1px solid #10b981;">
-                <h3>💳 Recharger mes pions auprès de la Caisse</h3>
-                <label style="font-size:12px; color:#94a3b8;">Valeur par pion :</label>
-                <div class="value-grid">
-                    <div class="value-option selected" id="val-20" onclick="selectValeurPion(20)">🪙 20<br><small>XPF</small></div>
-                    <div class="value-option" id="val-50" onclick="selectValeurPion(50)">🪙 50<br><small>XPF</small></div>
-                    <div class="value-option" id="val-100" onclick="selectValeurPion(100)">🪙 100<br><small>XPF</small></div>
-                </div>
-                
-                <label style="font-size:12px; color:#94a3b8;">Quantité désirée :</label>
-                <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
-                
-                <label style="font-size:12px; color:#94a3b8;">Destinataire de la commande :</label>
-                <select id="pion-destinataire">
-                    <option value="Admin Principal">Direction / Administrateur Général (Caisse Principale)</option>
-                    <option value="Organisateur Local">Animateur / Organisateur de la Salle</option>
+                <h3>💳 Passer une commande de Pions</h3>
+                <label style="font-size:12px; color:#94a3b8;">Taux et valeur de base d'un pion :</label>
+                <select id="pion-taux-select" onchange="calculerPions()">
+                    <option value="50">Taux standard : 1 pion pour 50fr</option>
+                    <option value="100">Taux spécial : 1 pion pour 100fr</option>
                 </select>
                 
-                <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Valeur totale : 200 XPF</div>
-                <button class="btn-gold" onclick="demanderPionsCaisse()">Transmettre la commande de pions</button>
+                <label style="font-size:12px; color:#94a3b8;">Nombre de pions à commander :</label>
+                <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
+                
+                <label style="font-size:12px; color:#94a3b8;">Intervenant destinataire :</label>
+                <select id="pion-destinataire">
+                    <option value="Admin Principal">Direction / Administrateur Général (Caisse Centrale)</option>
+                    <option value="Organisateur Local">Animateur / Organisateur de la Salle</option>
+                </select>
+
+                <label style="font-size:12px; color:#94a3b8;">Canal de paiement privilégié :</label>
+                <select id="pion-canal-paiement">
+                    <option value="Virement Bancaire Local">Virement Bancaire Local</option>
+                    <option value="Deblock">Deblock Mobile Express</option>
+                    <option value="Espèces Guichet">Espèces direct au comptoir</option>
+                </select>
+                
+                <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Montant à régler : 500 fr</div>
+                <button class="btn-gold" onclick="demanderPionsCaisse()">Soumettre la commande de pions</button>
+            </div>
+        </div>
+
+        <!-- ================= PARTIE 3 : RELEVÉ AUTOMATIQUE ================= -->
+        <div id="view-releve" class="tab-content">
+            <div class="card" style="border-top: 4px solid #06b6d4;">
+                <h3>📊 Historique & Relevé de vos Mouvements</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-8px;">Calculé automatiquement en temps réel par le serveur BingoHome.</p>
+                <div id="releve-mouvements-list" style="max-height: 300px; overflow-y: auto; background:#05050a; padding:8px; border-radius:6px; border:1px solid #2d3142;">
+                    Aucune transaction répertoriée.
+                </div>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= 🚨 PANNEAU DE JEU INTEGRÉ : TOUT EN UN AU MÊME ENDROIT 🚨 ================= -->
+    <!-- ================= INTERFACE DU PDF DU JOUEUR EN PLEIN ÉCRAN ================= -->
     <div class="fullscreen-overlay" id="overlay-cartons">
-        
-        <!-- EN-TÊTE INCORPORANT LE REPERE AUDIOVISUEL DES BOULES -->
-        <div style="background:#12131a; border:1px solid #222530; border-radius:10px; padding:10px; margin-bottom:10px; display:flex; align-items:center; justify-content:between; gap:10px;">
+        <div style="background:#12131a; border:1px solid #222530; border-radius:10px; padding:10px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                <!-- La boule visible en même temps que la grille -->
-                <div style="width:45px; height:45px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:bold; box-shadow:0 0 10px rgba(239,68,68,0.5);" id="overlay-live-ball">-</div>
-                <div style="font-size:11px; color:#94a3b8; line-height:1.2; overflow:hidden;" id="overlay-history">Boules : Aucun tirage actif.</div>
+                <div style="width:45px; height:45px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:bold;" id="overlay-live-ball">-</div>
+                <div style="font-size:11px; color:#94a3b8; line-height:1.2; overflow:hidden;" id="overlay-history">En attente de boules...</div>
             </div>
-            <button style="background:#ef4444; color:white; padding:6px 12px; font-weight:bold; font-size:12px;" onclick="fermerFichesPleinEcran()">✕ Fermer</button>
+            <button style="background:#ef4444; color:white; padding:6px 12px; font-weight:bold; font-size:12px;" onclick="fermerFichesPleinEcran()">✕ Quitter la table</button>
         </div>
 
-        <!-- LE BOUTON BINGO PLACÉ DIRECTEMENT SUR SES FICHES -->
-        <button class="bingo-alert-btn" onclick="annoncerBingoDirect()" style="padding:10px; margin-bottom:10px; font-size:1.1rem; background: linear-gradient(135deg, #ef4444, #dc2626);">🚨 ANNONCER BINGO ICI ! 🚨</button>
+        <!-- Bouton PAINA également disponible au-dessus des fiches -->
+        <button class="paina-trigger-btn" onclick="annoncerPainaDirect()">💥 PAINA ! 💥</button>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <button class="nav-btn" onclick="fichePrecedente()">⬅️ Fiche Précédente</button>
-            <span style="font-weight:bold; color:#06b6d4; font-size:13px;" id="fiche-index-label">Fiche 1 / 1</span>
-            <button class="nav-btn" onclick="ficheSuivante()">Suivante ➡️</button>
+            <button class="nav-btn" onclick="fichePrecedente()">⬅️ Précédent</button>
+            <span style="font-weight:bold; color:#06b6d4; font-size:13px;" id="fiche-index-label">Feuillet 1 / 1</span>
+            <button class="nav-btn" onclick="ficheSuivante()">Suivant ➡️</button>
         </div>
 
+        <!-- Commande pour pointage automatique -->
         <div class="switch-box">
-            <span style="font-size:12px; font-weight:bold; color:#94a3b8;">🤖 Coche automatique des numéros :</span>
+            <span style="font-size:12px; font-weight:bold; color:#94a3b8;">🤖 Mode de Pointage Automatique :</span>
             <label class="switch">
                 <input type="checkbox" id="chk-auto" onchange="toggleAutoMode()">
                 <span class="slider"></span>
             </label>
         </div>
 
-        <!-- LA FEUILLE DE CARTON À POINTER -->
+        <!-- Feuille de jeu avec ronds mauves -->
         <div class="board" id="bingo-board"></div>
     </div>
 
-    <!-- ONGLETS FIXES BAS DE PAGE -->
+    <!-- NAVIGATION PAR ONGLETS FIXES BAS DE PAGE -->
     <div class="bottom-nav-bar">
         <div class="nav-item active" id="nav-jouer" onclick="switchTab('joueur')"><div class="nav-icon">🎮</div><span>Jouer</span></div>
-        <div class="nav-item" id="nav-pions" onclick="switchTab('pions')"><div class="nav-icon">🪙</div><span>Mes Pions</span></div>
+        <div class="nav-item" id="nav-pions" onclick="switchTab('pions')"><div class="nav-icon">🪙</div><span>Pions</span></div>
+        <div class="nav-item" id="nav-releve" onclick="switchTab('releve')"><div class="nav-icon">📊</div><span>Relevé</span></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -194,27 +228,35 @@
         const socket = io();
         const monCode = sessionStorage.getItem('joueurCode');
         let monNom = ""; let autoCoche = false; let fichesJoueur = []; let indexFicheActuelle = 0;
-        let valeurPionSelectionne = 20; let valeurBoutiquePrixFiche = 5;
+        let valeurBoutiquePrixFiche = 5; let soldeActuelPions = 0;
 
         if(!monCode) { window.location.href = '/'; } else { socket.emit('player-login', monCode); }
+
+        function getBingoFormat(num) {
+            if (num <= 15) return "B " + num;
+            if (num <= 30) return "I " + num;
+            if (num <= 45) return "N " + num;
+            if (num <= 60) return "G " + num;
+            return "O " + num;
+        }
 
         function switchTab(onglet) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if(onglet === 'joueur') { document.getElementById('view-jouer').classList.add('active'); document.getElementById('nav-jouer').classList.add('active'); }
-            else { document.getElementById('view-pions').classList.add('active'); document.getElementById('nav-pions').classList.add('active'); }
+            else if(onglet === 'pions') { document.getElementById('view-pions').classList.add('active'); document.getElementById('nav-pions').classList.add('active'); }
+            else { document.getElementById('view-releve').classList.add('active'); document.getElementById('nav-releve').classList.add('active'); }
         }
 
-        function selectValeurPion(val) {
-            valeurPionSelectionne = val; document.querySelectorAll('.value-option').forEach(el => el.classList.remove('selected'));
-            if(val === 20) document.getElementById('val-20').classList.add('selected');
-            if(val === 50) document.getElementById('val-50').classList.add('selected');
-            if(val === 100) document.getElementById('val-100').classList.add('selected');
-            calculerPions();
+        function calculerFiches() { 
+            document.getElementById('fiche-prix-calcule').textContent = `Coût total : ${(document.getElementById('fiche-quantite').value || 0) * valeurBoutiquePrixFiche} Pions`; 
         }
 
-        function calculerFiches() { document.getElementById('fiche-prix-calcule').textContent = `Coût : ${(document.getElementById('fiche-quantite').value || 0) * valeurBoutiquePrixFiche} Pions`; }
-        function calculerPions() { document.getElementById('pion-prix-calcule').textContent = `Valeur totale : ${(document.getElementById('pion-quantite').value || 0) * valeurPionSelectionne} XPF`; }
+        function calculerPions() {
+            const qte = document.getElementById('pion-quantite').value || 0;
+            const taux = document.getElementById('pion-taux-select').value;
+            document.getElementById('pion-prix-calcule').textContent = `Montant à régler : ${(qte * taux).toLocaleString()} fr`;
+        }
 
         function initialiserTableau() {
             const grid = document.getElementById('tableau-verification'); grid.innerHTML = '';
@@ -222,27 +264,61 @@
         }
 
         socket.on('login-success-dashboard', (data) => {
-            monNom = data.player.nom; document.getElementById('player-welcome').textContent = `${monNom} (${data.player.code})`;
-            document.getElementById('series-label').textContent = `Attribution : ${data.player.seriesCartons || 'Aucune fiche active'}`;
-            document.getElementById('solde-pions').textContent = `${data.player.pions} Pions`;
+            monNom = data.player.nom;
+            soldeActuelPions = data.player.pions || 0;
+            
+            document.getElementById('lbl-welcome-player').textContent = `BIENVENUE ${monNom.toUpperCase()} (${data.player.code})`;
+            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
             initialiserTableau();
 
-            fichesJoueur = Array.from({length: data.player.nombreFiches || 0}, (_, idx) => ({ id: idx + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) }));
-            fichesJoueur.forEach(f => f.coches[12] = true);
+            // Gestion de l'affichage dynamique de la réception du PDF et des feuillets (1 à 3)
+            if(data.player.nombreFiches > 0) {
+                document.getElementById('pdf-container-card').style.display = 'block';
+                // Détermination dynamique de l'affichage des feuillets selon l'achat (max 3 feuilles d'examen)
+                const totalFeuilles = Math.min(3, data.player.nombreFiches);
+                document.getElementById('lbl-feuilles-count').textContent = `Feuillet (1 à ${totalFeuilles})`;
+                document.getElementById('lbl-game-title').textContent = data.player.seriesCartons || "PARTIE EN COURS";
+            }
 
+            // Génération des grilles PDF personnalisées du joueur
+            fichesJoueur = Array.from({length: data.player.nombreFiches || 0}, (_, idx) => ({ id: idx + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) }));
+            fichesJoueur.forEach(f => f.coches[12] = true); // Centre FREE d'office
+
+            // Restauration de l'historique
             if(data.liveHistory.length > 0) {
                 const derniere = data.liveHistory[data.liveHistory.length - 1];
-                document.getElementById('live-ball').textContent = derniere;
-                document.getElementById('overlay-live-ball').textContent = derniere;
-                document.getElementById('history').textContent = "Dernières boules : " + data.liveHistory.slice(-4).join(' - ');
-                document.getElementById('overlay-history').textContent = "Dernières boules : " + data.liveHistory.slice(-4).join(' - ');
+                document.getElementById('live-ball').textContent = getBingoFormat(derniere);
+                document.getElementById('overlay-live-ball').textContent = getBingoFormat(derniere);
+                const histFormat = data.liveHistory.map(n => getBingoFormat(n)).slice(-4).join(' - ');
+                document.getElementById('history').textContent = "Boules : " + histFormat;
+                document.getElementById('overlay-history').textContent = "Boules : " + histFormat;
                 data.liveHistory.forEach(b => { const el = document.getElementById(`verif-${b}`); if(el) el.classList.add('out'); });
+            }
+
+            // Actualisation du relevé de compte automatique
+            const rZone = document.getElementById('releve-mouvements-list');
+            if(data.player.historiquePions && data.player.historiquePions.length > 0) {
+                rZone.innerHTML = '';
+                data.player.historiquePions.forEach(m => {
+                    rZone.innerHTML += `<div class="statement-row">
+                        <span>📅 ${m.date} - ${m.description}</span>
+                        <span style="font-weight:bold; color:${m.montant.startsWith('+') ? '#10b981':'#ef4444'};">${m.montant} Pions</span>
+                    </div>`;
+                });
             }
         });
 
         socket.on('update-dashboard', (player) => { 
-            document.getElementById('solde-pions').textContent = `${player.pions} Pions`;
-            document.getElementById('series-label').textContent = `Attribution : ${player.seriesCartons || 'Aucune fiches'}`;
+            soldeActuelPions = player.pions || 0;
+            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
+            
+            if(player.nombreFiches > 0) {
+                document.getElementById('pdf-container-card').style.display = 'block';
+                const totalFeuilles = Math.min(3, player.nombreFiches);
+                document.getElementById('lbl-feuilles-count').textContent = `Feuillet (1 à ${totalFeuilles})`;
+                document.getElementById('lbl-game-title').textContent = player.seriesCartons || "TICKET PDF CHARGÉ";
+            }
+
             while(fichesJoueur.length < player.nombreFiches) {
                 const newF = { id: fichesJoueur.length + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) };
                 newF.coches[12] = true; fichesJoueur.push(newF);
@@ -250,40 +326,51 @@
             renderCarton();
         });
 
-        // ACTION DE SYNTHÈSE VOCALE ET SYNCHRO AUDIOPHONIQUE DES BOULES TIRÉES
         socket.on('new-ball', (data) => {
             const boule = data.actuelle;
-            document.getElementById('live-ball').textContent = boule;
-            document.getElementById('overlay-live-ball').textContent = boule;
-            document.getElementById('history').textContent = "Dernières boules : " + data.historique.slice(-4).join(' - ');
-            document.getElementById('overlay-history').textContent = "Dernières boules : " + data.historique.slice(-4).join(' - ');
+            const formatted = getBingoFormat(boule);
+            document.getElementById('live-ball').textContent = formatted;
+            document.getElementById('overlay-live-ball').textContent = formatted;
+            
+            const histFormat = data.historique.map(n => getBingoFormat(n)).slice(-4).join(' - ');
+            document.getElementById('history').textContent = "Boules : " + histFormat;
+            document.getElementById('overlay-history').textContent = "Boules : " + histFormat;
             const el = document.getElementById(`verif-${boule}`); if(el) el.classList.add('out');
 
-            // Lecture audio à voix haute automatique
             if ('speechSynthesis' in window) {
-                const phrase = new SpeechSynthesisUtterance(`Numéro ${boule}`);
-                phrase.lang = 'fr-FR'; phrase.rate = 1.1; window.speechSynthesis.speak(phrase);
+                const phrase = new SpeechSynthesisUtterance(formatted);
+                phrase.lang = 'fr-FR'; phrase.rate = 1; window.speechSynthesis.speak(phrase);
             }
 
             if(autoCoche) {
-                fichesJoueur.forEach(f => { const idx = f.numeros.indexOf(boule); if(idx !== -1) f.coches[idx] = true; });
+                fichesJoueur.forEach(f => { 
+                    const idx = f.numeros.indexOf(boule); 
+                    if(idx !== -1) f.coches[idx] = true; 
+                    
+                    // Vérification intelligente automatique : S'il ne reste qu'un seul numéro manquant pour faire Bingo, le serveur prévient et crie PAINA !
+                    let cochesCompte = f.coches.filter(c => c === true).length;
+                    if(cochesCompte === 24) {
+                        alert("🤖 ANALYSE SÉCURITÉ : Il ne vous reste plus qu'un seul numéro ! Déclenchement automatique !");
+                        annoncerPainaDirect();
+                    }
+                });
                 renderCarton();
             }
         });
 
         socket.on('refresh-boutique-joueurs', (data) => {
-            document.getElementById('boutique-orga-info').innerHTML = `🎟️ Vitrine : <strong>${data.boutiqueOrgaFichesEnVente} fiches dispos</strong><br>💰 Tarif : <strong>${data.prixFichePourJoueur} Pions</strong> l'unité`;
+            document.getElementById('boutique-orga-info').innerHTML = `🎟️ Annonce du match : <strong>${data.boutiqueOrgaFichesEnVente} fiches en stock</strong><br>💰 Tarif unitaire : <strong>${data.prixFichePourJoueur} Pions</strong>`;
             valeurBoutiquePrixFiche = data.prixFichePourJoueur; calculerFiches();
         });
 
         socket.on('notification', (msg) => { alert(msg); });
 
-        function ouvrirFichesPleinEcran() { if(fichesJoueur.length === 0) return alert("Vous n'avez pas de fiches."); document.getElementById('overlay-cartons').style.display = 'block'; renderCarton(); }
+        function ouvrirFichesPleinEcran() { if(fichesJoueur.length === 0) return alert("Aucun ticket PDF n'est attribué à votre compte."); document.getElementById('overlay-cartons').style.display = 'block'; renderCarton(); }
         function fermerFichesPleinEcran() { document.getElementById('overlay-cartons').style.display = 'none'; }
 
         function renderCarton() {
             if(fichesJoueur.length === 0) return; const currentFiche = fichesJoueur[indexFicheActuelle];
-            document.getElementById('fiche-index-label').textContent = `Fiche ${currentFiche.id} / ${fichesJoueur.length}`;
+            document.getElementById('fiche-index-label').textContent = `Feuillet ${currentFiche.id} / ${fichesJoueur.length}`;
             const b = document.getElementById('bingo-board'); b.innerHTML = '';
             currentFiche.numeros.forEach((num, idx) => {
                 const c = document.createElement('div'); c.className = 'cell';
@@ -301,16 +388,31 @@
             if(autoCoche) { fichesJoueur.forEach(f => { f.numeros.forEach((num, idx) => { const el = document.getElementById(`verif-${num}`); if(el && el.classList.contains('out')) f.coches[idx] = true; }); }); renderCarton(); }
         }
 
-        function acheterFichesMatch() { socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: parseInt(document.getElementById('fiche-quantite').value) }); }
+        function acheterFichesMatch() { 
+            const qte = parseInt(document.getElementById('fiche-quantite').value) || 1;
+            const totalRequis = qte * valeurBoutiquePrixFiche;
+            
+            // Bloqueur de Solde Insuffisant demandé
+            if(soldeActuelPions < totalRequis) {
+                return alert("❌ MESSAGE SYSTÈME : SOLDE INSUFFISANT ! Veuillez commander des pions à la caisse pour participer à ce jeu.");
+            }
+            socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: qte }); 
+        }
         
         function demanderPionsCaisse() {
             const qte = document.getElementById('pion-quantite').value;
             const dest = document.getElementById('pion-destinataire').value;
-            socket.emit('player-order', { code: monCode, type: `Achat via ${dest} (${valeurPionSelectionne} XPF)`, qte: qte, destinataire: dest });
-            alert(`Demande transmise à l'attention de l'intervenant : ${dest}`);
+            const taux = document.getElementById('pion-taux-select').value;
+            const canal = document.getElementById('pion-canal-paiement').value;
+            socket.emit('player-order', { code: monCode, type: `Achat via ${dest} - Mode: ${canal} (${taux}fr/pion)`, qte: qte, destinataire: dest });
+            alert(`Demande soumise ! Ordre enregistré à l'attention de l'intervenant sélectionné.`);
         }
 
-        function annoncerBingoDirect() { if(confirm("🚨 Déclarer BINGO immédiatement sur cette fiche ?")) { socket.emit('player-announce-bingo', { code: monCode, nom: monNom }); } }
+        function annoncerPainaDirect() { 
+            if(confirm("💥 Déclencher l'alerte générale et crier PAINA immédiatement ?")) { 
+                socket.emit('player-announce-bingo', { code: monCode, nom: monNom }); 
+            } 
+        }
     </script>
 </body>
 </html>
