@@ -11,35 +11,43 @@
         h2, h3 { margin-top: 0; color: #38bdf8; text-transform: uppercase; }
         .balance-box { background: #1a1c26; border: 1px solid #2d3142; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
         .balance-val { font-size: 1.6rem; font-weight: bold; color: #f59e0b; }
-        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #a855f7, #6b21a8); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #06b6d4, #0284c7); color: #05050a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
         input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 15px; text-align: center; }
+        .btn-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); color: white; }
+        .data-list { background: #1a1c26; padding: 8px; border-radius: 6px; font-size: 13px; max-height: 150px; overflow-y: auto; border: 1px solid #2d3142; }
+        .item-box { background: #12131a; padding: 10px; border-radius: 6px; border-left: 4px solid #f59e0b; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-mini { width: auto; padding: 6px 12px; background: #10b981; color: white; margin: 0; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🎪 Tableau Organisateur</h2>
-        <p style="color:#64748b; font-size:13px;">Achat de séries personnalisées auprès de la direction générale.</p>
+        <h2>🎪 Console Organisateur / Animateur</h2>
 
-        <!-- PORTEMONNAIE ORGA -->
         <div class="balance-box">
-            <div style="font-size:12px; color:#94a3b8;">MON BUDGET CAISSE DISPONIBLE</div>
+            <div style="font-size:12px; color:#94a3b8;">MON CRÉDIT CAISSE DISPONIBLE</div>
             <div class="balance-val" id="txt-orga-credit">0 XPF</div>
         </div>
 
-        <div class="card" style="border-color: #a855f7;">
-            <h3>🛒 Commander des Fiches à l'Admin</h3>
-            <p style="font-size:12px; color:#94a3b8;" id="txt-catalogue-info">Prix unitaire : 50 XPF / Fiche<br>Stock dispo chez l'admin : 0</p>
-            
-            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">Quantité de fiches personnalisées à acheter :</label>
-            <input type="number" id="buy-qte" value="10" min="1">
-            
-            <button onclick="acheterFiches()">Acheter les fiches de la direction</button>
+        <!-- NOUVEAU MODULE : TOUCHE POUR VOIR ET APPROUVER LES COMMANDES DE PIONS DES JOUEURS -->
+        <div class="card" style="border-top: 4px solid #10b981;">
+            <h3>🪙 Commandes de Pions Soumises par vos Joueurs</h3>
+            <div class="data-list" id="orga-orders-list">Aucun ordre de rechargement en attente.</div>
         </div>
 
-        <div class="card">
-            <h3>📦 Mon Stock de fiches prêtes à distribuer</h3>
-            <div style="font-size:1.3rem; font-weight:bold; text-align:center; color:#10b981;" id="txt-orga-fiches-count">0 Fiches en réserve</div>
+        <div class="card" style="border-left: 4px solid #a855f7;">
+            <h3>🛒 Acheter des fiches en gros à l'Admin</h3>
+            <p style="font-size:12px; color:#94a3b8;" id="txt-catalogue-info">Chargement du stock...</p>
+            <input type="number" id="buy-qte" value="10" min="1">
+            <button class="btn-purple" onclick="acheterFichesAdmin()">Acheter les fiches</button>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+            <h3>📢 Configurer la vitrine joueurs du Match</h3>
+            <p style="font-size:12px; color:#94a3b8;" id="txt-reserve-info">Fiches en réserve : 0</p>
+            <input type="number" id="market-qte" value="10">
+            <input type="number" id="market-prix" value="5">
+            <button onclick="ouvrirMarcheJoueurs()">⚡ Publier l'offre sur les mobiles</button>
         </div>
     </div>
 
@@ -50,16 +58,31 @@
 
         socket.on('refresh-orga', (data) => {
             document.getElementById('txt-orga-credit').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
-            document.getElementById('txt-orga-fiches-count').textContent = `${data.fichesDisponibles} Fiches en réserve`;
-            document.getElementById('txt-catalogue-info').innerHTML = `Tarif : <strong>${data.cataloguePrixFiche} XPF</strong> par fiche<br>Fiches disponibles chez l'Admin : <strong>${data.stockAdminCount}</strong>`;
+            document.getElementById('txt-catalogue-info').innerHTML = `Tarif grossiste : ${data.cataloguePrixFiche} XPF<br>Stock direction : <strong>${data.stockAdminCount} fiches</strong>`;
+            document.getElementById('txt-reserve-info').textContent = `Fiches totales en réserve : ${data.fichesDisponibles}`;
+            
+            // FILTRER ET AFFICHER LES COMMANDES ENVOYÉES SPÉCIFIQUEMENT À L'ORGANISATEUR
+            const oZone = document.getElementById('orga-orders-list');
+            const ordresPourMoi = data.orders.filter(o => o.type.includes("Organisateur"));
+            
+            if(ordresPourMoi.length === 0) {
+                oZone.innerHTML = '<div style="color:#64748b;text-align:center;padding:5px;">Aucune commande pour votre salle.</div>';
+            } else {
+                oZone.innerHTML = '';
+                ordresPourMoi.forEach(o => {
+                    oZone.innerHTML += `<div class="item-box">
+                        <span>👤 <strong>${o.nom}</strong> (${o.code})<br>🪙 +${o.qte} Pions requested</span>
+                        <button class="btn-mini" onclick="validerOrdrePionsOrga(${o.id})">Valider</button>
+                    </div>`;
+                });
+            }
         });
 
         socket.on('orga-notification', (msg) => { alert(msg); });
 
-        function acheterFiches() {
-            const qte = document.getElementById('buy-qte').value;
-            socket.emit('orga-buy-fiches', qte);
-        }
+        function acheterFichesAdmin() { socket.emit('orga-buy-fiches', document.getElementById('buy-qte').value); }
+        function ouvrirMarcheJoueurs() { socket.emit('orga-set-vende-fiches', { quantite: document.getElementById('market-qte').value, prix: document.getElementById('market-prix').value }); }
+        function validerOrdrePionsOrga(id) { socket.emit('admin-validate-order', id); alert("Distribution effectuée !"); }
     </script>
 </body>
 </html>
