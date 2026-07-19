@@ -81,16 +81,44 @@ io.on('connection', (socket) => {
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
     });
 
-    // 🔑 L'ADMIN CERTIFIE ET PUSH LE CODE UNIQUE ET UNIVERSEL (ANTI-FRAUDE ABSOLU)
+        // 🔑 L'ADMIN CERTIFIE ET REÇOIT LE CODE UNIQUE POUR L'ENVOYER PERSONNELLEMENT
     socket.on('admin-approve-registration', (idReg) => {
         const idx = pendingRegistrations.findIndex(r => r.id === idReg);
         if (idx !== -1) {
             const reg = pendingRegistrations[idx];
             
-            // Double verrou anti-doublon de dernière seconde
+            // Double verrou anti-doublon
             if (Object.values(players).find(p => p.tel === reg.tel)) {
                 pendingRegistrations.splice(idx, 1);
                 return io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+            }
+
+            // Génération de la clé universelle unique BingoHome
+            const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            players[codeUniverselUnique] = {
+                nom: reg.nom,
+                tel: reg.tel,
+                code: codeUniverselUnique,
+                pions: 0,
+                totalPionsRecus: 0,
+                totalPionsDepenses: 0,
+                nombreFiches: 0,
+                seriesCartons: "",
+                historiquePions: [{ date: "Système", description: "Compte certifié unique", montant: "+0" }],
+                online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
+            };
+
+            // 📢 CRITICAL : On envoie la confirmation au joueur ET on renvoie le code à l'ADMIN
+            io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
+            socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
+            
+            pendingRegistrations.splice(idx, 1);
+            
+            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+        }
+    });
+
             }
 
             // Génération de la clé universelle unique BingoHome
@@ -128,7 +156,44 @@ io.on('connection', (socket) => {
     });
 
     socket.on('player-buy-fiches-from-orga', ({ code, qte }) => {
-        if (players[code] && fichesMatchOuvertes && boutiqueOrgaFichesEnVente >= qte && players[code].pions >= (qte * prixFichePourJoueur)) {
+        if (players[code] && fichesMatchOuvertes && boutiqueOrgaFichesEnVente >=     // 🔑 L'ADMIN CERTIFIE ET REÇOIT LE CODE UNIQUE POUR L'ENVOYER PERSONNELLEMENT
+    socket.on('admin-approve-registration', (idReg) => {
+        const idx = pendingRegistrations.findIndex(r => r.id === idReg);
+        if (idx !== -1) {
+            const reg = pendingRegistrations[idx];
+            
+            // Double verrou anti-doublon
+            if (Object.values(players).find(p => p.tel === reg.tel)) {
+                pendingRegistrations.splice(idx, 1);
+                return io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+            }
+
+            // Génération de la clé universelle unique BingoHome
+            const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            players[codeUniverselUnique] = {
+                nom: reg.nom,
+                tel: reg.tel,
+                code: codeUniverselUnique,
+                pions: 0,
+                totalPionsRecus: 0,
+                totalPionsDepenses: 0,
+                nombreFiches: 0,
+                seriesCartons: "",
+                historiquePions: [{ date: "Système", description: "Compte certifié unique", montant: "+0" }],
+                online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
+            };
+
+            // 📢 CRITICAL : On envoie la confirmation au joueur ET on renvoie le code à l'ADMIN
+            io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
+            socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
+            
+            pendingRegistrations.splice(idx, 1);
+            
+            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+        }
+    });
+qte && players[code].pions >= (qte * prixFichePourJoueur)) {
             const coutTotal = qte * prixFichePourJoueur;
             players[code].pions -= coutTotal; players[code].totalPionsDepenses += coutTotal; boutiqueOrgaFichesEnVente -= qte;
             const livrees = fichesAcheteesOrga.splice(0, qte); players[code].nombreFiches += qte; players[code].seriesCartons = `Série ${livrees[0].serieNom} (#${livrees[0].numero})`;
