@@ -9,14 +9,14 @@
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 1500px; margin: 0 auto; }
         @media (max-width: 1024px) { .admin-grid { grid-template-columns: 1fr; } }
         .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #222530; padding-bottom: 8px; text-transform: uppercase; }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; border-bottom: 1px solid #222530; padding-bottom: 8px; text-transform: uppercase; }
         button { padding: 10px 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-success { background: #10b981; color: white; }
         .btn-primary { background: #0284c7; color: white; }
         .btn-purple { background: #a855f7; color: white; }
         input { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; }
         .data-list { max-height: 180px; overflow-y: auto; background: #1a1c26; padding: 8px; border-radius: 6px; font-size: 13px; border: 1px solid #2d3142; }
-        .item-box { background: #12131a; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .item-box { background: #12131a; padding: 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222530; }
         .stat-banner { display: flex; gap: 10px; margin-bottom: 15px; }
         .stat-box { background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 8px; flex: 1; text-align: center; font-size: 12px; color:#94a3b8; }
         .stat-box strong { display: block; font-size: 1.4rem; color: #f59e0b; margin-top: 5px; }
@@ -26,59 +26,50 @@
 
     <div style="text-align:center; margin-bottom:20px;">
         <h2 style="margin:0; color:#f59e0b;">👑 CONSOLE MAÎTRE SUPRÊME — BINGOHOME</h2>
-        <p style="margin:5px 0 0 0; color:#94a3b8; font-size:14px;">Création de fiches exclusives et approvisionnement de la régie organisateur.</p>
+        <p style="margin:5px 0 0 0; color:#94a3b8; font-size:14px;">Gestion des stocks direction et encaissement des commandes Admin.</p>
     </div>
 
-    <!-- BANDEAU DES STOCKS -->
     <div class="stat-banner">
         <div class="stat-box">Fiches en Stock Admin (Dispo)<strong id="txt-stock-admin">0 Fiches</strong></div>
-        <div class="stat-box">Crédit actuel de l'Organisateur<strong id="txt-credit-orga">0 XPF</strong></div>
+        <div class="stat-box">Crédit de l'Organisateur<strong id="txt-credit-orga">0 XPF</strong></div>
     </div>
 
     <div class="admin-grid">
-        
-        <!-- COLONNE GAUCHE -->
         <div>
-            <!-- 🔥 TOUCHE INTÉGRATION DE FICHES PERSONNALISÉES -->
+            <!-- COMMANDES DIRECTES ADMIN -->
+            <div class="card" style="border-top: 4px solid #f59e0b;">
+                <h3>🪙 Vos commandes de pions reçues (Option Admin)</h3>
+                <div class="data-list" id="admin-orders-list">Aucun versement destiné à la direction.</div>
+            </div>
+
             <div class="card" style="border-top: 4px solid #a855f7;">
-                <h3>📦 Production & Injection de Fiches Personnalisées</h3>
-                <label style="font-size:11px; color:#94a3b8;">Nom de la série personnalisée :</label>
-                <input type="text" id="custom-serie-name" placeholder="Ex: Série Premium Or Nocturne">
-                <label style="font-size:11px; color:#94a3b8;">Nombre de cartons à fabriquer en masse :</label>
-                <input type="number" id="custom-serie-qte" value="50" min="1">
-                <button class="btn-purple" onclick="injecterFiches()" style="width:100%;">⚙️ Injecter les fiches dans le catalogue</button>
+                <h3>📦 Production de Fiches Personnalisées</h3>
+                <input type="text" id="custom-serie-name" placeholder="Ex: Série Premium Or">
+                <input type="number" id="custom-serie-qte" value="50">
+                <button class="btn-purple" onclick="injecterFiches()" style="width:100%;">⚙️ Injecter au catalogue</button>
             </div>
 
-            <!-- 🔥 CRÉDITER L'ORGANISATEUR -->
             <div class="card" style="border-top: 4px solid #10b981;">
-                <h3>💵 Financement de la Régie Organisateur</h3>
-                <label style="font-size:11px; color:#94a3b8;">Montant à verser sur le compte de l'orga (XPF) :</label>
-                <input type="number" id="orga-recharge-montant" value="5000" min="100">
-                <button class="btn-success" onclick="rechargerOrga()" style="width:100%;">💰 Alimenter le solde Organisateur</button>
-            </div>
-
-            <div class="card" style="border-top: 4px solid #38bdf8;">
-                <h3>🔔 Inscriptions en attente de Validation</h3>
-                <div class="data-list" id="pending-registrations-list">Aucune demande.</div>
+                <h3>💵 Alimenter la régie Organisateur</h3>
+                <input type="number" id="orga-recharge-montant" value="5000">
+                <button class="btn-success" onclick="rechargerOrga()" style="width:100%;">💰 Créditer le solde</button>
             </div>
         </div>
 
-        <!-- COLONNE DROITE -->
         <div>
             <div class="card" style="border-top: 4px solid #ef4444;">
-                <h3>🎰 Boulier Automatique Régie</h3>
-                <div style="text-align:center; background:#1a1c26; padding:15px; border-radius:8px; border:1px solid #2d3142;">
+                <h3>🎰 Boulier Direction</h3>
+                <div style="text-align:center; background:#1a1c26; padding:15px; border-radius:8px;">
                     <div style="width:60px; height:60px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:bold; margin:0 auto 10px auto;" id="live-ball">-</div>
                     <button class="btn-primary" onclick="socket.emit('admin-draw')" style="background:#ef4444;">⚡ TIRER UNE BOULE</button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>👥 Liste des Joueurs Actifs</h3>
-                <div class="data-list" id="players-list">Chargement...</div>
+            <div class="card" style="border-top: 4px solid #38bdf8;">
+                <h3>🔔 Inscriptions Téléphone à Valider</h3>
+                <div class="data-list" id="pending-registrations-list">Aucune.</div>
             </div>
         </div>
-
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -91,33 +82,31 @@
             document.getElementById('txt-credit-orga').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
             document.getElementById('live-ball').textContent = data.history[data.history.length - 1] || "-";
 
-            // Liste inscriptions
+            // FILTRER ET AFFICHER UNIQUEMENT LES ORDRES DESTINÉS À L'ADMIN PRINCIPAL
+            const oZone = document.getElementById('admin-orders-list');
+            const ordresPourAdmin = data.orders.filter(o => o.type.includes("Admin"));
+            
+            if(ordresPourAdmin.length === 0) {
+                oZone.innerHTML = '<div style="color:#64748b;text-align:center;padding:10px;">Aucune commande en attente pour la direction.</div>';
+            } else {
+                oZone.innerHTML = '';
+                ordresPourAdmin.forEach(o => {
+                    oZone.innerHTML += `<div class="item-box">
+                        <span>👤 <strong>${o.nom}</strong> (${o.code})<br>💵 ${o.type} (+${o.qte} Pions)</span>
+                        <button class="btn-success" onclick="socket.emit('admin-validate-order', ${o.id})">Valider</button>
+                    </div>`;
+                });
+            }
+
             const regZone = document.getElementById('pending-registrations-list');
             regZone.innerHTML = data.pendingRegistrations.length === 0 ? 'Aucune.' : '';
             data.pendingRegistrations.forEach(r => {
                 regZone.innerHTML += `<div class="item-box"><span>👤 ${r.nom} (${r.tel})</span><button class="btn-success" onclick="socket.emit('admin-approve-registration', ${r.id})">Valider</button></div>`;
             });
-
-            // Liste joueurs
-            const pZone = document.getElementById('players-list');
-            pZone.innerHTML = '';
-            data.players.forEach(p => {
-                pZone.innerHTML += `<div class="item-box"><span><strong>${p.nom}</strong> [${p.code}]</span><span style="color:#10b981;">🟢</span></div>`;
-            });
         });
 
-        function injecterFiches() {
-            const nomSerie = document.getElementById('custom-serie-name').value;
-            const quantite = document.getElementById('custom-serie-qte').value;
-            socket.emit('admin-add-custom-fiches', { nomSerie, quantite });
-            alert("Fiches personnalisées générées avec succès !");
-        }
-
-        function rechargerOrga() {
-            const m = document.getElementById('orga-recharge-montant').value;
-            socket.emit('admin-recharge-orga', m);
-            alert("Compte Organisateur crédité !");
-        }
+        function injecterFiches() { socket.emit('admin-add-custom-fiches', { nomSerie: document.getElementById('custom-serie-name').value, quantite: document.getElementById('custom-serie-qte').value }); alert("Généré !"); }
+        function rechargerOrga() { socket.emit('admin-recharge-orga', document.getElementById('orga-recharge-montant').value); alert("Crédité !"); }
     </script>
 </body>
 </html>
