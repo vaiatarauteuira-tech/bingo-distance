@@ -5,49 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espace Organisateur - BingoHome</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #05050a; color: #f1f5f9; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #05050a; color: #f1f5f9; padding: 15px; }
         .container { max-width: 500px; margin: 0 auto; }
-        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        h2, h3 { margin-top: 0; color: #38bdf8; text-transform: uppercase; }
-        .balance-box { background: #1a1c26; border: 1px solid #2d3142; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .balance-val { font-size: 1.6rem; font-weight: bold; color: #f59e0b; }
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        h2, h3 { margin-top: 0; color: #38bdf8; text-transform: uppercase; font-size: 1rem; }
+        .balance-box { background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .balance-val { font-size: 1.5rem; font-weight: bold; color: #f59e0b; }
         button { width: 100%; padding: 12px; background: linear-gradient(135deg, #06b6d4, #0284c7); color: #05050a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
-        input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 15px; text-align: center; }
-        .btn-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); color: white; }
-        .data-list { background: #1a1c26; padding: 8px; border-radius: 6px; font-size: 13px; max-height: 150px; overflow-y: auto; border: 1px solid #2d3142; }
-        .item-box { background: #12131a; padding: 10px; border-radius: 6px; border-left: 4px solid #f59e0b; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        input { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; text-align: center; }
+        .data-list { background: #1a1c26; padding: 8px; border-radius: 6px; font-size: 13px; max-height: 140px; overflow-y: auto; border: 1px solid #2d3142; }
+        .item-box { background: #12131a; padding: 10px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222530; }
         .btn-mini { width: auto; padding: 6px 12px; background: #10b981; color: white; margin: 0; font-size: 12px; }
+        .live-ball-display { width: 55px; height: 55px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: bold; margin: 10px auto; box-shadow: 0 0 12px rgba(239,68,68,0.4); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🎪 Console Organisateur / Animateur</h2>
+        <h2>🎪 Console Organisateur Active</h2>
 
         <div class="balance-box">
-            <div style="font-size:12px; color:#94a3b8;">MON CRÉDIT CAISSE DISPONIBLE</div>
+            <div style="font-size:11px; color:#94a3b8;">MON CRÉDIT DISPONIBLE</div>
             <div class="balance-val" id="txt-orga-credit">0 XPF</div>
         </div>
 
-        <!-- NOUVEAU MODULE : TOUCHE POUR VOIR ET APPROUVER LES COMMANDES DE PIONS DES JOUEURS -->
+        <!-- 🎤 MICRO DE L'ORGANISATEUR DIRECT EN SALLE -->
+        <div class="card" style="border-top: 4px solid #38bdf8;">
+            <h3>🎤 Prise de Parole Micro Animateur</h3>
+            <button id="btn-micro" onclick="toggleMicroOrga()" style="background:#0284c7; color:white;">🎤 ACTIVER LE MICRO EN DIRECT</button>
+            <button onclick="couperMicroOrga()" style="background:#1a1c26; color:#64748b; border:1px solid #2d3142;">🔇 COUPER LE FLUX AUDIO</button>
+        </div>
+
+        <!-- 🎰 BOULIER ET TIRAGE EN DIRECT POUR L'ORGANISATEUR -->
+        <div class="card" style="border-top: 4px solid #ef4444; text-align: center;">
+            <h3>🎰 Votre Boulier de Tirage Numérique</h3>
+            <div class="live-ball-display" id="orga-live-ball">-</div>
+            <div id="orga-history" style="font-size:11px; color:#94a3b8; margin-bottom:10px;">Dernières boules : Aucun tirage actif.</div>
+            <button onclick="tirerBouleOrga()" style="background:#ef4444; color:white;">⚡ TIRER LE NUMÉRO SUIVANT</button>
+        </div>
+
+        <!-- 🪙 RECHARGES DESTINÉES À L'ORGANISATEUR -->
         <div class="card" style="border-top: 4px solid #10b981;">
-            <h3>🪙 Commandes de Pions Soumises par vos Joueurs</h3>
+            <h3>🪙 Commandes de Pions Reçues (Option Organisateur)</h3>
             <div class="data-list" id="orga-orders-list">Aucun ordre de rechargement en attente.</div>
         </div>
 
         <div class="card" style="border-left: 4px solid #a855f7;">
-            <h3>🛒 Acheter des fiches en gros à l'Admin</h3>
-            <p style="font-size:12px; color:#94a3b8;" id="txt-catalogue-info">Chargement du stock...</p>
-            <input type="number" id="buy-qte" value="10" min="1">
-            <button class="btn-purple" onclick="acheterFichesAdmin()">Acheter les fiches</button>
+            <h3>🛒 Approvisionnement Grossiste (Admin)</h3>
+            <p style="font-size:11px; color:#94a3b8;" id="txt-catalogue-info">Chargement...</p>
+            <input type="number" id="buy-qte" value="10">
+            <button style="background: linear-gradient(135deg, #a855f7, #6b21a8); color:white;" onclick="acheterFichesAdmin()">Acheter les fiches</button>
         </div>
 
         <div class="card" style="border-left: 4px solid #f59e0b;">
-            <h3>📢 Configurer la vitrine joueurs du Match</h3>
-            <p style="font-size:12px; color:#94a3b8;" id="txt-reserve-info">Fiches en réserve : 0</p>
+            <h3>📢 Publier et revendre aux Joueurs</h3>
+            <p style="font-size:11px; color:#94a3b8;" id="txt-reserve-info">Fiches en réserve : 0</p>
             <input type="number" id="market-qte" value="10">
             <input type="number" id="market-prix" value="5">
-            <button onclick="ouvrirMarcheJoueurs()">⚡ Publier l'offre sur les mobiles</button>
+            <button style="background: linear-gradient(135deg, #f59e0b, #d97706); color:#05050a;" onclick="ouvrirMarcheJoueurs()">Ouvrir les ventes mobiles</button>
         </div>
     </div>
 
@@ -58,31 +73,48 @@
 
         socket.on('refresh-orga', (data) => {
             document.getElementById('txt-orga-credit').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
-            document.getElementById('txt-catalogue-info').innerHTML = `Tarif grossiste : ${data.cataloguePrixFiche} XPF<br>Stock direction : <strong>${data.stockAdminCount} fiches</strong>`;
-            document.getElementById('txt-reserve-info').textContent = `Fiches totales en réserve : ${data.fichesDisponibles}`;
+            document.getElementById('txt-catalogue-info').innerHTML = `Tarif grossiste : ${data.cataloguePrixFiche} XPF | Stock direction : <strong>${data.stockAdminCount}</strong>`;
+            document.getElementById('txt-reserve-info').textContent = `Fiches en réserve : ${data.fichesDisponibles}`;
             
-            // FILTRER ET AFFICHER LES COMMANDES ENVOYÉES SPÉCIFIQUEMENT À L'ORGANISATEUR
+            // FILTRER ET NE MONTRER QUE LES ORDRES DÉDIÉS À L'ORGANISATEUR LOCAL
             const oZone = document.getElementById('orga-orders-list');
             const ordresPourMoi = data.orders.filter(o => o.type.includes("Organisateur"));
             
             if(ordresPourMoi.length === 0) {
-                oZone.innerHTML = '<div style="color:#64748b;text-align:center;padding:5px;">Aucune commande pour votre salle.</div>';
+                oZone.innerHTML = '<div style="color:#64748b;text-align:center;padding:10px;">Aucune commande en attente pour votre régie.</div>';
             } else {
                 oZone.innerHTML = '';
                 ordresPourMoi.forEach(o => {
                     oZone.innerHTML += `<div class="item-box">
-                        <span>👤 <strong>${o.nom}</strong> (${o.code})<br>🪙 +${o.qte} Pions requested</span>
-                        <button class="btn-mini" onclick="validerOrdrePionsOrga(${o.id})">Valider</button>
+                        <span>👤 <strong>${o.nom}</strong> (${o.code})<br>🪙 Quantité : +${o.qte} Pions</span>
+                        <button class="btn-mini" onclick="socket.emit('admin-validate-order', ${o.id})">Valider</button>
                     </div>`;
                 });
             }
         });
 
+        // MISE À JOUR SYNCHRONISÉE DES BOULES EN DIRECT
+        socket.on('new-ball', (data) => {
+            document.getElementById('orga-live-ball').textContent = data.actuelle;
+            document.getElementById('orga-history').textContent = "Dernières boules : " + data.historique.slice(-4).join(' - ');
+        });
+
         socket.on('orga-notification', (msg) => { alert(msg); });
 
+        function tirerBouleOrga() { socket.emit('admin-draw'); }
         function acheterFichesAdmin() { socket.emit('orga-buy-fiches', document.getElementById('buy-qte').value); }
         function ouvrirMarcheJoueurs() { socket.emit('orga-set-vende-fiches', { quantite: document.getElementById('market-qte').value, prix: document.getElementById('market-prix').value }); }
-        function validerOrdrePionsOrga(id) { socket.emit('admin-validate-order', id); alert("Distribution effectuée !"); }
+        
+        function toggleMicroOrga() {
+            document.getElementById('btn-micro').textContent = "🎙️ MICRO DIRECT EN SALLE OUVERT";
+            document.getElementById('btn-micro').style.background = "#ef4444";
+            socket.emit('admin-send-flash', "🎙️ L'animateur local vient d'activer son micro en direct ! Ouvrez bien vos oreilles.");
+        }
+
+        function couperMicroOrga() {
+            document.getElementById('btn-micro').textContent = "🎤 ACTIVER LE MICRO EN DIRECT";
+            document.getElementById('btn-micro').style.background = "#0284c7";
+        }
     </script>
 </body>
 </html>
