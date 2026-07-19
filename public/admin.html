@@ -26,8 +26,11 @@
         .stat-box { background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 8px; flex: 1; text-align: center; font-size: 12px; color:#94a3b8; }
         .stat-box strong { display: block; font-size: 1.4rem; color: #f59e0b; margin-top: 5px; }
 
-        /* Style Rouge Flach pour le cadre d'Alerte de Fraude */
         .fraud-alert-box { background: rgba(239, 68, 68, 0.15); border: 2px dashed #ef4444; color: #f87171; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; font-weight: bold; text-align: center; display: none; }
+        
+        /* 📜 Cadre spécial d'affichage du Code unique généré */
+        .code-display-box { background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; display: none; }
+        .code-giant { font-size: 2rem; font-weight: 900; color: #10b981; letter-spacing: 2px; margin: 5px 0; background: #05050a; padding: 8px; border-radius: 6px; display: inline-block; border: 1px solid #222530; }
     </style>
 </head>
 <body>
@@ -49,14 +52,21 @@
         <button onclick="document.getElementById('fraud-gyrophare').style.display='none'" style="padding:4px 8px; font-size:11px; background:#ef4444; color:white; margin-left:10px; width:auto;">Fermer l'alerte</button>
     </div>
 
+    <!-- 🔥 NOUVEAU MODULE : LE CADRE DE CODE GÉNÉRÉ POUR ENVOI PERSONNEL -->
+    <div class="code-display-box" id="code-generator-output-box">
+        <div style="font-weight: bold; font-size: 14px; color: #cbd5e1;">🎉 CODE UNIQUE CRÉÉ AVEC SUCCÈS !</div>
+        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;" id="code-owner-details">Joueur : -- | Tél : --</div>
+        <div><span class="code-giant" id="code-target-value">BH-0000</span></div>
+        <p style="font-size: 11px; color: #94a3b8; margin: 0 0 10px 0;">Copie ce code pour l'envoyer personnellement au joueur par SMS ou Messenger.</p>
+        <button onclick="copierCodeGenere()" style="background: #10b981; color: white; padding: 6px 15px; font-size: 12px; width: auto;">📋 Copier le code secret</button>
+        <button onclick="document.getElementById('code-generator-output-box').style.display='none'" style="background: transparent; color: #64748b; padding: 6px 15px; font-size: 12px; width: auto; border: 1px solid #222530; margin-left: 5px;">Masquer</button>
+    </div>
+
     <div class="admin-grid">
-        
         <!-- COLONNE DE GAUCHE -->
         <div>
-            <!-- 👤 CADRE BLEU DE VALIDATION ET CERTIFICATION DU CODE UNIQUE ET UNIVERSEL -->
             <div class="card" style="border: 2px solid #38bdf8;">
-                <h3 style="color:#38bdf8;">🔑 Validation & Certification des Codes Joueurs Unique</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-top:-6px;">Vérifiez l'identité du numéro de téléphone avant d'autoriser la génération de sa clé universelle anti-fraude.</p>
+                <h3 style="color:#38bdf8;">🔑 Validation & Certification des Codes Joueurs</h3>
                 <div class="data-list" id="pending-registrations-list">Aucun dossier d'inscription en attente.</div>
             </div>
 
@@ -92,7 +102,6 @@
                 <div class="data-list" id="admin-sales-list">Aucune transaction répertoriée.</div>
             </div>
         </div>
-
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -118,7 +127,6 @@
             document.getElementById('live-ball-display').textContent = formatBoule;
             document.getElementById('live-history-text').textContent = "Historique : " + (data.history.map(n => getBingoFormat(n)).slice(-6).join(' - ') || "Aucun numéro");
 
-            // 1. Liste des inscriptions certifiées uniques
             const regZone = document.getElementById('pending-registrations-list');
             regZone.innerHTML = data.pendingRegistrations.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune demande de création de code unique.</div>' : '';
             data.pendingRegistrations.forEach(r => {
@@ -128,7 +136,6 @@
                 </div>`;
             });
 
-            // 2. Commandes pions admin
             const oZone = document.getElementById('admin-orders-list');
             const ordresPourAdmin = data.orders.filter(o => o.destinataire.includes("Admin"));
             oZone.innerHTML = ordresPourAdmin.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune commande en attente.</div>' : '';
@@ -136,7 +143,6 @@
                 oZone.innerHTML += `<div class="item-box"><span>👤 ${o.nom} (${o.code})<br>💵 ${o.type}</span><button class="btn-success" style="width:auto; padding:6px 14px;" onclick="socket.emit('admin-validate-order', ${o.id})">Valider</button></div>`;
             });
 
-            // 3. Grand Livre des ventes
             const sZone = document.getElementById('admin-sales-list');
             sZone.innerHTML = data.historiqueVentes.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune vente.</div>' : '';
             data.historiqueVentes.forEach(s => {
@@ -144,19 +150,30 @@
             });
         });
 
-        // 🚨 RÉCEPTION DES ALERTES ANTI-FRAUDE DU SERVEUR
+        // 🔥 CAPTEUR DU CODE UNIQUE ASSIGNÉ POUR AFFICHAGE CHEZ L'ADMIN
+        socket.on('admin-code-generated-display', (data) => {
+            document.getElementById('code-generator-output-box').style.display = 'block';
+            document.getElementById('code-owner-details').innerHTML = `Joueur : <strong>${data.nom.toUpperCase()}</strong> | Téléphone : <strong>${data.tel}</strong>`;
+            document.getElementById('code-target-value').textContent = data.code;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        </style>
+        });
+
+        function copierCodeGenere() {
+            const codeText = document.getElementById('code-target-value').textContent;
+            navigator.clipboard.writeText(codeText);
+            alert(`Clé universelle ${codeText} copiée dans le presse-papiers !`);
+        }
+
         socket.on('admin-security-alert', (data) => {
             const gyrophare = document.getElementById('fraud-gyrophare');
             const details = document.getElementById('fraud-details');
-            
             gyrophare.style.display = 'block';
             if(data.type === "FRAUDE_NUMERO_EXISTANT") {
                 details.innerHTML = `L'appareil de <strong>${data.nomFraudeur}</strong> tente d'extorquer un nouveau code avec le numéro <strong>${data.tel}</strong>. Ce numéro appartient déjà à <strong>${data.nomProprietaire}</strong> (Clé : ${data.codeAssocie}). ACTION : Tentative bloquée automatiquement.`;
             } else {
                 details.innerHTML = `L'appareil de <strong>${data.nomFraudeur}</strong> harcèle le bouton d'inscription pour le numéro <strong>${data.tel}</strong>. Demande mise en sourdine.`;
             }
-
-            // Alerte vocale de sécurité Admin
             if ('speechSynthesis' in window) {
                 const alerte = new SpeechSynthesisUtterance("Attention tentative de fraude bloquée");
                 alerte.lang = 'fr-FR'; window.speechSynthesis.speak(alerte);
