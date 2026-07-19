@@ -2,46 +2,64 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bingo - Espace Organisateur / Animateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Organisateur - BingoHome</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        button { width: 100%; padding: 15px; font-weight: bold; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; }
-        .boulier { background: #e2e8f0; padding: 25px; border-radius: 8px; margin: 20px 0; }
-        .ball { font-size: 5rem; font-weight: bold; color: #dc3545; margin: 15px 0; }
-        .history { text-align: left; background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 14px; min-height: 50px; color: #4a5568; word-break: break-all; }
+        body { font-family: 'Segoe UI', sans-serif; background: #05050a; color: #f1f5f9; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        h2, h3 { margin-top: 0; color: #38bdf8; text-transform: uppercase; }
+        .balance-box { background: #1a1c26; border: 1px solid #2d3142; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .balance-val { font-size: 1.6rem; font-weight: bold; color: #f59e0b; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #a855f7, #6b21a8); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <span style="background:#fd7e14; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:bold;">🎙️ ESPACE SÉCURISÉ ANIMATEUR</span>
-        <h2 style="margin-top:10px;">🔮 Tirage des Boules en Direct</h2>
-        
-        <div class="boulier">
-            <button onclick="tirer()">🔮 TIRER UN NUMÉRO</button>
-            <div class="ball" id="live-ball">-</div>
-            <strong>Historique du tirage :</strong>
-            <div class="history" id="history">Aucun numéro tiré.</div>
+        <h2>🎪 Tableau Organisateur</h2>
+        <p style="color:#64748b; font-size:13px;">Achat de séries personnalisées auprès de la direction générale.</p>
+
+        <!-- PORTEMONNAIE ORGA -->
+        <div class="balance-box">
+            <div style="font-size:12px; color:#94a3b8;">MON BUDGET CAISSE DISPONIBLE</div>
+            <div class="balance-val" id="txt-orga-credit">0 XPF</div>
         </div>
-        
-        <div style="background: #edf2f7; padding: 12px; border-radius: 6px; text-align: left; font-size: 14px;">
-            📢 <strong>Note micro :</strong> Annoncez le numéro à haute voix dès qu'il apparaît sur l'écran. Tous les joueurs connectés le voient instantanément chez eux.
+
+        <div class="card" style="border-color: #a855f7;">
+            <h3>🛒 Commander des Fiches à l'Admin</h3>
+            <p style="font-size:12px; color:#94a3b8;" id="txt-catalogue-info">Prix unitaire : 50 XPF / Fiche<br>Stock dispo chez l'admin : 0</p>
+            
+            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">Quantité de fiches personnalisées à acheter :</label>
+            <input type="number" id="buy-qte" value="10" min="1">
+            
+            <button onclick="acheterFiches()">Acheter les fiches de la direction</button>
+        </div>
+
+        <div class="card">
+            <h3>📦 Mon Stock de fiches prêtes à distribuer</h3>
+            <div style="font-size:1.3rem; font-weight:bold; text-align:center; color:#10b981;" id="txt-orga-fiches-count">0 Fiches en réserve</div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        if(sessionStorage.getItem('orgaToken') !== 'valide') { window.location.href = '/'; }
-
         const socket = io();
-        socket.emit('admin-init'); // Récupérer l'état actuel du boulier si déconnexion
+        socket.emit('orga-init');
 
-        socket.on('refresh-admin', ({ history }) => {
-            document.getElementById('history').textContent = history.join(', ') || "Aucun numéro tiré.";
-            document.getElementById('live-ball').textContent = history[history.length - 1] || "-";
+        socket.on('refresh-orga', (data) => {
+            document.getElementById('txt-orga-credit').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
+            document.getElementById('txt-orga-fiches-count').textContent = `${data.fichesDisponibles} Fiches en réserve`;
+            document.getElementById('txt-catalogue-info').innerHTML = `Tarif : <strong>${data.cataloguePrixFiche} XPF</strong> par fiche<br>Fiches disponibles chez l'Admin : <strong>${data.stockAdminCount}</strong>`;
         });
 
-        function tirer() { socket.emit('admin-draw'); }
+        socket.on('orga-notification', (msg) => { alert(msg); });
+
+        function acheterFiches() {
+            const qte = document.getElementById('buy-qte').value;
+            socket.emit('orga-buy-fiches', qte);
+        }
     </script>
 </body>
 </html>
