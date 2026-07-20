@@ -5,12 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BingoHome - Espace Joueur</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 12px; padding-bottom: 85px; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: #05050a; 
+            color: #f1f5f9; 
+            margin: 0; 
+            padding: 12px; 
+            padding-bottom: 85px; 
+        }
         .main-container { max-width: 450px; margin: 0 auto; }
         
         .admin-info-banner { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 2px solid #a855f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #e2e8f0; text-align: center; }
         
-        /* 🟡 CADRE D'ACHAT GOLD (affiche PAR DÉFAUT SI FERMÉ) */
         .ticket-order-gold-card {
             background: rgba(245, 158, 11, 0.08);
             border: 2px solid #f59e0b;
@@ -18,9 +24,23 @@
             padding: 16px;
             margin-bottom: 15px;
             box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-            display: none; /* Masqué au départ */
+            position: relative;
         }
-        .ticket-game-title { font-size: 1.4rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.5px; }
+
+        .status-badge-sale {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .status-badge-sale.open { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .status-badge-sale.closed { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+        .ticket-game-title { font-size: 1.4rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.5px; padding-right: 90px; }
         .ticket-price-sub { font-size: 14px; font-weight: bold; color: #f59e0b; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
         .ticket-mode-sub { font-size: 12px; color: #94a3b8; margin-bottom: 12px; }
         .ticket-orga-name { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 12px; }
@@ -44,17 +64,15 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: 0.2s;
         }
 
-        .closed-ventes-card {
-            background: #12131a;
-            border: 1px dashed #222530;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
-            color: #64748b;
-            font-size: 13px;
+        button.btn-orange-gold:disabled {
+            background: #1e202e !important;
+            color: #64748b !important;
+            border: 1px solid #2d3142 !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
         }
 
         .game-title-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
@@ -111,16 +129,10 @@
             🏆 INFOS TOURNOI : Bienvenue sur BingoHome ! En attente d'annonces...
         </div>
 
-        <!-- ================= PARTIE 1 : JOUER ================= -->
         <div id="view-jouer" class="tab-content active">
-            
-            <!-- 🔒 MESSAGE SI VENTES FERMÉES -->
-            <div class="closed-ventes-card" id="box-ventes-fermees">
-                🔒 Ventes actuellement fermées. En attente de l'ouverture du jeu par votre organisateur...
-            </div>
+            <div class="ticket-order-gold-card">
+                <div class="status-badge-sale closed" id="badge-sale-status">🔒 Fermé</div>
 
-            <!-- 🟡 ENCADREMENT D'ACHAT AMBRE / GOLD (APPARAÎT QUAND L'ORGA OUVRE LA VENTE) -->
-            <div class="ticket-order-gold-card" id="box-ventes-ouvertes">
                 <div class="ticket-game-title" id="card-game-title">500 FRANCS</div>
                 <div class="ticket-price-sub">💰 <span id="card-ticket-price">100</span> XPF / ticket</div>
                 <div class="ticket-mode-sub" id="card-ticket-desc">1 boule pour 1 boule</div>
@@ -131,12 +143,11 @@
                     <span class="order-calc-label" id="card-calc-total">× 100 XPF</span>
                 </div>
 
-                <button class="btn-orange-gold" onclick="validerCommandeTicketPions()">
-                    🎫 Commander ce jeu avec mes pions
+                <button class="btn-orange-gold" id="btn-submit-order" onclick="validerCommandeTicketPions()" disabled>
+                    🔒 Ventes actuellement fermées
                 </button>
             </div>
 
-            <!-- INTITULÉ DU JEU ET BIENVENUE -->
             <div class="game-title-card">
                 <div class="welcome-player-text" id="lbl-welcome-player">BIENVENUE (JOUEUR)</div>
                 
@@ -163,7 +174,6 @@
             </div>
         </div>
 
-        <!-- ================= PARTIE 2 : PIONS ================= -->
         <div id="view-pions" class="tab-content">
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3>💰 Pions Actuels Disponibles</h3>
@@ -195,7 +205,6 @@
             </div>
         </div>
 
-        <!-- ================= PARTIE 3 : RELEVÉ ================= -->
         <div id="view-releve" class="tab-content">
             <div class="card" style="border-top: 4px solid #06b6d4;">
                 <h3>📊 Historique & Relevé</h3>
@@ -207,7 +216,6 @@
 
     </div>
 
-    <!-- OVERLAY FULLSCREEN EXAMEN TICKET PDF -->
     <div class="fullscreen-overlay" id="overlay-cartons">
         <div style="background:#12131a; border:1px solid #222530; border-radius:10px; padding:10px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px; flex:1;">
@@ -247,7 +255,7 @@
         const socket = io();
         const monCode = sessionStorage.getItem('joueurCode');
         let monNom = ""; let autoCoche = false; let fichesJoueur = []; let indexFicheActuelle = 0;
-        let prixUnitaireTicket = 100; let soldeActuelPions = 0;
+        let prixUnitaireTicket = 100; let soldeActuelPions = 0; let venteActiveActuelle = false;
 
         if(!monCode) { window.location.href = '/'; } else { socket.emit('player-login', monCode); }
 
@@ -272,29 +280,36 @@
             document.getElementById('card-calc-total').textContent = `× ${qte * prixUnitaireTicket} XPF`;
         }
 
-        // SYNCHRONISATION EN DIRECT DES VENTES AVEC LE SERVEUR
         socket.on('sync-vente-status', (data) => {
-            const cardOuverte = document.getElementById('box-ventes-ouvertes');
-            const cardFermee = document.getElementById('box-ventes-fermees');
+            const badge = document.getElementById('badge-sale-status');
+            const btn = document.getElementById('btn-submit-order');
+
+            venteActiveActuelle = data.active;
+            
+            document.getElementById('card-game-title').textContent = data.jeu.titre;
+            document.getElementById('card-ticket-price').textContent = data.jeu.prix;
+            document.getElementById('card-ticket-desc').textContent = data.jeu.desc;
+            document.getElementById('card-orga-name').textContent = data.jeu.orga;
+            
+            prixUnitaireTicket = data.jeu.prix;
+            actualiserCalculPions();
 
             if (data.active) {
-                cardFermee.style.display = 'none';
-                cardOuverte.style.display = 'block';
-
-                document.getElementById('card-game-title').textContent = data.jeu.titre;
-                document.getElementById('card-ticket-price').textContent = data.jeu.prix;
-                document.getElementById('card-ticket-desc').textContent = data.jeu.desc;
-                document.getElementById('card-orga-name').textContent = data.jeu.orga;
-                
-                prixUnitaireTicket = data.jeu.prix;
-                actualiserCalculPions();
+                badge.className = "status-badge-sale open";
+                badge.textContent = "🔓 Ouvert";
+                btn.disabled = false;
+                btn.innerHTML = "🎫 Commander ce jeu avec mes pions";
             } else {
-                cardOuverte.style.display = 'none';
-                cardFermee.style.display = 'block';
+                badge.className = "status-badge-sale closed";
+                badge.textContent = "🔒 Fermé";
+                btn.disabled = true;
+                btn.innerHTML = "🔒 Ventes actuellement fermées";
             }
         });
 
         function validerCommandeTicketPions() {
+            if(!venteActiveActuelle) return alert("❌ Ventes fermées pour le moment.");
+
             const qte = parseInt(document.getElementById('ticket-order-qty').value) || 1;
             const coutTotal = qte * prixUnitaireTicket;
             
@@ -307,7 +322,7 @@
             
             if(confirm(`📋 RÉCAPITULATIF DE COMMANDE\n\n🎯 Jeu : ${titreJeu}\n👤 Organisateur : ${orgaNom}\n🎟️ Nombre de tickets : ${qte}\n💰 Montant total : ${coutTotal} Pions\n\nConfirmer la commande ?`)) {
                 socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: qte });
-                alert("✅ Commande envoyée avec succès !");
+                alert("✅ Commande transmise avec succès !");
             }
         }
 
@@ -350,6 +365,13 @@
                 newF.coches[12] = true; fichesJoueur.push(newF);
             }
             renderCarton();
+        });
+
+        socket.on('update-dashboard-global', (data) => {
+            if (data.code === monCode) {
+                soldeActuelPions = data.player.pions || 0;
+                document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
+            }
         });
 
         socket.on('new-ball', (data) => {
