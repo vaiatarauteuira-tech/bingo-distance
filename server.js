@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
             const reg = pendingRegistrations[idx];
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
             players[codeUniverselUnique] = {
-                nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", historiquePions: [], online: false, socketId: null
+                nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", pdfUrl: null, online: false, socketId: null
             };
             io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
             socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
@@ -97,7 +97,6 @@ io.on('connection', (socket) => {
         io.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
     });
 
-    // 📩 COMMANDE DE PIONS DU JOUEUR
     socket.on('player-order', ({ code, type, qte, destinataire }) => {
         const codeClean = (code || "").trim().toUpperCase();
         if (players[codeClean] || codeClean === "ORGANISATEUR") { 
@@ -114,7 +113,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 🪙 VALIDATION D'UNE COMMANDE DE PIONS
     socket.on('admin-validate-order', (idOrder) => {
         const idx = orders.findIndex(o => o.id === idOrder);
         if (idx !== -1) {
@@ -124,7 +122,6 @@ io.on('connection', (socket) => {
                 players[codeClean].pions += parseInt(o.qte); 
                 players[codeClean].totalPionsRecus += parseInt(o.qte);
                 
-                // Diffusion globale de la mise à jour du joueur (par socket direct + io.emit)
                 if (players[codeClean].socketId) {
                     io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
                 }
@@ -135,7 +132,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 💸 TRANSFERT DIRECT / REMISE DE GAIN DU JOUEUR (ADMIN OU ORGANISATEUR)
     socket.on('admin-direct-reward', ({ code, montant }) => {
         const codeClean = (code || "").trim().toUpperCase();
         const ajoutPions = parseInt(montant) || 0;
@@ -144,18 +140,32 @@ io.on('connection', (socket) => {
             players[codeClean].pions += ajoutPions; 
             players[codeClean].totalPionsRecus += ajoutPions;
             
-            // Notification et mise à jour directe sur l'appareil du joueur
             if (players[codeClean].socketId) {
                 io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
                 io.to(players[codeClean].socketId).emit('notification', `🎁 Rechargement : +${ajoutPions} Pions crédités sur votre compte !`);
             }
 
-            // Mise à jour globale par sécurité si reconnexion rapide
             io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
-            
             broadcastRefresh(); 
         } else {
             socket.emit('notification', `❌ Code joueur ${codeClean} introuvable ! Vérifiez la saisie.`);
+        }
+    });
+
+    // 📄 DISTRIBUTION DE FICHIERS PDF PERSONNALISÉS PAR L'ORGANISATEUR
+    socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, qte }) => {
+        const codeClean = (code || "").trim().toUpperCase();
+        if (players[codeClean]) {
+            players[codeClean].pdfUrl = fichierUrl;
+            players[codeClean].seriesCartons = serie;
+            players[codeClean].nombreFiches += parseInt(qte) || 1;
+
+            if (players[codeClean].socketId) {
+                io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
+                io.to(players[codeClean].socketId).emit('notification', '📄 Vos cartons PDF officiels sont disponibles !');
+            }
+            io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
+            broadcastRefresh();
         }
     });
 
