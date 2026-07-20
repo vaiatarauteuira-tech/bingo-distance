@@ -3,249 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BingoHome - Espace Joueur</title>
+    <title>Console Organisateur - BingoHome</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            background: #05050a; 
-            color: #f1f5f9; 
-            margin: 0; 
-            padding: 12px; 
-            padding-bottom: 85px; 
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #05050a;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 12px;
+            padding-bottom: 80px;
         }
-        .main-container { max-width: 450px; margin: 0 auto; }
+        .main-container { max-width: 600px; margin: 0 auto; }
         
-        .admin-info-banner { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 2px solid #a855f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #e2e8f0; text-align: center; }
-        
-        /* 🟡 CADRE JAUNE DÉDIÉ COMMANDE TICKET (MODÈLE PHOTO) */
-        .ticket-order-gold-card {
-            background: rgba(245, 158, 11, 0.05);
-            border: 2px solid #f59e0b;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 15px;
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
-        }
-        .ticket-game-title { font-size: 1.4rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.5px; }
-        .ticket-price-sub { font-size: 14px; font-weight: bold; color: #f59e0b; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-        .ticket-mode-sub { font-size: 12px; color: #94a3b8; margin-bottom: 12px; }
-        .ticket-orga-name { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 12px; }
-        
-        .order-input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-        .order-qty-input { width: 100px !important; margin-bottom: 0 !important; font-size: 16px !important; font-weight: bold !important; text-align: center; }
-        .order-calc-label { font-size: 15px; font-weight: bold; color: #f59e0b; }
-
-        button.btn-orange-gold {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #05050a;
-            font-size: 15px;
-            font-weight: 800;
-            padding: 14px;
-            width: 100%;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        .header-orga {
+            background: #12131a;
+            border: 1px solid #222530;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
         }
 
-        .game-title-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
-        .welcome-player-text { font-size: 14px; color: #a855f7; font-weight: bold; margin: 0; }
-
-        .pdf-delivery-box { background: #1a1c26; border: 1px solid #2d3142; border-radius: 10px; padding: 12px; margin-top: 12px; display: none; }
-        .pdf-title { color: #f59e0b; font-weight: bold; font-size: 13px; margin-bottom: 6px; }
-        .pdf-pages-badge { background: #05050a; border: 1px solid #a855f7; color: #cbd5e1; padding: 4px 8px; border-radius: 5px; font-size: 12px; display: inline-block; font-weight: bold; margin-bottom: 8px; }
+        .alert-banner {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        h3 { margin-top: 0; color: #38bdf8; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 12px; }
+        .card {
+            background: #12131a;
+            border: 1px solid #222530;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
 
-        button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        button.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; width: 100%; }
-        button.btn-cyan { background: #06b6d4; color: #05050a; width: 100%; }
-        button.btn-purple { background: #a855f7; color: white; width: 100%; }
-        button.nav-btn { background: #1a1c26; color: white; border: 1px solid #2d3142; padding: 8px 14px; width: 48%; }
-        
-        button.paina-trigger-btn { background: linear-gradient(135deg, #ec4899, #ef4444); color: white; font-size: 1.6rem; font-weight: 900; padding: 16px; width: 100%; margin-bottom: 15px; border-radius: 50px; box-shadow: 0 0 20px rgba(236,72,153,0.5); text-transform: uppercase; border: 2px solid #fff; }
+        h3 {
+            margin-top: 0;
+            color: #38bdf8;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; }
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+            width: 100%;
+        }
 
-        .fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05050a; z-index: 2000; padding: 12px; box-sizing: border-box; overflow-y: auto; }
-        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1a1c26; padding: 10px; border-radius: 10px; border: 1px solid #2d3142; margin-top: 10px; }
-        .cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #222533; font-weight: bold; border-radius: 50%; cursor: pointer; font-size: 1.2rem; border: 1px solid #2d3142; position: relative; color: white; }
-        .cell.marked { background: rgba(168, 85, 247, 0.6) !important; border-color: #c084fc; color: #fff; text-shadow: 0 0 5px #000; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-cyan { background: #06b6d4; color: #05050a; }
+        .btn-purple { background: #a855f7; color: white; }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
 
-        .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #1a1c26; padding: 8px; border-radius: 8px; border: 1px solid #2d3142; }
-        @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
-        .verif-num { background: #12131a; border: 1px solid #222530; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 3px; color: #475569; font-weight: bold; }
-        .verif-num.out { background: #ef4444; color: white; border-color: #f87171; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1c26;
+            border: 1px solid #2d3142;
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
 
-        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; width: 23%; text-align: center; }
+        .data-list {
+            background: #05050a;
+            border: 1px solid #222530;
+            border-radius: 8px;
+            padding: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .item-box {
+            background: #12131a;
+            border: 1px solid #222530;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Volets de navigation bas de page */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #12131a;
+            border-top: 1px solid #222530;
+            height: 60px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 20%;
+            text-align: center;
+        }
+
         .nav-item.active { color: #f59e0b; }
-        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+        .nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
 
-        .switch-box { display: flex; justify-content: space-between; align-items: center; background: #1a1c26; padding: 10px; border-radius: 8px; border: 1px solid #2d3142; margin-bottom: 10px; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3142; transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #a855f7; }
-        input:checked + .slider:before { transform: translateX(20px); }
+        .boulier-display {
+            text-align: center;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ef4444;
+        }
 
-        .statement-row { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid #222530; font-size: 13px; }
+        .ball-giant {
+            width: 75px;
+            height: 75px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 10px auto;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .commission-badge {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="main-container">
-        
-        <div class="admin-info-banner" id="admin-info-box">
-            🏆 INFOS TOURNOI : Bienvenue sur BingoHome ! En attente d'annonces...
+
+        <div class="header-orga">
+            <span style="font-weight:900; color:#f59e0b;">🎪 REGIE ORGANISATEUR</span>
+            <span style="font-size:12px; color:#94a3b8;" id="status-orga">Session Active</span>
         </div>
 
-        <!-- ================= PARTIE 1 : JOUER ================= -->
-        <div id="view-jouer" class="tab-content active">
+        <div class="alert-banner">
+            C'est rétabli, comme avant ! Rafraichis ta page.
+        </div>
+
+        <!-- ================= VOLET 1 : TICKETS & PDF ================= -->
+        <div id="view-tickets" class="tab-content active">
             
-            <!-- 🟡 ENCADREMENT JAUNE EXACTEMENT COMME SUR LA PHOTO -->
-            <div class="ticket-order-gold-card">
-                <div class="ticket-game-title" id="card-game-title">500 FRANCS</div>
-                <div class="ticket-price-sub">💰 <span id="card-ticket-price">100</span> XPF / ticket</div>
-                <div class="ticket-mode-sub" id="card-ticket-desc">1 boule pour 1 boule</div>
-                <div class="ticket-orga-name">Organisateur : <span id="card-orga-name" style="color:#f59e0b; font-weight:bold;">VAHINE</span></div>
+            <!-- OUVERTURE ET FERMETURE DES COMMANDES -->
+            <div class="card" style="border-left: 4px solid #06b6d4;">
+                <h3>🎟️ Ventes de Tickets PDF</h3>
+                <input type="text" id="orga-game-title" placeholder="Intitulé du JEU (ex: Spécial Gros Lots)">
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <button class="btn-green" onclick="ouvrirVentes(true)">🔓 COMMANDES OUVERTES</button>
+                    <button class="btn-red" onclick="ouvrirVentes(false)">🔒 COMMANDES FERMÉES</button>
+                </div>
+            </div>
+
+            <!-- VALIDER ET AFFECTER LES PDF AUX JOUEURS -->
+            <div class="card" style="border-left: 4px solid #a855f7;">
+                <h3>📥 Commandes Joueurs à Traiter (Pions débités)</h3>
+                <div class="data-list" id="orga-pdf-orders">Aucune commande en attente.</div>
                 
-                <div class="order-input-row">
-                    <input type="number" id="ticket-order-qty" class="order-qty-input" value="1" min="1" oninput="actualiserCalculPions()">
-                    <span class="order-calc-label" id="card-calc-total">× 100 XPF</span>
-                </div>
+                <div style="background:#1a1c26; padding:10px; border-radius:8px; margin-top:10px;">
+                    <label style="font-size:11px; color:#94a3b8;">Série :</label>
+                    <input type="text" id="pdf-serie" placeholder="Nom de la Série (ex: Série A)">
+                    
+                    <div style="display:flex; gap:5px;">
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Page Début :</label>
+                            <input type="number" id="pdf-page-debut" value="1">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Page Fin :</label>
+                            <input type="number" id="pdf-page-fin" value="3">
+                        </div>
+                    </div>
 
-                <button class="btn-orange-gold" onclick="validerCommandeTicketPions()">
-                    🎫 Commander ce jeu avec mes pions
-                </button>
-            </div>
+                    <label style="font-size:11px; color:#94a3b8;">Sélectionner le PDF :</label>
+                    <select id="pdf-menu">
+                        <option value="grille_1_75.pdf">Grilles_Bingo_Série_Principale.pdf</option>
+                        <option value="grille_speciale.pdf">Grilles_Spéciales_Lot.pdf</option>
+                    </select>
 
-            <!-- INTITULÉ DU JEU ET BIENVENUE -->
-            <div class="game-title-card">
-                <div class="welcome-player-text" id="lbl-welcome-player">BIENVENUE (JOUEUR)</div>
-                
-                <div class="pdf-delivery-box" id="pdf-container-card">
-                    <div class="pdf-title">📁 Votre ticket PDF</div>
-                    <div class="pdf-pages-badge" id="lbl-feuilles-count">Feuilles 1 à 3</div>
-                    <button class="btn-purple" style="padding: 8px 12px; font-size: 13px;" onclick="ouvrirFichesPleinEcran()">🎮 Jouer maintenant !</button>
-                </div>
-            </div>
-
-            <button class="paina-trigger-btn" onclick="annoncerPainaDirect()">💥 PAINA ! 💥</button>
-
-            <!-- BOULIER EN DIRECT -->
-            <div class="card" style="border-left: 4px solid #ef4444;">
-                <h3>🎰 Boules tirées en direct</h3>
-                <div style="display:flex; align-items:center; gap:15px; background:#1a1c26; padding:12px; border-radius:10px; border:1px solid #2d3142;">
-                    <div style="width:55px; height:55px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold;" id="live-ball">-</div>
-                    <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">En attente de la première boule...</div>
+                    <button class="btn-purple" onclick="validerEtLivrerPDF()">✅ Valider & Transmettre la Fiche instantanément</button>
                 </div>
             </div>
 
+            <!-- IMPRESSION TICKET SALLE -->
             <div class="card">
-                <h3>📋 Grille de Contrôle Générale (1 à 75)</h3>
-                <div class="verif-grid" id="tableau-verification"></div>
+                <h3>🖨️ Imprimer tes cartes de bingo</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Génère et imprime les cartes pour vos tournois physiques en salle.</p>
+                <button class="btn-cyan" onclick="window.print()">🖨️ Générer & Imprimer la Fiche PDF</button>
             </div>
         </div>
 
-        <!-- ================= PARTIE 2 : PIONS & COMMANDES ================= -->
-        <div id="view-pions" class="tab-content">
+        <!-- ================= VOLET 2 : JOUER ================= -->
+        <div id="view-jouer" class="tab-content">
+            <!-- BOULIER DIRECT -->
+            <div class="boulier-display card">
+                <h3>🎰 Boulier en Direct</h3>
+                <div class="ball-giant" id="orga-live-ball">-</div>
+                <div id="orga-live-format" style="font-weight:bold; color:#f59e0b; margin-bottom:8px;">Format : --</div>
+                <div id="orga-history" style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Historique : Aucun tirage</div>
+                <button class="btn-red" onclick="tirerBouleOrga()">⚡ TIRER LE NUMÉRO SUIVANT</button>
+            </div>
+
+            <!-- MICRO EN DIRECT -->
+            <div class="card">
+                <h3>🎙️ Commande Micro Salle</h3>
+                <button class="btn-purple" id="btn-micro" onclick="toggleMicro()">🎤 ACTIVER / DÉSACTIVER MICRO</button>
+            </div>
+
+            <!-- LISTE DES JOUEURS CONNECTÉS -->
+            <div class="card">
+                <h3>👥 Statut des Joueurs Connectés</h3>
+                <div class="data-list" id="orga-players-status">Chargement...</div>
+            </div>
+        </div>
+
+        <!-- ================= VOLET 3 : VÉRIFIER & GAINS ================= -->
+        <div id="view-verifier" class="tab-content">
+            
+            <!-- CALCUL DE GAIN AVEC COMMISSION -13% -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
-                <h3>💰 Pions Actuels Disponibles</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px;">
-                    <span style="font-size:13px; color:#94a3b8;">Votre solde actuel :</span>
-                    <span style="font-size:1.5rem; font-weight:bold; color:#f59e0b;" id="solde-pions">0 Pions</span>
+                <h3>💰 Calculateur de Gains (-13% Organisateur)</h3>
+                <label style="font-size:11px; color:#94a3b8;">Cagnotte totale du jeu :</label>
+                <input type="number" id="cagnotte-brute" placeholder="Ex: 10000" oninput="calculerPartOrga()">
+                
+                <div class="commission-badge" id="display-calcul-commission">
+                    Gain Joueur (87%) : 0 XPF | Part Organisateur (13%) : 0 XPF
                 </div>
             </div>
 
-            <div class="card" style="border: 1px solid #10b981;">
-                <h3>💳 Passer une commande de Pions</h3>
-                <label style="font-size:12px; color:#94a3b8;">Taux unitaire :</label>
-                <select id="pion-taux-select" onchange="calculerPions()">
-                    <option value="50">1 pion pour 50fr</option>
-                    <option value="100">1 pion pour 100fr</option>
-                </select>
+            <!-- REMETTRE UN GAIN RAPIDEMENT -->
+            <div class="card" style="border-left: 4px solid #10b981;">
+                <h3>🎁 Remettre un Gain Rapidement</h3>
+                <label style="font-size:11px; color:#94a3b8;">Code du joueur :</label>
+                <input type="text" id="gain-player-code" placeholder="Ex: BH-1234">
                 
-                <label style="font-size:12px; color:#94a3b8;">Nombre de pions :</label>
-                <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
+                <label style="font-size:11px; color:#94a3b8;">Le JEU GAGNÉ (Traçabilité) :</label>
+                <input type="text" id="gain-game-title" placeholder="Ex: Quine Spéciale">
                 
-                <label style="font-size:12px; color:#94a3b8;">Intervenant :</label>
-                <select id="pion-destinataire">
-                    <option value="Admin Principal">Direction / Administrateur Général</option>
-                    <option value="Organisateur Local">Animateur / Organisateur</option>
-                </select>
+                <label style="font-size:11px; color:#94a3b8;">Montant net à remettre :</label>
+                <input type="number" id="gain-amount" placeholder="Montant en XPF ou Pions">
                 
-                <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Montant à régler : 500 fr</div>
-                <button class="btn-gold" onclick="demanderPionsCaisse()">Soumettre la commande de pions</button>
+                <button class="btn-green" onclick="remettreGainRapide()">💸 REMETTRE LE GAIN</button>
             </div>
         </div>
 
-        <!-- ================= PARTIE 3 : RELEVÉ AUTOMATIQUE ================= -->
-        <div id="view-releve" class="tab-content">
-            <div class="card" style="border-top: 4px solid #06b6d4;">
-                <h3>📊 Historique & Relevé</h3>
-                <div id="releve-mouvements-list" style="max-height: 300px; overflow-y: auto; background:#05050a; padding:8px; border-radius:6px; border:1px solid #2d3142;">
-                    Aucune transaction répertoriée.
+        <!-- ================= VOLET 4 : PIONS & TRESORERIE ================= -->
+        <div id="view-pions" class="tab-content">
+            
+            <!-- COMPTABILITÉ ORGANISATEUR -->
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3>🪙 MES PIONS Disponibles</h3>
+                <div style="font-size:1.4rem; font-weight:bold; color:#f59e0b; text-align:center; margin:8px 0;" id="orga-solde-pions">0 Pions</div>
+                <div style="font-size:11px; color:#94a3b8; text-align:center;">Base de calcul : 20fr, 50fr ou 100fr.</div>
+            </div>
+
+            <!-- COMMANDE DE PIONS ORGA -> ADMIN -->
+            <div class="card">
+                <h3>🏦 Commande de Pions Vers l'Admin (Et vice versa)</h3>
+                <input type="number" id="order-pions-admin-qte" placeholder="Nombre de pions">
+                <button class="btn-gold" onclick="commanderPionsAdmin()">📨 Commander des Pions auprès de l'Admin</button>
+            </div>
+
+            <!-- TRANSFERT DIRECT ORGA -> JOUEUR (Deblock / Virement) -->
+            <div class="card">
+                <h3>↔️ Transfert Direct de Pions à un Joueur</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Pour les paiements directs reçus sur Deblock ou virement local.</p>
+                <input type="text" id="transfer-player-code" placeholder="Code unique du Joueur (ex: BH-8044)">
+                <input type="number" id="transfer-pions-amount" placeholder="Quantité de Pions">
+                <button class="btn-cyan" onclick="transfererPionsJoueur()">💸 Effectuer le Transfert</button>
+            </div>
+
+            <!-- COMMANDES DE PIONS REÇUES DES JOUEURS -->
+            <div class="card">
+                <h3>📥 Commandes de Pions reçues des Joueurs</h3>
+                <div class="data-list" id="orga-pions-orders-list">Aucune commande de pions en attente.</div>
+            </div>
+        </div>
+
+        <!-- ================= VOLET 5 : SUIVI & RELEVÉS ================= -->
+        <div id="view-releves" class="tab-content">
+            <div class="card">
+                <h3>📊 Circuit de Traçabilité & Relevés Entrée / Sortie</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Messages des joueurs souhaitant retirer leurs gains ou pions.</p>
+                <div class="data-list" id="orga-traceability-log">
+                    Aucun mouvement enregistré.
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- OVERLAY FULLSCREEN EXAMEN TICKET PDF -->
-    <div class="fullscreen-overlay" id="overlay-cartons">
-        <div style="background:#12131a; border:1px solid #222530; border-radius:10px; padding:10px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="display:flex; align-items:center; gap:10px; flex:1;">
-                <div style="width:45px; height:45px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:bold;" id="overlay-live-ball">-</div>
-                <div style="font-size:11px; color:#94a3b8; line-height:1.2; overflow:hidden;" id="overlay-history">En attente de boules...</div>
-            </div>
-            <button style="background:#ef4444; color:white; padding:6px 12px; font-weight:bold; font-size:12px;" onclick="fermerFichesPleinEcran()">✕ Fermer</button>
-        </div>
-
-        <button class="paina-trigger-btn" onclick="annoncerPainaDirect()">💥 PAINA ! 💥</button>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <button class="nav-btn" onclick="fichePrecedente()">⬅️ Précédent</button>
-            <span style="font-weight:bold; color:#06b6d4; font-size:13px;" id="fiche-index-label">Feuillet 1 / 1</span>
-            <button class="nav-btn" onclick="ficheSuivante()">Suivant ➡️</button>
-        </div>
-
-        <div class="switch-box">
-            <span style="font-size:12px; font-weight:bold; color:#94a3b8;">🤖 Pointage Automatique :</span>
-            <label class="switch">
-                <input type="checkbox" id="chk-auto" onchange="toggleAutoMode()">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="board" id="bingo-board"></div>
-    </div>
-
-    <!-- BARRE DE NAVIGATION BAS -->
+    <!-- VOLETS DE NAVIGATION BAS DE PAGE -->
     <div class="bottom-nav-bar">
-        <div class="nav-item active" id="nav-jouer" onclick="switchTab('joueur')"><div class="nav-icon">🎮</div><span>Jouer</span></div>
-        <div class="nav-item" id="nav-pions" onclick="switchTab('pions')"><div class="nav-icon">🪙</div><span>Pions</span></div>
-        <div class="nav-item" id="nav-releve" onclick="switchTab('releve')"><div class="nav-icon">📊</div><span>Relevé</span></div>
+        <div class="nav-item active" onclick="switchTab('tickets', this)"><div class="nav-icon">🎟️</div><span>TICKETS</span></div>
+        <div class="nav-item" onclick="switchTab('jouer', this)"><div class="nav-icon">🎮</div><span>JOUER</span></div>
+        <div class="nav-item" onclick="switchTab('verifier', this)"><div class="nav-icon">🔍</div><span>VÉRIFIER</span></div>
+        <div class="nav-item" onclick="switchTab('pions', this)"><div class="nav-icon">🪙</div><span>PIONS</span></div>
+        <div class="nav-item" onclick="switchTab('releves', this)"><div class="nav-icon">📊</div><span>RELEVÉS</span></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const monCode = sessionStorage.getItem('joueurCode');
-        let monNom = ""; let autoCoche = false; let fichesJoueur = []; let indexFicheActuelle = 0;
-        let prixUnitaireTicket = 100; let soldeActuelPions = 0;
+        socket.emit('orga-init');
 
-        if(!monCode) { window.location.href = '/'; } else { socket.emit('player-login', monCode); }
+        let commandeSelectionnee = null;
+        let microActif = false;
 
         function getBingoFormat(num) {
             if (num <= 15) return "B " + num;
@@ -255,174 +367,114 @@
             return "O " + num;
         }
 
-        function switchTab(onglet) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if(onglet === 'joueur') { document.getElementById('view-jouer').classList.add('active'); document.getElementById('nav-jouer').classList.add('active'); }
-            else if(onglet === 'pions') { document.getElementById('view-pions').classList.add('active'); document.getElementById('nav-pions').classList.add('active'); }
-            else { document.getElementById('view-releve').classList.add('active'); document.getElementById('nav-releve').classList.add('active'); }
+        function switchTab(onglet, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`view-${onglet}`).classList.add('active');
+            el.classList.add('active');
         }
 
-        function actualiserCalculPions() {
-            const qte = parseInt(document.getElementById('ticket-order-qty').value) || 1;
-            document.getElementById('card-calc-total').textContent = `× ${qte * prixUnitaireTicket} XPF`;
-        }
+        socket.on('refresh-orga', (data) => {
+            document.getElementById('orga-solde-pions').textContent = `${data.fichesDisponibles || 0} Pions`;
 
-        function validerCommandeTicketPions() {
-            const qte = parseInt(document.getElementById('ticket-order-qty').value) || 1;
-            const coutTotal = qte * prixUnitaireTicket;
+            // Filtre des commandes
+            const pZone = document.getElementById('orga-pdf-orders');
+            const ordersOrga = (data.orders || []).filter(o => o.destinataire.includes("Organisateur"));
+            pZone.innerHTML = ordersOrga.length === 0 ? '<div style="text-align:center;color:#64748b;">Aucune demande de ticket.</div>' : '';
             
-            if(soldeActuelPions < coutTotal) {
-                return alert(`❌ SOLDE INSUFFISANT !\n\nCoût de la commande : ${coutTotal} Pions/XPF\nVotre solde : ${soldeActuelPions} Pions\n\nVeuillez recharger vos pions.`);
+            ordersOrga.forEach(o => {
+                pZone.innerHTML += `<div class="item-box">
+                    <span><strong>${o.nom}</strong> (${o.code})<br><small style="color:#38bdf8;">${o.type} [Qté: ${o.qte}]</small></span>
+                    <button class="btn-cyan" style="width:auto; padding:4px 8px;" onclick="selectionnerCommande('${o.code}', ${o.qte})">Sélectionner</button>
+                </div>`;
+            });
+
+            // Affichage des Joueurs avec statut
+            const pStatus = document.getElementById('orga-players-status');
+            if (data.playersList && data.playersList.length > 0) {
+                pStatus.innerHTML = '';
+                data.playersList.forEach(p => {
+                    pStatus.innerHTML += `<div class="item-box">
+                        <span>👤 ${p.nom} (${p.code})</span>
+                        <span style="color:${p.online ? '#10b981':'#ef4444'}; font-weight:bold;">${p.online ? 'En Jeu':'Déconnecté'}</span>
+                    </div>`;
+                });
+            } else {
+                pStatus.innerHTML = '<div style="text-align:center;color:#64748b;">Aucun joueur enregistré.</div>';
             }
-
-            // Récapitulatif de commande sous forme de pop-up d'infirmation
-            const titreJeu = document.getElementById('card-game-title').textContent;
-            const orgaNom = document.getElementById('card-orga-name').textContent;
-            
-            if(confirm(`📋 RÉCAPITULATIF DE VOTRE COMMANDE\n\n🎯 Jeu : ${titreJeu}\n👤 Organisateur : ${orgaNom}\n🎟️ Nombre de tickets : ${qte}\n💰 Montant total : ${coutTotal} Pions\n\nConfirmer la commande ?`)) {
-                socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: qte });
-                alert("✅ Commande envoyée avec succès à votre organisateur !");
-            }
-        }
-
-        function calculerPions() {
-            const qte = document.getElementById('pion-quantite').value || 0;
-            const taux = document.getElementById('pion-taux-select').value;
-            document.getElementById('pion-prix-calcule').textContent = `Montant à régler : ${(qte * taux).toLocaleString()} fr`;
-        }
-
-        function initialiserTableau() {
-            const grid = document.getElementById('tableau-verification'); grid.innerHTML = '';
-            for(let i=1; i<=75; i++) { const box = document.createElement('div'); box.className = 'verif-num'; box.id = `verif-${i}`; box.textContent = i; grid.appendChild(box); }
-        }
-
-        socket.on('login-success-dashboard', (data) => {
-            monNom = data.player.nom;
-            soldeActuelPions = data.player.pions || 0;
-            
-            document.getElementById('lbl-welcome-player').textContent = `BIENVENUE ${monNom.toUpperCase()} (${data.player.code})`;
-            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
-            initialiserTableau();
-
-            if(data.player.nombreFiches > 0) {
-                document.getElementById('pdf-container-card').style.display = 'block';
-                document.getElementById('lbl-feuilles-count').textContent = `Feuilles 1 à ${data.player.nombreFiches}`;
-            }
-
-            fichesJoueur = Array.from({length: data.player.nombreFiches || 0}, (_, idx) => ({ id: idx + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) }));
-            fichesJoueur.forEach(f => f.coches[12] = true);
-
-            if(data.liveHistory.length > 0) {
-                const derniere = data.liveHistory[data.liveHistory.length - 1];
-                document.getElementById('live-ball').textContent = getBingoFormat(derniere);
-                document.getElementById('overlay-live-ball').textContent = getBingoFormat(derniere);
-                const histFormat = data.liveHistory.map(n => getBingoFormat(n)).slice(-4).join(' - ');
-                document.getElementById('history').textContent = "Boules : " + histFormat;
-                document.getElementById('overlay-history').textContent = "Boules : " + histFormat;
-                data.liveHistory.forEach(b => { const el = document.getElementById(`verif-${b}`); if(el) el.classList.add('out'); });
-            }
-        });
-
-        socket.on('update-dashboard', (player) => { 
-            soldeActuelPions = player.pions || 0;
-            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
-            
-            if(player.nombreFiches > 0) {
-                document.getElementById('pdf-container-card').style.display = 'block';
-                document.getElementById('lbl-feuilles-count').textContent = `Feuilles 1 à ${player.nombreFiches}`;
-            }
-
-            while(fichesJoueur.length < player.nombreFiches) {
-                const newF = { id: fichesJoueur.length + 1, numeros: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1), coches: new Array(25).fill(false) };
-                newF.coches[12] = true; fichesJoueur.push(newF);
-            }
-            renderCarton();
         });
 
         socket.on('new-ball', (data) => {
-            const boule = data.actuelle;
-            const formatted = getBingoFormat(boule);
-            document.getElementById('live-ball').textContent = formatted;
-            document.getElementById('overlay-live-ball').textContent = formatted;
+            const formatted = getBingoFormat(data.actuelle);
+            document.getElementById('orga-live-ball').textContent = data.actuelle;
+            document.getElementById('orga-live-format').textContent = "Énoncé : " + formatted;
+            document.getElementById('orga-history').textContent = "Historique : " + data.historique.map(n => getBingoFormat(n)).slice(-5).join(' - ');
+        });
+
+        function selectionnerCommande(code, qte) {
+            commandeSelectionnee = { code, qte };
+            alert(`Commande sélectionnée pour le joueur ${code} (${qte} ticket/s)`);
+        }
+
+        function validerEtLivrerPDF() {
+            if (!commandeSelectionnee) return alert("Veuillez sélectionner une commande dans la liste ci-dessus.");
+            const serie = document.getElementById('pdf-serie').value || "Série Standard";
+            const debut = document.getElementById('pdf-page-debut').value;
+            const fin = document.getElementById('pdf-page-fin').value;
             
-            const histFormat = data.historique.map(n => getBingoFormat(n)).slice(-4).join(' - ');
-            document.getElementById('history').textContent = "Boules : " + histFormat;
-            document.getElementById('overlay-history').textContent = "Boules : " + histFormat;
-            const el = document.getElementById(`verif-${boule}`); if(el) el.classList.add('out');
-
-            if ('speechSynthesis' in window) {
-                const phrase = new SpeechSynthesisUtterance(formatted);
-                phrase.lang = 'fr-FR'; phrase.rate = 1; window.speechSynthesis.speak(phrase);
-            }
-
-            if(autoCoche) {
-                fichesJoueur.forEach(f => { 
-                    const idx = f.numeros.indexOf(boule); 
-                    if(idx !== -1) f.coches[idx] = true; 
-                    
-                    let cochesCompte = f.coches.filter(c => c === true).length;
-                    if(cochesCompte === 24) {
-                        alert("🤖 ANALYSE SÉCURITÉ : Il ne vous reste plus qu'un seul numéro !");
-                        annoncerPainaDirect();
-                    }
-                });
-                renderCarton();
-            }
-        });
-
-        socket.on('refresh-boutique-joueurs', (data) => {
-            prixUnitaireTicket = data.prixFichePourJoueur || 100;
-            document.getElementById('card-ticket-price').textContent = prixUnitaireTicket;
-            actualiserCalculPions();
-        });
-
-        socket.on('notification', (msg) => { 
-            if(msg.startsWith("JEU:")) {
-                const titrePropre = msg.replace("JEU:", "");
-                document.getElementById('card-game-title').textContent = titrePropre.toUpperCase();
-            } else if(msg.startsWith("🏆 INFOS TOURNOI :")) {
-                document.getElementById('admin-info-box').textContent = msg;
-            } else {
-                alert(msg);
-            }
-        });
-
-        function ouvrirFichesPleinEcran() { if(fichesJoueur.length === 0) return alert("Aucun ticket PDF n'est attribué à votre compte."); document.getElementById('overlay-cartons').style.display = 'block'; renderCarton(); }
-        function fermerFichesPleinEcran() { document.getElementById('overlay-cartons').style.display = 'none'; }
-
-        function renderCarton() {
-            if(fichesJoueur.length === 0) return; const currentFiche = fichesJoueur[indexFicheActuelle];
-            document.getElementById('fiche-index-label').textContent = `Feuillet ${currentFiche.id} / ${fichesJoueur.length}`;
-            const b = document.getElementById('bingo-board'); b.innerHTML = '';
-            currentFiche.numeros.forEach((num, idx) => {
-                const c = document.createElement('div'); c.className = 'cell';
-                if(idx === 12) { c.textContent = "FREE"; c.classList.add('marked'); }
-                else { c.textContent = num; if(currentFiche.coches[idx]) c.classList.add('marked'); c.onclick = () => { if(!autoCoche) { currentFiche.coches[idx] = !currentFiche.coches[idx]; c.classList.toggle('marked'); } }; }
-                b.appendChild(c);
+            socket.emit('orga-deliver-pdf', {
+                code: commandeSelectionnee.code,
+                serie: serie,
+                pages: `${debut} à ${fin}`
             });
+            alert(`Fiches transmises instantanément au joueur ${commandeSelectionnee.code} !`);
+            commandeSelectionnee = null;
         }
 
-        function ficheSuivante() { if(indexFicheActuelle < fichesJoueur.length - 1) { indexFicheActuelle++; renderCarton(); } }
-        function fichePrecedente() { if(indexFicheActuelle > 0) { indexFicheActuelle--; renderCarton(); } }
-
-        function toggleAutoMode() {
-            autoCoche = document.getElementById('chk-auto').checked;
-            if(autoCoche) { fichesJoueur.forEach(f => { f.numeros.forEach((num, idx) => { const el = document.getElementById(`verif-${num}`); if(el && el.classList.contains('out')) f.coches[idx] = true; }); }); renderCarton(); }
+        function ouvrirVentes(ouvert) {
+            const titre = document.getElementById('orga-game-title').value || "MATCH GENERAL";
+            socket.emit('admin-toggle-ventes', ouvert);
+            socket.emit('admin-send-flash', `JEU:${titre}`);
+            alert(ouvert ? "Ventes de tickets OUVERTES !" : "Ventes de tickets FERMÉES !");
         }
 
-        function demanderPionsCaisse() {
-            const qte = document.getElementById('pion-quantite').value;
-            const dest = document.getElementById('pion-destinataire').value;
-            const taux = document.getElementById('pion-taux-select').value;
-            socket.emit('player-order', { code: monCode, type: `Achat via ${dest} (${taux}fr/pion)`, qte: qte, destinataire: dest });
-            alert(`Demande soumise ! Ordre enregistré.`);
+        function tirerBouleOrga() { socket.emit('admin-draw'); }
+
+        function toggleMicro() {
+            microActif = !microActif;
+            document.getElementById('btn-micro').textContent = microActif ? "🔴 MICRO EN DIRECT (CLIQUEZ POUR COUPER)" : "🎤 ACTIVER MICRO";
+            document.getElementById('btn-micro').style.background = microActif ? "#ef4444" : "#a855f7";
         }
 
-        function annoncerPainaDirect() { 
-            if(confirm("💥 Déclencher l'alerte générale et crier PAINA immédiatement ?")) { 
-                socket.emit('player-announce-bingo', { code: monCode, nom: monNom }); 
-            } 
+        function calculerPartOrga() {
+            const brut = parseFloat(document.getElementById('cagnotte-brute').value) || 0;
+            const orga = Math.round(brut * 0.13);
+            const joueur = brut - orga;
+            document.getElementById('display-calcul-commission').textContent = `Gain Joueur (87%) : ${joueur.toLocaleString()} XPF | Part Organisateur (13%) : ${orga.toLocaleString()} XPF`;
+        }
+
+        function remettreGainRapide() {
+            const code = document.getElementById('gain-player-code').value;
+            const jeu = document.getElementById('gain-game-title').value;
+            const montant = document.getElementById('gain-amount').value;
+            
+            if(!code || !montant) return alert("Veuillez remplir le code et le montant.");
+            socket.emit('admin-direct-reward', { code, montant });
+            alert(`Gain de ${montant} XPF attribué avec succès au joueur ${code} pour le jeu : ${jeu}`);
+        }
+
+        function commanderPionsAdmin() {
+            const qte = document.getElementById('order-pions-admin-qte').value;
+            socket.emit('player-order', { code: "ORGANISATEUR", type: "Commande Pions Orga", qte: qte, destinataire: "Admin Principal" });
+            alert("Commande transmise à l'Admin !");
+        }
+
+        function transfererPionsJoueur() {
+            const code = document.getElementById('transfer-player-code').value;
+            const qte = document.getElementById('transfer-pions-amount').value;
+            if(!code || !qte) return alert("Veuillez indiquer le code et le montant.");
+            socket.emit('admin-direct-reward', { code, montant: qte });
+            alert(`Transfert direct de ${qte} pions effectué vers le joueur ${code} !`);
         }
     </script>
 </body>
