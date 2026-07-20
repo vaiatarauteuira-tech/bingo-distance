@@ -79,7 +79,8 @@ io.on('connection', (socket) => {
     socket.on('player-login', (code) => {
         const codeVerif = code.trim().toUpperCase();
         if (players[codeVerif]) {
-            players[codeVerif].online = true; players[codeVerif].socketId = socket.id;
+            players[codeVerif].online = true; 
+            players[codeVerif].socketId = socket.id;
             socket.emit('login-success-dashboard', { player: players[codeVerif], liveHistory: drawnNumbers });
             socket.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
             broadcastRefresh();
@@ -96,13 +97,14 @@ io.on('connection', (socket) => {
         io.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
     });
 
-    // 📩 RÉCEPTION ET TRANSMISSION DE LA COMMANDE DE PIONS JOUEUR
+    // 📩 COMMANDE DE PIONS DU JOUEUR
     socket.on('player-order', ({ code, type, qte, destinataire }) => {
-        if (players[code] || code === "ORGANISATEUR") { 
-            const nomEmetteur = players[code] ? players[code].nom : "ORGANISATEUR";
+        const codeClean = (code || "").trim().toUpperCase();
+        if (players[codeClean] || codeClean === "ORGANISATEUR") { 
+            const nomEmetteur = players[codeClean] ? players[codeClean].nom : "ORGANISATEUR";
             orders.push({ 
                 id: Date.now(), 
-                code: code, 
+                code: codeClean, 
                 nom: nomEmetteur, 
                 type: type, 
                 qte: parseInt(qte), 
@@ -112,34 +114,68 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 🪙 VALIDATION DE LA COMMANDE PAR L'ADMIN OU L'ORGANISATEUR
+    // 🪙 VALIDATION D'UNE COMMANDE DE PIONS
     socket.on('admin-validate-order', (idOrder) => {
         const idx = orders.findIndex(o => o.id === idOrder);
         if (idx !== -1) {
             const o = orders[idx];
-            if (players[o.code]) { 
-                players[o.code].pions += o.qte; 
-                if (players[o.code].socketId) {
-                    io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]); 
+            const codeClean = (o.code || "").trim().toUpperCase();
+            if (players[codeClean]) { 
+                players[codeClean].pions += parseInt(o.qte); 
+                players[codeClean].totalPionsRecus += parseInt(o.qte);
+                
+                // Diffusion globale de la mise à jour du joueur (par socket direct + io.emit)
+                if (players[codeClean].socketId) {
+                    io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
                 }
+                io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
             }
             orders.splice(idx, 1);
             broadcastRefresh();
         }
     });
 
+    // 💸 TRANSFERT DIRECT / REMISE DE GAIN DU JOUEUR (ADMIN OU ORGANISATEUR)
+    socket.on('admin-direct-reward', ({ code, montant }) => {
+        const codeClean = (code || "").trim().toUpperCase();
+        const ajoutPions = parseInt(montant) || 0;
+
+        if (players[codeClean]) { 
+            players[codeClean].pions += ajoutPions; 
+            players[codeClean].totalPionsRecus += ajoutPions;
+            
+            // Notification et mise à jour directe sur l'appareil du joueur
+            if (players[codeClean].socketId) {
+                io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
+                io.to(players[codeClean].socketId).emit('notification', `🎁 Rechargement : +${ajoutPions} Pions crédités sur votre compte !`);
+            }
+
+            // Mise à jour globale par sécurité si reconnexion rapide
+            io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
+            
+            broadcastRefresh(); 
+        } else {
+            socket.emit('notification', `❌ Code joueur ${codeClean} introuvable ! Vérifiez la saisie.`);
+        }
+    });
+
     socket.on('player-buy-fiches-from-orga', ({ code, qte }) => {
+        const codeClean = (code || "").trim().toUpperCase();
         if (!venteActive) return socket.emit('notification', '❌ Les ventes sont actuellement fermées !');
         
         const coutTotal = qte * jeuActuel.prix;
-        if (players[code] && players[code].pions >= coutTotal) {
-            players[code].pions -= coutTotal;
-            players[code].nombreFiches += qte;
-            players[code].seriesCartons = jeuActuel.titre;
+        if (players[codeClean] && players[codeClean].pions >= coutTotal) {
+            players[codeClean].pions -= coutTotal;
+            players[codeClean].nombreFiches += qte;
+            players[codeClean].seriesCartons = jeuActuel.titre;
             
-            historiqueVentes.unshift({ id: Date.now(), date: "Commande Directe", nomJoueur: players[code].nom, codeJoueur: players[code].code, quantite: qte, pionsDepenses: coutTotal, infoSérie: jeuActuel.titre });
+            historiqueVentes.unshift({ id: Date.now(), date: "Commande Directe", nomJoueur: players[codeClean].nom, codeJoueur: players[codeClean].code, quantite: qte, pionsDepenses: coutTotal, infoSérie: jeuActuel.titre });
             
-            socket.emit('update-dashboard', players[code]);
+            if (players[codeClean].socketId) {
+                io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
+            }
+            io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
+
             broadcastRefresh();
         }
     });
@@ -147,7 +183,6 @@ io.on('connection', (socket) => {
     socket.on('admin-draw', () => { if (pool.length === 0) return; const num = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; drawnNumbers.push(num); io.emit('new-ball', { actuelle: num, historique: drawnNumbers }); });
     socket.on('player-announce-bingo', (data) => { io.emit('admin-receive-bingo', data); });
     socket.on('admin-send-flash', (msg) => { io.emit('notification', msg); });
-    socket.on('admin-direct-reward', ({ code, montant }) => { if (players[code]) { players[code].pions += parseInt(montant); if (players[code].socketId) io.to(players[code].socketId).emit('update-dashboard', players[code]); broadcastRefresh(); } });
     socket.on('admin-reset-all', () => { players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; venteActive = false; io.emit('game-reset'); });
 });
 
