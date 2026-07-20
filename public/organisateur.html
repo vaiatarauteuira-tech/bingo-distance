@@ -5,261 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console Organisateur - BingoHome</title>
     <style>
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #05050a;
-            color: #f1f5f9;
-            margin: 0;
-            padding: 12px;
-            padding-bottom: 80px;
-        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 12px; padding-bottom: 80px; }
         .main-container { max-width: 600px; margin: 0 auto; }
-        
-        .header-orga {
-            background: #12131a;
-            border: 1px solid #222530;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .alert-banner {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid #10b981;
-            color: #34d399;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 12px;
-            text-align: center;
-            font-weight: bold;
-        }
-
+        .header-orga { background: #12131a; border: 1px solid #222530; padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .alert-banner { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; text-align: center; font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        .card {
-            background: #12131a;
-            border: 1px solid #222530;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
-
-        h3 {
-            margin-top: 0;
-            color: #38bdf8;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        button {
-            padding: 10px 14px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-            width: 100%;
-        }
-
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 10px; }
+        button { padding: 10px 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; width: 100%; transition: 0.2s; }
         .btn-green { background: #10b981; color: white; }
         .btn-red { background: #ef4444; color: white; }
         .btn-cyan { background: #06b6d4; color: #05050a; }
         .btn-purple { background: #a855f7; color: white; }
         .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            background: #1a1c26;
-            border: 1px solid #2d3142;
-            border-radius: 8px;
-            color: white;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
-
-        .data-list {
-            background: #05050a;
-            border: 1px solid #222530;
-            border-radius: 8px;
-            padding: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 12px;
-        }
-
-        .item-box {
-            background: #12131a;
-            border: 1px solid #222530;
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Volets de navigation bas de page */
-        .bottom-nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #12131a;
-            border-top: 1px solid #222530;
-            height: 60px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 20%;
-            text-align: center;
-        }
-
+        input, select { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 13px; }
+        .data-list { background: #05050a; border: 1px solid #222530; border-radius: 8px; padding: 8px; max-height: 200px; overflow-y: auto; font-size: 12px; }
+        .item-box { background: #12131a; border: 1px solid #222530; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 60px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 10px; font-weight: bold; cursor: pointer; width: 20%; text-align: center; }
         .nav-item.active { color: #f59e0b; }
         .nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
-
-        .boulier-display {
-            text-align: center;
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #ef4444;
-        }
-
-        .ball-giant {
-            width: 75px;
-            height: 75px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0 auto 10px auto;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-        }
-
-        .commission-badge {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid #f59e0b;
-            color: #f59e0b;
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+        .boulier-display { text-align: center; background: #0f172a; padding: 15px; border-radius: 12px; border: 2px solid #ef4444; }
+        .ball-giant { width: 75px; height: 75px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 10px auto; }
+        .commission-badge { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #f59e0b; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
-
         <div class="header-orga">
             <span style="font-weight:900; color:#f59e0b;">🎪 REGIE ORGANISATEUR</span>
-            <span style="font-size:12px; color:#94a3b8;" id="status-orga">Session Active</span>
+            <span style="font-size:12px; color:#94a3b8;">Session Active</span>
         </div>
 
         <div class="alert-banner">
-            C'est rétabli, comme avant ! Rafraichis ta page.
+            C'est rétabli ! Distribution directe des fichiers PDF activée.
         </div>
 
         <!-- ================= VOLET 1 : TICKETS & PDF ================= -->
         <div id="view-tickets" class="tab-content active">
-            
-            <!-- OUVERTURE ET FERMETURE DES COMMANDES -->
-            <div class="card" style="border-left: 4px solid #06b6d4;">
-                <h3>🎟️ Ventes de Tickets PDF</h3>
-                <input type="text" id="orga-game-title" placeholder="Intitulé du JEU (ex: Spécial Gros Lots)">
-                <div style="display:flex; gap:8px; margin-bottom:10px;">
-                    <button class="btn-green" onclick="ouvrirVentes(true)">🔓 COMMANDES OUVERTES</button>
-                    <button class="btn-red" onclick="ouvrirVentes(false)">🔒 COMMANDES FERMÉES</button>
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3>🎟️ Configuration du Jeu & Guichet</h3>
+                <label style="font-size:11px; color:#94a3b8;">Intitulé du Jeu (ex: 500 FRANCS) :</label>
+                <input type="text" id="orga-game-title" value="500 FRANCS">
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:11px; color:#94a3b8;">Prix Ticket (XPF) :</label>
+                        <input type="number" id="orga-game-price" value="100">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:11px; color:#94a3b8;">Organisateur :</label>
+                        <input type="text" id="orga-game-name" value="VAHINE">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:5px;">
+                    <button class="btn-green" onclick="controlerVente(true)">🔓 OUVRIR LA VENTE</button>
+                    <button class="btn-red" onclick="controlerVente(false)">🔒 FERMER LA VENTE</button>
                 </div>
             </div>
 
-            <!-- VALIDER ET AFFECTER LES PDF AUX JOUEURS -->
+            <!-- VALIDER ET ENVOYER LE FICHIER PDF CHOISI -->
             <div class="card" style="border-left: 4px solid #a855f7;">
-                <h3>📥 Commandes Joueurs à Traiter (Pions débités)</h3>
+                <h3>📥 Commandes Joueurs & Envoi de vos PDF</h3>
                 <div class="data-list" id="orga-pdf-orders">Aucune commande en attente.</div>
                 
                 <div style="background:#1a1c26; padding:10px; border-radius:8px; margin-top:10px;">
-                    <label style="font-size:11px; color:#94a3b8;">Série :</label>
-                    <input type="text" id="pdf-serie" placeholder="Nom de la Série (ex: Série A)">
-                    
-                    <div style="display:flex; gap:5px;">
-                        <div>
-                            <label style="font-size:11px; color:#94a3b8;">Page Début :</label>
-                            <input type="number" id="pdf-page-debut" value="1">
-                        </div>
-                        <div>
-                            <label style="font-size:11px; color:#94a3b8;">Page Fin :</label>
-                            <input type="number" id="pdf-page-fin" value="3">
-                        </div>
-                    </div>
+                    <label style="font-size:11px; color:#94a3b8;">Série / Titre du carton :</label>
+                    <input type="text" id="pdf-serie" placeholder="ex: Série A Gros Lots">
 
-                    <label style="font-size:11px; color:#94a3b8;">Sélectionner le PDF :</label>
+                    <label style="font-size:11px; color:#94a3b8;">Sélectionner le fichier PDF sur le serveur :</label>
                     <select id="pdf-menu">
-                        <option value="grille_1_75.pdf">Grilles_Bingo_Série_Principale.pdf</option>
-                        <option value="grille_speciale.pdf">Grilles_Spéciales_Lot.pdf</option>
+                        <option value="serie_A.pdf">Série A - Grilles Standard (serie_A.pdf)</option>
+                        <option value="serie_B.pdf">Série B - Spéciale (serie_B.pdf)</option>
+                        <option value="special_gros_lots.pdf">Gros Lots (special_gros_lots.pdf)</option>
                     </select>
 
-                    <button class="btn-purple" onclick="validerEtLivrerPDF()">✅ Valider & Transmettre la Fiche instantanément</button>
+                    <button class="btn-purple" onclick="validerEtLivrerPDF()">📄 Transmettre le fichier PDF au joueur</button>
                 </div>
             </div>
 
-            <!-- IMPRESSION TICKET SALLE -->
             <div class="card">
-                <h3>🖨️ Imprimer tes cartes de bingo</h3>
-                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Génère et imprime les cartes pour vos tournois physiques en salle.</p>
-                <button class="btn-cyan" onclick="window.print()">🖨️ Générer & Imprimer la Fiche PDF</button>
+                <h3>🖨️ Impression Carton Salle</h3>
+                <button class="btn-cyan" onclick="window.print()">🖨️ Imprimer la page actuelle</button>
             </div>
         </div>
 
         <!-- ================= VOLET 2 : JOUER ================= -->
         <div id="view-jouer" class="tab-content">
-            <!-- BOULIER DIRECT -->
             <div class="boulier-display card">
                 <h3>🎰 Boulier en Direct</h3>
                 <div class="ball-giant" id="orga-live-ball">-</div>
-                <div id="orga-live-format" style="font-weight:bold; color:#f59e0b; margin-bottom:8px;">Format : --</div>
+                <div id="orga-live-format" style="font-weight:bold; color:#f59e0b; margin-bottom:8px;">Énoncé : --</div>
                 <div id="orga-history" style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Historique : Aucun tirage</div>
                 <button class="btn-red" onclick="tirerBouleOrga()">⚡ TIRER LE NUMÉRO SUIVANT</button>
             </div>
 
-            <!-- MICRO EN DIRECT -->
             <div class="card">
                 <h3>🎙️ Commande Micro Salle</h3>
                 <button class="btn-purple" id="btn-micro" onclick="toggleMicro()">🎤 ACTIVER / DÉSACTIVER MICRO</button>
             </div>
 
-            <!-- LISTE DES JOUEURS CONNECTÉS -->
             <div class="card">
                 <h3>👥 Statut des Joueurs Connectés</h3>
                 <div class="data-list" id="orga-players-status">Chargement...</div>
@@ -268,8 +116,6 @@
 
         <!-- ================= VOLET 3 : VÉRIFIER & GAINS ================= -->
         <div id="view-verifier" class="tab-content">
-            
-            <!-- CALCUL DE GAIN AVEC COMMISSION -13% -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3>💰 Calculateur de Gains (-13% Organisateur)</h3>
                 <label style="font-size:11px; color:#94a3b8;">Cagnotte totale du jeu :</label>
@@ -280,69 +126,47 @@
                 </div>
             </div>
 
-            <!-- REMETTRE UN GAIN RAPIDEMENT -->
             <div class="card" style="border-left: 4px solid #10b981;">
-                <h3>🎁 Remettre un Gain Rapidement</h3>
+                <h3>🎁 Remettre un Gain / Crédit Rapide</h3>
                 <label style="font-size:11px; color:#94a3b8;">Code du joueur :</label>
                 <input type="text" id="gain-player-code" placeholder="Ex: BH-1234">
                 
-                <label style="font-size:11px; color:#94a3b8;">Le JEU GAGNÉ (Traçabilité) :</label>
-                <input type="text" id="gain-game-title" placeholder="Ex: Quine Spéciale">
+                <label style="font-size:11px; color:#94a3b8;">Montant en Pions :</label>
+                <input type="number" id="gain-amount" placeholder="Montant">
                 
-                <label style="font-size:11px; color:#94a3b8;">Montant net à remettre :</label>
-                <input type="number" id="gain-amount" placeholder="Montant en XPF ou Pions">
-                
-                <button class="btn-green" onclick="remettreGainRapide()">💸 REMETTRE LE GAIN</button>
+                <button class="btn-green" onclick="remettreGainRapide()">💸 CREDITER / REMETTRE</button>
             </div>
         </div>
 
-        <!-- ================= VOLET 4 : PIONS & TRESORERIE ================= -->
+        <!-- ================= VOLET 4 : PIONS ================= -->
         <div id="view-pions" class="tab-content">
-            
-            <!-- COMPTABILITÉ ORGANISATEUR -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3>🪙 MES PIONS Disponibles</h3>
                 <div style="font-size:1.4rem; font-weight:bold; color:#f59e0b; text-align:center; margin:8px 0;" id="orga-solde-pions">0 Pions</div>
-                <div style="font-size:11px; color:#94a3b8; text-align:center;">Base de calcul : 20fr, 50fr ou 100fr.</div>
             </div>
 
-            <!-- COMMANDE DE PIONS ORGA -> ADMIN -->
-            <div class="card">
-                <h3>🏦 Commande de Pions Vers l'Admin (Et vice versa)</h3>
-                <input type="number" id="order-pions-admin-qte" placeholder="Nombre de pions">
-                <button class="btn-gold" onclick="commanderPionsAdmin()">📨 Commander des Pions auprès de l'Admin</button>
-            </div>
-
-            <!-- TRANSFERT DIRECT ORGA -> JOUEUR (Deblock / Virement) -->
             <div class="card">
                 <h3>↔️ Transfert Direct de Pions à un Joueur</h3>
-                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Pour les paiements directs reçus sur Deblock ou virement local.</p>
-                <input type="text" id="transfer-player-code" placeholder="Code unique du Joueur (ex: BH-8044)">
+                <input type="text" id="transfer-player-code" placeholder="Code unique Joueur (ex: BH-8044)">
                 <input type="number" id="transfer-pions-amount" placeholder="Quantité de Pions">
                 <button class="btn-cyan" onclick="transfererPionsJoueur()">💸 Effectuer le Transfert</button>
             </div>
 
-            <!-- COMMANDES DE PIONS REÇUES DES JOUEURS -->
             <div class="card">
                 <h3>📥 Commandes de Pions reçues des Joueurs</h3>
                 <div class="data-list" id="orga-pions-orders-list">Aucune commande de pions en attente.</div>
             </div>
         </div>
 
-        <!-- ================= VOLET 5 : SUIVI & RELEVÉS ================= -->
+        <!-- ================= VOLET 5 : RELEVÉS ================= -->
         <div id="view-releves" class="tab-content">
             <div class="card">
-                <h3>📊 Circuit de Traçabilité & Relevés Entrée / Sortie</h3>
-                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Messages des joueurs souhaitant retirer leurs gains ou pions.</p>
-                <div class="data-list" id="orga-traceability-log">
-                    Aucun mouvement enregistré.
-                </div>
+                <h3>📊 Relevés et Historiques des Ventes</h3>
+                <div class="data-list" id="orga-traceability-log">Chargement de l'historique...</div>
             </div>
         </div>
-
     </div>
 
-    <!-- VOLETS DE NAVIGATION BAS DE PAGE -->
     <div class="bottom-nav-bar">
         <div class="nav-item active" onclick="switchTab('tickets', this)"><div class="nav-icon">🎟️</div><span>TICKETS</span></div>
         <div class="nav-item" onclick="switchTab('jouer', this)"><div class="nav-icon">🎮</div><span>JOUER</span></div>
@@ -377,9 +201,8 @@
         socket.on('refresh-orga', (data) => {
             document.getElementById('orga-solde-pions').textContent = `${data.fichesDisponibles || 0} Pions`;
 
-            // Filtre des commandes
             const pZone = document.getElementById('orga-pdf-orders');
-            const ordersOrga = (data.orders || []).filter(o => o.destinataire.includes("Organisateur"));
+            const ordersOrga = (data.orders || []).filter(o => o.destinataire && o.destinataire.toLowerCase().includes("orga"));
             pZone.innerHTML = ordersOrga.length === 0 ? '<div style="text-align:center;color:#64748b;">Aucune demande de ticket.</div>' : '';
             
             ordersOrga.forEach(o => {
@@ -411,31 +234,33 @@
             document.getElementById('orga-history').textContent = "Historique : " + data.historique.map(n => getBingoFormat(n)).slice(-5).join(' - ');
         });
 
+        function controlerVente(ouvert) {
+            const titre = document.getElementById('orga-game-title').value;
+            const prix = document.getElementById('orga-game-price').value;
+            const orga = document.getElementById('orga-game-name').value;
+            
+            socket.emit('toggle-vente-game', { active: ouvert, titre: titre, prix: prix, orga: orga, desc: "1 boule pour 1 boule" });
+            alert(ouvert ? `✅ Vente OUVERTE à ${prix} XPF !` : "🔒 Vente FERMÉE !");
+        }
+
         function selectionnerCommande(code, qte) {
             commandeSelectionnee = { code, qte };
-            alert(`Commande sélectionnée pour le joueur ${code} (${qte} ticket/s)`);
+            alert(`Commande sélectionnée pour le joueur ${code}`);
         }
 
         function validerEtLivrerPDF() {
-            if (!commandeSelectionnee) return alert("Veuillez sélectionner une commande dans la liste ci-dessus.");
-            const serie = document.getElementById('pdf-serie').value || "Série Standard";
-            const debut = document.getElementById('pdf-page-debut').value;
-            const fin = document.getElementById('pdf-page-fin').value;
+            if (!commandeSelectionnee) return alert("Sélectionne d'abord une commande dans la liste.");
+            const serie = document.getElementById('pdf-serie').value || "Série A";
+            const fichierPdf = document.getElementById('pdf-menu').value;
             
             socket.emit('orga-deliver-pdf', {
                 code: commandeSelectionnee.code,
                 serie: serie,
-                pages: `${debut} à ${fin}`
+                fichierUrl: `/pdf/${fichierPdf}`,
+                qte: commandeSelectionnee.qte
             });
-            alert(`Fiches transmises instantanément au joueur ${commandeSelectionnee.code} !`);
+            alert(`Fichier PDF (${fichierPdf}) transmis instantanément au joueur ${commandeSelectionnee.code} !`);
             commandeSelectionnee = null;
-        }
-
-        function ouvrirVentes(ouvert) {
-            const titre = document.getElementById('orga-game-title').value || "MATCH GENERAL";
-            socket.emit('admin-toggle-ventes', ouvert);
-            socket.emit('admin-send-flash', `JEU:${titre}`);
-            alert(ouvert ? "Ventes de tickets OUVERTES !" : "Ventes de tickets FERMÉES !");
         }
 
         function tirerBouleOrga() { socket.emit('admin-draw'); }
@@ -455,26 +280,18 @@
 
         function remettreGainRapide() {
             const code = document.getElementById('gain-player-code').value;
-            const jeu = document.getElementById('gain-game-title').value;
             const montant = document.getElementById('gain-amount').value;
-            
-            if(!code || !montant) return alert("Veuillez remplir le code et le montant.");
+            if(!code || !montant) return alert("Indique le code et le montant.");
             socket.emit('admin-direct-reward', { code, montant });
-            alert(`Gain de ${montant} XPF attribué avec succès au joueur ${code} pour le jeu : ${jeu}`);
-        }
-
-        function commanderPionsAdmin() {
-            const qte = document.getElementById('order-pions-admin-qte').value;
-            socket.emit('player-order', { code: "ORGANISATEUR", type: "Commande Pions Orga", qte: qte, destinataire: "Admin Principal" });
-            alert("Commande transmise à l'Admin !");
+            alert(`Crédit effectué vers le joueur ${code} !`);
         }
 
         function transfererPionsJoueur() {
             const code = document.getElementById('transfer-player-code').value;
             const qte = document.getElementById('transfer-pions-amount').value;
-            if(!code || !qte) return alert("Veuillez indiquer le code et le montant.");
+            if(!code || !qte) return alert("Indique le code et la quantité.");
             socket.emit('admin-direct-reward', { code, montant: qte });
-            alert(`Transfert direct de ${qte} pions effectué vers le joueur ${code} !`);
+            alert(`Transfert direct de ${qte} pions vers ${code} effectué !`);
         }
     </script>
 </body>
