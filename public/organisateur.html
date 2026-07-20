@@ -3,186 +3,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BingoHome - Console Organisateur</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        bgNight: '#0E162F',
-                        purpleTiare: '#8B5CF6',
-                        roseCoral: '#F43F5E',
-                        greenLagon: '#10B981',
-                    }
-                }
-            }
+    <title>Console Organisateur - BingoHome</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #05050a;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 12px;
+            padding-bottom: 80px;
         }
-    </script>
-</head>
-<body class="bg-bgNight text-white min-h-screen font-sans">
-
-    <header class="border-b border-gray-800 bg-black bg-opacity-40 p-4 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
-        <div class="flex items-center space-x-3">
-            <span class="text-2xl">🔮</span>
-            <h1 class="text-xl font-bold tracking-wider">BingoHome <span class="text-purpleTiare text-xs font-semibold px-2 py-0.5 bg-purpleTiare bg-opacity-10 rounded border border-purpleTiare border-opacity-30">ORGANISATEUR</span></h1>
-        </div>
-        <div class="flex items-center space-x-4">
-            <div class="text-right hidden sm:block">
-                <p class="text-sm font-bold">VAHINE</p>
-                <p class="text-xs text-gray-400">ID: #OR987</p>
-            </div>
-            <button class="bg-roseCoral hover:bg-opacity-80 px-4 py-2 rounded-lg text-xs font-bold transition">Déconnexion</button>
-        </div>
-    </header>
-
-    <div id="withdrawalAlert" class="bg-roseCoral bg-opacity-20 border-b border-roseCoral border-opacity-40 p-3 text-center text-sm font-bold text-roseCoral flex justify-center items-center space-x-2 animate-pulse">
-        <span>🚨 1 Demande de retrait d'argent en attente de validation</span>
-        <button onclick="ouvrirRetraits()" class="bg-roseCoral text-white px-3 py-1 rounded text-xs ml-3 hover:bg-opacity-90">Gérer</button>
-    </div>
-
-    <main class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+        .main-container { max-width: 600px; margin: 0 auto; }
         
-        <div class="lg:col-span-2 space-y-6">
-            
-            <section class="bg-black bg-opacity-20 border border-gray-800 rounded-2xl p-4">
-                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Mon Stock de Pions</h2>
-                <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
-                        <span class="text-purpleTiare text-xs font-bold block mb-1">🪙 20 XPF</span>
-                        <span class="text-xl font-black text-white">189</span> <span class="text-gray-500 text-xs">restants</span>
-                    </div>
-                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
-                        <span class="text-yellow-500 text-xs font-bold block mb-1">🪙 50 XPF</span>
-                        <span class="text-xl font-black text-white">55</span> <span class="text-gray-500 text-xs">restants</span>
-                    </div>
-                    <div class="bg-gray-950 bg-opacity-40 p-3 rounded-xl border border-gray-800">
-                        <span class="text-greenLagon text-xs font-bold block mb-1">🪙 100 XPF</span>
-                        <span class="text-xl font-black text-white">810</span> <span class="text-gray-500 text-xs">restants</span>
-                    </div>
-                </div>
-                <button onclick="ouvrirPopUpTransfert()" class="w-full mt-3 bg-purpleTiare hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg flex justify-center items-center space-x-2">
-                    <span>⚡ Transférer des pions à un joueur</span>
-                </button>
-            </section>
+        .header-orga {
+            background: #12131a;
+            border: 1px solid #222530;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-            <section class="bg-gradient-to-br from-black to-gray-950 bg-opacity-40 border border-gray-800 p-6 rounded-2xl text-center relative overflow-hidden">
-                <div class="absolute top-3 right-3 flex items-center space-x-1.5 bg-greenLagon bg-opacity-10 text-greenLagon border border-greenLagon border-opacity-20 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
-                    <span class="h-1.5 w-1.5 rounded-full bg-greenLagon animate-ping"></span>
-                    <span>Session Prête</span>
-                </div>
-                
-                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Console du Tournoi</h2>
-                
-                <div class="my-6 flex justify-center items-center">
-                    <div class="w-32 h-32 bg-bgNight rounded-full flex flex-col justify-center items-center shadow-2xl border-2 border-gray-800 relative">
-                        <span class="text-[10px] uppercase tracking-widest text-gray-500">Dernier tirage</span>
-                        <span class="text-4xl font-black mt-1 text-white" id="boulierDisplay">--</span>
-                    </div>
-                </div>
+        .alert-banner {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
 
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="tirerUneBoule()" class="bg-purpleTiare hover:bg-opacity-90 text-white font-bold py-3.5 rounded-xl transition text-sm">
-                        🎰 TIRER UNE BOULE
-                    </button>
-                    <button class="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white font-bold py-3.5 rounded-xl transition text-sm">
-                        🏆 VALIDER BINGO
-                    </button>
-                </div>
-            </section>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
+        .card {
+            background: #12131a;
+            border: 1px solid #222530;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #38bdf8;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-cyan { background: #06b6d4; color: #05050a; }
+        .btn-purple { background: #a855f7; color: white; }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1c26;
+            border: 1px solid #2d3142;
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .data-list {
+            background: #05050a;
+            border: 1px solid #222530;
+            border-radius: 8px;
+            padding: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .item-box {
+            background: #12131a;
+            border: 1px solid #222530;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Volets de navigation bas de page */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #12131a;
+            border-top: 1px solid #222530;
+            height: 60px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 20%;
+            text-align: center;
+        }
+
+        .nav-item.active { color: #f59e0b; }
+        .nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
+
+        .boulier-display {
+            text-align: center;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ef4444;
+        }
+
+        .ball-giant {
+            width: 75px;
+            height: 75px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 10px auto;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .commission-badge {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <div class="header-orga">
+            <span style="font-weight:900; color:#f59e0b;">🎪 REGIE ORGANISATEUR</span>
+            <span style="font-size:12px; color:#94a3b8;" id="status-orga">Session Active</span>
         </div>
 
-        <div class="space-y-6">
-            
-            <section class="bg-black bg-opacity-20 border border-gray-800 rounded-2xl p-4">
-                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Santé Financière du Tournoi</h2>
-                
-                <div class="grid grid-cols-3 gap-2 text-center mb-4">
-                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg">
-                        <span class="text-[10px] text-gray-400 block uppercase">Achats</span>
-                        <span class="text-xs font-bold text-roseCoral">-800k F</span>
-                    </div>
-                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg">
-                        <span class="text-[10px] text-gray-400 block uppercase">Ventes</span>
-                        <span class="text-xs font-bold text-greenLagon">+54.7k F</span>
-                    </div>
-                    <div class="p-2 bg-gray-900 bg-opacity-30 rounded-lg bg-opacity-50 border border-gray-800">
-                        <span class="text-[10px] text-gray-400 block uppercase">Marge</span>
-                        <span class="text-xs font-bold text-white">-745.3k F</span>
-                    </div>
-                </div>
-
-                <div class="space-y-2 max-h-[220px] overflow-y-auto pr-1 text-xs">
-                    <div class="p-2.5 bg-gray-950 bg-opacity-60 rounded-lg border-l-2 border-purpleTiare flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">Vente pions — Moana</p>
-                            <p class="text-[10px] text-gray-500">Aujourd'hui, 16:30 • Espèces</p>
-                        </div>
-                        <span class="font-bold text-greenLagon">+2 000 XPF</span>
-                    </div>
-                    <div class="p-2.5 bg-gray-950 bg-opacity-60 rounded-lg border-l-2 border-roseCoral flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">Achat Fiches Loto Admin</p>
-                            <p class="text-[10px] text-gray-500">29 Juin • Compte Appli</p>
-                        </div>
-                        <span class="font-bold text-white">-80 000 XPF</span>
-                    </div>
-                </div>
-            </section>
-
+        <div class="alert-banner">
+            C'est rétabli, comme avant ! Rafraichis ta page.
         </div>
-    </main>
 
-    <div id="transferModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-bgNight border border-gray-800 w-full sm:max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">⚡ Donner des pions</h3>
-                <button onclick="fermerPopUpTransfert()" class="text-gray-400 text-xl font-bold">&times;</button>
+        <!-- ================= VOLET 1 : TICKETS & PDF ================= -->
+        <div id="view-tickets" class="tab-content active">
+            
+            <!-- OUVERTURE ET FERMETURE DES COMMANDES -->
+            <div class="card" style="border-left: 4px solid #06b6d4;">
+                <h3>🎟️ Ventes de Tickets PDF</h3>
+                <input type="text" id="orga-game-title" placeholder="Intitulé du JEU (ex: Spécial Gros Lots)">
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <button class="btn-green" onclick="ouvrirVentes(true)">🔓 COMMANDES OUVERTES</button>
+                    <button class="btn-red" onclick="ouvrirVentes(false)">🔒 COMMANDES FERMÉES</button>
+                </div>
             </div>
-            
-            <div class="space-y-3">
-                <div>
-                    <label class="text-xs text-gray-400 block mb-1">Code Unique de la Joueuse</label>
-                    <input type="text" placeholder="Ex: AB12CD" class="w-full bg-black bg-opacity-40 border border-gray-800 rounded-xl p-3 text-white placeholder-gray-600 focus:outline-none focus:border-purpleTiare text-sm">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 block mb-1">Valeur du pion</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button class="border border-purpleTiare bg-purpleTiare bg-opacity-10 py-2 rounded-lg text-xs font-bold">20 XPF</button>
-                        <button class="border border-gray-800 py-2 rounded-lg text-xs font-bold text-gray-400">50 XPF</button>
-                        <button class="border border-gray-800 py-2 rounded-lg text-xs font-bold text-gray-400">100 XPF</button>
+
+            <!-- VALIDER ET AFFECTER LES PDF AUX JOUEURS -->
+            <div class="card" style="border-left: 4px solid #a855f7;">
+                <h3>📥 Commandes Joueurs à Traiter (Pions débités)</h3>
+                <div class="data-list" id="orga-pdf-orders">Aucune commande en attente.</div>
+                
+                <div style="background:#1a1c26; padding:10px; border-radius:8px; margin-top:10px;">
+                    <label style="font-size:11px; color:#94a3b8;">Série :</label>
+                    <input type="text" id="pdf-serie" placeholder="Nom de la Série (ex: Série A)">
+                    
+                    <div style="display:flex; gap:5px;">
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Page Début :</label>
+                            <input type="number" id="pdf-page-debut" value="1">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Page Fin :</label>
+                            <input type="number" id="pdf-page-fin" value="3">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 block mb-1">Nombre de pions</label>
-                    <input type="number" value="10" class="w-full bg-black bg-opacity-40 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-purpleTiare text-sm">
+
+                    <label style="font-size:11px; color:#94a3b8;">Sélectionner le PDF :</label>
+                    <select id="pdf-menu">
+                        <option value="grille_1_75.pdf">Grilles_Bingo_Série_Principale.pdf</option>
+                        <option value="grille_speciale.pdf">Grilles_Spéciales_Lot.pdf</option>
+                    </select>
+
+                    <button class="btn-purple" onclick="validerEtLivrerPDF()">✅ Valider & Transmettre la Fiche instantanément</button>
                 </div>
             </div>
 
-            <button onclick="fermerPopUpTransfert()" class="w-full bg-greenLagon hover:bg-opacity-90 text-white font-bold py-3 rounded-xl text-sm transition">
-                Confirmer le transfert
-            </button>
+            <!-- IMPRESSION TICKET SALLE -->
+            <div class="card">
+                <h3>🖨️ Imprimer tes cartes de bingo</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Génère et imprime les cartes pour vos tournois physiques en salle.</p>
+                <button class="btn-cyan" onclick="window.print()">🖨️ Générer & Imprimer la Fiche PDF</button>
+            </div>
         </div>
+
+        <!-- ================= VOLET 2 : JOUER ================= -->
+        <div id="view-jouer" class="tab-content">
+            <!-- BOULIER DIRECT -->
+            <div class="boulier-display card">
+                <h3>🎰 Boulier en Direct</h3>
+                <div class="ball-giant" id="orga-live-ball">-</div>
+                <div id="orga-live-format" style="font-weight:bold; color:#f59e0b; margin-bottom:8px;">Format : --</div>
+                <div id="orga-history" style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Historique : Aucun tirage</div>
+                <button class="btn-red" onclick="tirerBouleOrga()">⚡ TIRER LE NUMÉRO SUIVANT</button>
+            </div>
+
+            <!-- MICRO EN DIRECT -->
+            <div class="card">
+                <h3>🎙️ Commande Micro Salle</h3>
+                <button class="btn-purple" id="btn-micro" onclick="toggleMicro()">🎤 ACTIVER / DÉSACTIVER MICRO</button>
+            </div>
+
+            <!-- LISTE DES JOUEURS CONNECTÉS -->
+            <div class="card">
+                <h3>👥 Statut des Joueurs Connectés</h3>
+                <div class="data-list" id="orga-players-status">Chargement...</div>
+            </div>
+        </div>
+
+        <!-- ================= VOLET 3 : VÉRIFIER & GAINS ================= -->
+        <div id="view-verifier" class="tab-content">
+            
+            <!-- CALCUL DE GAIN AVEC COMMISSION -13% -->
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3>💰 Calculateur de Gains (-13% Organisateur)</h3>
+                <label style="font-size:11px; color:#94a3b8;">Cagnotte totale du jeu :</label>
+                <input type="number" id="cagnotte-brute" placeholder="Ex: 10000" oninput="calculerPartOrga()">
+                
+                <div class="commission-badge" id="display-calcul-commission">
+                    Gain Joueur (87%) : 0 XPF | Part Organisateur (13%) : 0 XPF
+                </div>
+            </div>
+
+            <!-- REMETTRE UN GAIN RAPIDEMENT -->
+            <div class="card" style="border-left: 4px solid #10b981;">
+                <h3>🎁 Remettre un Gain Rapidement</h3>
+                <label style="font-size:11px; color:#94a3b8;">Code du joueur :</label>
+                <input type="text" id="gain-player-code" placeholder="Ex: BH-1234">
+                
+                <label style="font-size:11px; color:#94a3b8;">Le JEU GAGNÉ (Traçabilité) :</label>
+                <input type="text" id="gain-game-title" placeholder="Ex: Quine Spéciale">
+                
+                <label style="font-size:11px; color:#94a3b8;">Montant net à remettre :</label>
+                <input type="number" id="gain-amount" placeholder="Montant en XPF ou Pions">
+                
+                <button class="btn-green" onclick="remettreGainRapide()">💸 REMETTRE LE GAIN</button>
+            </div>
+        </div>
+
+        <!-- ================= VOLET 4 : PIONS & TRESORERIE ================= -->
+        <div id="view-pions" class="tab-content">
+            
+            <!-- COMPTABILITÉ ORGANISATEUR -->
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3>🪙 MES PIONS Disponibles</h3>
+                <div style="font-size:1.4rem; font-weight:bold; color:#f59e0b; text-align:center; margin:8px 0;" id="orga-solde-pions">0 Pions</div>
+                <div style="font-size:11px; color:#94a3b8; text-align:center;">Base de calcul : 20fr, 50fr ou 100fr.</div>
+            </div>
+
+            <!-- COMMANDE DE PIONS ORGA -> ADMIN -->
+            <div class="card">
+                <h3>🏦 Commande de Pions Vers l'Admin (Et vice versa)</h3>
+                <input type="number" id="order-pions-admin-qte" placeholder="Nombre de pions">
+                <button class="btn-gold" onclick="commanderPionsAdmin()">📨 Commander des Pions auprès de l'Admin</button>
+            </div>
+
+            <!-- TRANSFERT DIRECT ORGA -> JOUEUR (Deblock / Virement) -->
+            <div class="card">
+                <h3>↔️ Transfert Direct de Pions à un Joueur</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Pour les paiements directs reçus sur Deblock ou virement local.</p>
+                <input type="text" id="transfer-player-code" placeholder="Code unique du Joueur (ex: BH-8044)">
+                <input type="number" id="transfer-pions-amount" placeholder="Quantité de Pions">
+                <button class="btn-cyan" onclick="transfererPionsJoueur()">💸 Effectuer le Transfert</button>
+            </div>
+
+            <!-- COMMANDES DE PIONS REÇUES DES JOUEURS -->
+            <div class="card">
+                <h3>📥 Commandes de Pions reçues des Joueurs</h3>
+                <div class="data-list" id="orga-pions-orders-list">Aucune commande de pions en attente.</div>
+            </div>
+        </div>
+
+        <!-- ================= VOLET 5 : SUIVI & RELEVÉS ================= -->
+        <div id="view-releves" class="tab-content">
+            <div class="card">
+                <h3>📊 Circuit de Traçabilité & Relevés Entrée / Sortie</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">Messages des joueurs souhaitant retirer leurs gains ou pions.</p>
+                <div class="data-list" id="orga-traceability-log">
+                    Aucun mouvement enregistré.
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- VOLETS DE NAVIGATION BAS DE PAGE -->
+    <div class="bottom-nav-bar">
+        <div class="nav-item active" onclick="switchTab('tickets', this)"><div class="nav-icon">🎟️</div><span>TICKETS</span></div>
+        <div class="nav-item" onclick="switchTab('jouer', this)"><div class="nav-icon">🎮</div><span>JOUER</span></div>
+        <div class="nav-item" onclick="switchTab('verifier', this)"><div class="nav-icon">🔍</div><span>VÉRIFIER</span></div>
+        <div class="nav-item" onclick="switchTab('pions', this)"><div class="nav-icon">🪙</div><span>PIONS</span></div>
+        <div class="nav-item" onclick="switchTab('releves', this)"><div class="nav-icon">📊</div><span>RELEVÉS</span></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        function ouvrirPopUpTransfert() {
-            document.getElementById('transferModal').classList.remove('hidden');
-        }
-        function fermerPopUpTransfert() {
-            document.getElementById('transferModal').classList.add('hidden');
-        }
-        function ouvrirRetraits() {
-            alert("Ouverture du panneau des demandes de retraits joueuses...");
+        const socket = io();
+        socket.emit('orga-init');
+
+        let commandeSelectionnee = null;
+        let microActif = false;
+
+        function getBingoFormat(num) {
+            if (num <= 15) return "B " + num;
+            if (num <= 30) return "I " + num;
+            if (num <= 45) return "N " + num;
+            if (num <= 60) return "G " + num;
+            return "O " + num;
         }
 
-        // Simulation du tirage de boule
-        function tirerUneBoule() {
-            const lettres = ['B', 'I', 'N', 'G', 'O'];
-            const randomLettre = lettres[Math.floor(Math.random() * lettres.length)];
-            const randomNum = Math.floor(Math.random() * 75) + 1;
-            document.getElementById('boulierDisplay').innerText = `${randomLettre}-${randomNum}`;
+        function switchTab(onglet, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`view-${onglet}`).classList.add('active');
+            el.classList.add('active');
+        }
+
+        socket.on('refresh-orga', (data) => {
+            document.getElementById('orga-solde-pions').textContent = `${data.fichesDisponibles || 0} Pions`;
+
+            // Filtre des commandes
+            const pZone = document.getElementById('orga-pdf-orders');
+            const ordersOrga = (data.orders || []).filter(o => o.destinataire.includes("Organisateur"));
+            pZone.innerHTML = ordersOrga.length === 0 ? '<div style="text-align:center;color:#64748b;">Aucune demande de ticket.</div>' : '';
+            
+            ordersOrga.forEach(o => {
+                pZone.innerHTML += `<div class="item-box">
+                    <span><strong>${o.nom}</strong> (${o.code})<br><small style="color:#38bdf8;">${o.type} [Qté: ${o.qte}]</small></span>
+                    <button class="btn-cyan" style="width:auto; padding:4px 8px;" onclick="selectionnerCommande('${o.code}', ${o.qte})">Sélectionner</button>
+                </div>`;
+            });
+
+            // Affichage des Joueurs avec statut
+            const pStatus = document.getElementById('orga-players-status');
+            if (data.playersList && data.playersList.length > 0) {
+                pStatus.innerHTML = '';
+                data.playersList.forEach(p => {
+                    pStatus.innerHTML += `<div class="item-box">
+                        <span>👤 ${p.nom} (${p.code})</span>
+                        <span style="color:${p.online ? '#10b981':'#ef4444'}; font-weight:bold;">${p.online ? 'En Jeu':'Déconnecté'}</span>
+                    </div>`;
+                });
+            } else {
+                pStatus.innerHTML = '<div style="text-align:center;color:#64748b;">Aucun joueur enregistré.</div>';
+            }
+        });
+
+        socket.on('new-ball', (data) => {
+            const formatted = getBingoFormat(data.actuelle);
+            document.getElementById('orga-live-ball').textContent = data.actuelle;
+            document.getElementById('orga-live-format').textContent = "Énoncé : " + formatted;
+            document.getElementById('orga-history').textContent = "Historique : " + data.historique.map(n => getBingoFormat(n)).slice(-5).join(' - ');
+        });
+
+        function selectionnerCommande(code, qte) {
+            commandeSelectionnee = { code, qte };
+            alert(`Commande sélectionnée pour le joueur ${code} (${qte} ticket/s)`);
+        }
+
+        function validerEtLivrerPDF() {
+            if (!commandeSelectionnee) return alert("Veuillez sélectionner une commande dans la liste ci-dessus.");
+            const serie = document.getElementById('pdf-serie').value || "Série Standard";
+            const debut = document.getElementById('pdf-page-debut').value;
+            const fin = document.getElementById('pdf-page-fin').value;
+            
+            socket.emit('orga-deliver-pdf', {
+                code: commandeSelectionnee.code,
+                serie: serie,
+                pages: `${debut} à ${fin}`
+            });
+            alert(`Fiches transmises instantanément au joueur ${commandeSelectionnee.code} !`);
+            commandeSelectionnee = null;
+        }
+
+        function ouvrirVentes(ouvert) {
+            const titre = document.getElementById('orga-game-title').value || "MATCH GENERAL";
+            socket.emit('admin-toggle-ventes', ouvert);
+            socket.emit('admin-send-flash', `JEU:${titre}`);
+            alert(ouvert ? "Ventes de tickets OUVERTES !" : "Ventes de tickets FERMÉES !");
+        }
+
+        function tirerBouleOrga() { socket.emit('admin-draw'); }
+
+        function toggleMicro() {
+            microActif = !microActif;
+            document.getElementById('btn-micro').textContent = microActif ? "🔴 MICRO EN DIRECT (CLIQUEZ POUR COUPER)" : "🎤 ACTIVER MICRO";
+            document.getElementById('btn-micro').style.background = microActif ? "#ef4444" : "#a855f7";
+        }
+
+        function calculerPartOrga() {
+            const brut = parseFloat(document.getElementById('cagnotte-brute').value) || 0;
+            const orga = Math.round(brut * 0.13);
+            const joueur = brut - orga;
+            document.getElementById('display-calcul-commission').textContent = `Gain Joueur (87%) : ${joueur.toLocaleString()} XPF | Part Organisateur (13%) : ${orga.toLocaleString()} XPF`;
+        }
+
+        function remettreGainRapide() {
+            const code = document.getElementById('gain-player-code').value;
+            const jeu = document.getElementById('gain-game-title').value;
+            const montant = document.getElementById('gain-amount').value;
+            
+            if(!code || !montant) return alert("Veuillez remplir le code et le montant.");
+            socket.emit('admin-direct-reward', { code, montant });
+            alert(`Gain de ${montant} XPF attribué avec succès au joueur ${code} pour le jeu : ${jeu}`);
+        }
+
+        function commanderPionsAdmin() {
+            const qte = document.getElementById('order-pions-admin-qte').value;
+            socket.emit('player-order', { code: "ORGANISATEUR", type: "Commande Pions Orga", qte: qte, destinataire: "Admin Principal" });
+            alert("Commande transmise à l'Admin !");
+        }
+
+        function transfererPionsJoueur() {
+            const code = document.getElementById('transfer-player-code').value;
+            const qte = document.getElementById('transfer-pions-amount').value;
+            if(!code || !qte) return alert("Veuillez indiquer le code et le montant.");
+            socket.emit('admin-direct-reward', { code, montant: qte });
+            alert(`Transfert direct de ${qte} pions effectué vers le joueur ${code} !`);
         }
     </script>
 </body>
