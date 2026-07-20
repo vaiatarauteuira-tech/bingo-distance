@@ -46,10 +46,8 @@ io.on('connection', (socket) => {
         const telNettoye = tel.trim().replace(/[^0-9]/g, "");
         if (!nom || !telNettoye) return;
 
-        // 🚨 CRITICAL ANTI-FRAUDE 1 : Le numéro existe déjà dans la base certifiée ?
         const joueurExistant = Object.values(players).find(p => p.tel === telNettoye);
         if (joueurExistant) {
-            // On déclenche le gyrophare de fraude sur l'écran Admin
             io.emit('admin-security-alert', {
                 type: "FRAUDE_NUMERO_EXISTANT",
                 tel: telNettoye,
@@ -57,11 +55,9 @@ io.on('connection', (socket) => {
                 nomProprietaire: joueurExistant.nom,
                 codeAssocie: joueurExistant.code
             });
-            // On renvoie simplement son code d'origine au joueur sans rien recréer
             return socket.emit('registration-status', { status: 'already_active', code: joueurExistant.code });
         }
 
-        // 🚨 CRITICAL ANTI-FRAUDE 2 : Le numéro harcèle la liste d'attente ?
         const dejaEnAttente = pendingRegistrations.find(r => r.tel === telNettoye);
         if (dejaEnAttente) {
             io.emit('admin-security-alert', {
@@ -74,26 +70,23 @@ io.on('connection', (socket) => {
             return socket.emit('registration-status', { status: 'pending' });
         }
 
-        // Si tout est vert, on met en attente de certification Admin
         pendingRegistrations.push({ id: Date.now(), nom: nom.trim(), tel: telNettoye, socketId: socket.id });
         socket.emit('registration-status', { status: 'submitted' });
         
         io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
     });
 
-        // 🔑 L'ADMIN CERTIFIE ET REÇOIT LE CODE UNIQUE POUR L'ENVOYER PERSONNELLEMENT
+    // 🔑 L'ADMIN CERTIFIE ET PUSH LE CODE UNIQUE ET UNIVERSEL
     socket.on('admin-approve-registration', (idReg) => {
         const idx = pendingRegistrations.findIndex(r => r.id === idReg);
         if (idx !== -1) {
             const reg = pendingRegistrations[idx];
             
-            // Double verrou anti-doublon
             if (Object.values(players).find(p => p.tel === reg.tel)) {
                 pendingRegistrations.splice(idx, 1);
                 return io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
             }
 
-            // Génération de la clé universelle unique BingoHome
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
 
             players[codeUniverselUnique] = {
@@ -109,7 +102,6 @@ io.on('connection', (socket) => {
                 online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
             };
 
-            // 📢 CRITICAL : On envoie la confirmation au joueur ET on renvoie le code à l'ADMIN
             io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
             socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
             
@@ -119,32 +111,6 @@ io.on('connection', (socket) => {
         }
     });
 
-            }
-
-            // Génération de la clé universelle unique BingoHome
-            const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
-
-            players[codeUniverselUnique] = {
-                nom: reg.nom,
-                tel: reg.tel,
-                code: codeUniverselUnique,
-                pions: 0,
-                totalPionsRecus: 0,
-                totalPionsDepenses: 0,
-                nombreFiches: 0,
-                seriesCartons: "",
-                historiquePions: [{ date: "Système", description: "Compte certifié unique et universel", montant: "+0" }],
-                online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
-            };
-
-            io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
-            pendingRegistrations.splice(idx, 1);
-            
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-        }
-    });
-
-    // LE RESTE DES FLUX RÉSEAU DE L'ÉCOSYSTÈME BINGOHOME
     socket.on('player-login', (code) => {
         const codeVerif = code.trim().toUpperCase();
         if (players[codeVerif]) {
@@ -156,44 +122,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('player-buy-fiches-from-orga', ({ code, qte }) => {
-        if (players[code] && fichesMatchOuvertes && boutiqueOrgaFichesEnVente >=     // 🔑 L'ADMIN CERTIFIE ET REÇOIT LE CODE UNIQUE POUR L'ENVOYER PERSONNELLEMENT
-    socket.on('admin-approve-registration', (idReg) => {
-        const idx = pendingRegistrations.findIndex(r => r.id === idReg);
-        if (idx !== -1) {
-            const reg = pendingRegistrations[idx];
-            
-            // Double verrou anti-doublon
-            if (Object.values(players).find(p => p.tel === reg.tel)) {
-                pendingRegistrations.splice(idx, 1);
-                return io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-            }
-
-            // Génération de la clé universelle unique BingoHome
-            const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
-
-            players[codeUniverselUnique] = {
-                nom: reg.nom,
-                tel: reg.tel,
-                code: codeUniverselUnique,
-                pions: 0,
-                totalPionsRecus: 0,
-                totalPionsDepenses: 0,
-                nombreFiches: 0,
-                seriesCartons: "",
-                historiquePions: [{ date: "Système", description: "Compte certifié unique", montant: "+0" }],
-                online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
-            };
-
-            // 📢 CRITICAL : On envoie la confirmation au joueur ET on renvoie le code à l'ADMIN
-            io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
-            socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
-            
-            pendingRegistrations.splice(idx, 1);
-            
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-        }
-    });
-qte && players[code].pions >= (qte * prixFichePourJoueur)) {
+        if (players[code] && fichesMatchOuvertes && boutiqueOrgaFichesEnVente >= qte && players[code].pions >= (qte * prixFichePourJoueur)) {
             const coutTotal = qte * prixFichePourJoueur;
             players[code].pions -= coutTotal; players[code].totalPionsDepenses += coutTotal; boutiqueOrgaFichesEnVente -= qte;
             const livrees = fichesAcheteesOrga.splice(0, qte); players[code].nombreFiches += qte; players[code].seriesCartons = `Série ${livrees[0].serieNom} (#${livrees[0].numero})`;
