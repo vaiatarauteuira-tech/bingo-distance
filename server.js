@@ -9,105 +9,70 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Variables de session globales BingoHome
 let players = {};              
 let pendingRegistrations = []; 
 let pool = Array.from({length: 75}, (_, i) => i + 1);
 let drawnNumbers = [];
 let orders = [];
-let fichesMatchOuvertes = true;
+
+let venteActive = false; 
+let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", desc: "1 boule pour 1 boule" };
 
 let stockFichesAdmin = []; 
 let creditOrganisateur = 0; 
 let fichesAcheteesOrga = []; 
 let cataloguePrixFiche = 50; 
 let boutiqueOrgaFichesEnVente = 0; 
-let prixFichePourJoueur = 5;       
+let prixFichePourJoueur = 100;       
 let historiqueVentes = []; 
+
+function broadcastRefresh() {
+    io.emit('refresh-admin', { 
+        players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations,
+        stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes
+    });
+    io.emit('refresh-orga', {
+        creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche,
+        stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes,
+        playersList: Object.values(players)
+    });
+}
 
 io.on('connection', (socket) => {
     
-    socket.on('admin-init', () => {
-        socket.emit('refresh-admin', { 
-            players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations,
-            stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes
-        });
-    });
+    socket.on('admin-init', () => { broadcastRefresh(); });
+    socket.on('orga-init', () => { broadcastRefresh(); });
 
-    socket.on('orga-init', () => {
-        socket.emit('refresh-orga', {
-            creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche,
-            stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes
-        });
-    });
-
-    // 📱 TRAITEMENT DES INSCRIPTIONS ET DÉTECTION STRICTE DE LA FRAUDE
     socket.on('player-request-registration', ({ nom, tel }) => {
         const telNettoye = tel.trim().replace(/[^0-9]/g, "");
         if (!nom || !telNettoye) return;
 
         const joueurExistant = Object.values(players).find(p => p.tel === telNettoye);
         if (joueurExistant) {
-            io.emit('admin-security-alert', {
-                type: "FRAUDE_NUMERO_EXISTANT",
-                tel: telNettoye,
-                nomFraudeur: nom.trim(),
-                nomProprietaire: joueurExistant.nom,
-                codeAssocie: joueurExistant.code
-            });
+            io.emit('admin-security-alert', { type: "FRAUDE_NUMERO_EXISTANT", tel: telNettoye, nomFraudeur: nom.trim(), nomProprietaire: joueurExistant.nom, codeAssocie: joueurExistant.code });
             return socket.emit('registration-status', { status: 'already_active', code: joueurExistant.code });
         }
 
         const dejaEnAttente = pendingRegistrations.find(r => r.tel === telNettoye);
-        if (dejaEnAttente) {
-            io.emit('admin-security-alert', {
-                type: "SPAM_INSCRIPTION",
-                tel: telNettoye,
-                nomFraudeur: nom.trim(),
-                nomProprietaire: dejaEnAttente.nom,
-                codeAssocie: "En attente de validation Admin"
-            });
-            return socket.emit('registration-status', { status: 'pending' });
-        }
+        if (dejaEnAttente) return socket.emit('registration-status', { status: 'pending' });
 
         pendingRegistrations.push({ id: Date.now(), nom: nom.trim(), tel: telNettoye, socketId: socket.id });
         socket.emit('registration-status', { status: 'submitted' });
-        
-        io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+        broadcastRefresh();
     });
 
-    // 🔑 L'ADMIN CERTIFIE ET PUSH LE CODE UNIQUE ET UNIVERSEL
     socket.on('admin-approve-registration', (idReg) => {
         const idx = pendingRegistrations.findIndex(r => r.id === idReg);
         if (idx !== -1) {
             const reg = pendingRegistrations[idx];
-            
-            if (Object.values(players).find(p => p.tel === reg.tel)) {
-                pendingRegistrations.splice(idx, 1);
-                return io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-            }
-
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
-
             players[codeUniverselUnique] = {
-                nom: reg.nom,
-                tel: reg.tel,
-                code: codeUniverselUnique,
-                pions: 0,
-                totalPionsRecus: 0,
-                totalPionsDepenses: 0,
-                nombreFiches: 0,
-                seriesCartons: "",
-                historiquePions: [{ date: "Système", description: "Compte certifié unique", montant: "+0" }],
-                online: false, socketId: null, grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1)
+                nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", historiquePions: [], online: false, socketId: null
             };
-
             io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
             socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
-            
             pendingRegistrations.splice(idx, 1);
-            
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+            broadcastRefresh();
         }
     });
 
@@ -115,50 +80,75 @@ io.on('connection', (socket) => {
         const codeVerif = code.trim().toUpperCase();
         if (players[codeVerif]) {
             players[codeVerif].online = true; players[codeVerif].socketId = socket.id;
-            socket.emit('login-success-dashboard', { player: players[codeVerif], tournoiActuel: {}, liveHistory: drawnNumbers });
-            socket.emit('refresh-boutique-joueurs', { boutiqueOrgaFichesEnVente, prixFichePourJoueur });
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
+            socket.emit('login-success-dashboard', { player: players[codeVerif], liveHistory: drawnNumbers });
+            socket.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
+            broadcastRefresh();
         } else { socket.emit('login-error'); }
     });
 
-    socket.on('player-buy-fiches-from-orga', ({ code, qte }) => {
-        if (players[code] && fichesMatchOuvertes && boutiqueOrgaFichesEnVente >= qte && players[code].pions >= (qte * prixFichePourJoueur)) {
-            const coutTotal = qte * prixFichePourJoueur;
-            players[code].pions -= coutTotal; players[code].totalPionsDepenses += coutTotal; boutiqueOrgaFichesEnVente -= qte;
-            const livrees = fichesAcheteesOrga.splice(0, qte); players[code].nombreFiches += qte; players[code].seriesCartons = `Série ${livrees[0].serieNom} (#${livrees[0].numero})`;
-            historiqueVentes.unshift({ id: Date.now(), date: "Achat Direct", nomJoueur: players[code].nom, codeJoueur: players[code].code, quantite: qte, pionsDepenses: coutTotal, infoSérie: players[code].seriesCartons });
-            socket.emit('update-dashboard', players[code]);
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-            io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes });
-            io.emit('refresh-boutique-joueurs', { boutiqueOrgaFichesEnVente, prixFichePourJoueur });
+    socket.on('toggle-vente-game', ({ active, titre, prix, orga, desc }) => {
+        venteActive = active;
+        if(titre) jeuActuel.titre = titre;
+        if(prix) jeuActuel.prix = parseInt(prix);
+        if(orga) jeuActuel.orga = orga;
+        if(desc) jeuActuel.desc = desc;
+
+        io.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
+    });
+
+    // 📩 RÉCEPTION ET TRANSMISSION DE LA COMMANDE DE PIONS JOUEUR
+    socket.on('player-order', ({ code, type, qte, destinataire }) => {
+        if (players[code] || code === "ORGANISATEUR") { 
+            const nomEmetteur = players[code] ? players[code].nom : "ORGANISATEUR";
+            orders.push({ 
+                id: Date.now(), 
+                code: code, 
+                nom: nomEmetteur, 
+                type: type, 
+                qte: parseInt(qte), 
+                destinataire: destinataire 
+            }); 
+            broadcastRefresh(); 
         }
     });
 
-    socket.on('player-order', ({ code, type, qte, destinataire }) => {
-        if (players[code]) { orders.push({ id: Date.now(), code, nom: players[code].nom, type, qte: parseInt(qte), destinataire }); io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes }); io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes }); }
-    });
-
+    // 🪙 VALIDATION DE LA COMMANDE PAR L'ADMIN OU L'ORGANISATEUR
     socket.on('admin-validate-order', (idOrder) => {
         const idx = orders.findIndex(o => o.id === idOrder);
         if (idx !== -1) {
             const o = orders[idx];
-            if (players[o.code]) { players[o.code].pions += o.qte; players[o.code].totalPionsRecus += o.qte; players[o.code].historiquePions.unshift({ date: "Caisse", description: "Recharge pions approuvée", montant: `+${o.qte}` }); if (players[o.code].socketId) io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]); }
+            if (players[o.code]) { 
+                players[o.code].pions += o.qte; 
+                if (players[o.code].socketId) {
+                    io.to(players[o.code].socketId).emit('update-dashboard', players[o.code]); 
+                }
+            }
             orders.splice(idx, 1);
-            io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes });
-            io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes });
+            broadcastRefresh();
+        }
+    });
+
+    socket.on('player-buy-fiches-from-orga', ({ code, qte }) => {
+        if (!venteActive) return socket.emit('notification', '❌ Les ventes sont actuellement fermées !');
+        
+        const coutTotal = qte * jeuActuel.prix;
+        if (players[code] && players[code].pions >= coutTotal) {
+            players[code].pions -= coutTotal;
+            players[code].nombreFiches += qte;
+            players[code].seriesCartons = jeuActuel.titre;
+            
+            historiqueVentes.unshift({ id: Date.now(), date: "Commande Directe", nomJoueur: players[code].nom, codeJoueur: players[code].code, quantite: qte, pionsDepenses: coutTotal, infoSérie: jeuActuel.titre });
+            
+            socket.emit('update-dashboard', players[code]);
+            broadcastRefresh();
         }
     });
 
     socket.on('admin-draw', () => { if (pool.length === 0) return; const num = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; drawnNumbers.push(num); io.emit('new-ball', { actuelle: num, historique: drawnNumbers }); });
     socket.on('player-announce-bingo', (data) => { io.emit('admin-receive-bingo', data); });
-    socket.on('admin-toggle-ventes', (statut) => { fichesMatchOuvertes = statut; });
     socket.on('admin-send-flash', (msg) => { io.emit('notification', msg); });
-    socket.on('admin-request-carton', (code) => { if (players[code]) socket.emit('admin-view-carton', { nom: players[code].nom, code: code, grille: players[code].grille, history: drawnNumbers }); });
-    socket.on('admin-direct-reward', ({ code, montant }) => { if (players[code]) { players[code].pions += parseInt(montant); if (players[code].socketId) io.to(players[code].socketId).emit('update-dashboard', players[code]); io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes }); } });
-    socket.on('admin-add-custom-fiches', ({ nomSerie, quantite }) => { const qte = parseInt(quantite) || 1; for (let i = 0; i < qte; i++) { stockFichesAdmin.push({ serieNom: nomSerie || "Série Spéciale", numero: Math.floor(100000 + Math.random() * 900000), grille: Array.from({length: 25}, () => Math.floor(Math.random() * 75) + 1) }); } io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes }); io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes }); });
-    socket.on('admin-recharge-orga', (montant) => { creditOrganisateur += parseInt(montant) || 0; io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes }); io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes }); });
-    socket.on('orga-buy-fiches', (quantite) => { const qte = parseInt(quantite) || 0; const coutTotal = qte * cataloguePrixFiche; if (creditOrganisateur >= coutTotal && stockFichesAdmin.length >= qte) { creditOrganisateur -= coutTotal; fichesAcheteesOrga = fichesAcheteesOrga.concat(stockFichesAdmin.splice(0, qte)); io.emit('refresh-admin', { players: Object.values(players), history: drawnNumbers, orders, pendingRegistrations, stockFichesCount: stockFichesAdmin.length, creditOrganisateur, historiqueVentes }); io.emit('refresh-orga', { creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche, stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes }); } });
-    socket.on('admin-reset-all', () => { players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; stockFichesAdmin = []; fichesAcheteesOrga = []; creditOrganisateur = 0; boutiqueOrgaFichesEnVente = 0; pendingRegistrations = []; historiqueVentes = []; io.emit('game-reset'); });
+    socket.on('admin-direct-reward', ({ code, montant }) => { if (players[code]) { players[code].pions += parseInt(montant); if (players[code].socketId) io.to(players[code].socketId).emit('update-dashboard', players[code]); broadcastRefresh(); } });
+    socket.on('admin-reset-all', () => { players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; venteActive = false; io.emit('game-reset'); });
 });
 
 const PORT = process.env.PORT || 3000;
