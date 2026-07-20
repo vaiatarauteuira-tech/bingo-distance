@@ -114,7 +114,7 @@
             if (num <= 30) return "I " + num;
             if (num <= 45) return "N " + num;
             if (num <= 60) return "G " + num;
-            return "O " + num;
+            if (num <= 75) return "O " + num;
         }
 
         socket.on('refresh-admin', (data) => {
