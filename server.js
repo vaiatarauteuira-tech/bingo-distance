@@ -9,7 +9,6 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// BASE DE DONNÉES EN MÉMOIRE
 let players = {};              
 let pendingRegistrations = []; 
 let pool = Array.from({length: 75}, (_, i) => i + 1);
@@ -35,42 +34,47 @@ function broadcastRefresh() {
     io.emit('refresh-orga', {
         creditOrganisateur, fichesDisponibles: fichesAcheteesOrga.length, cataloguePrixFiche,
         stockAdminCount: stockFichesAdmin.length, boutiqueOrgaFichesEnVente, prixFichePourJoueur, orders, historiqueVentes,
-        playersList: Object.values(players)
+        playersList: Object.values(players), pendingRegistrations
     });
 }
 
 io.on('connection', (socket) => {
     
+    // RENTRÉE ADMIN / ORGA -> SYNCHRONISATION IMMÉDIATE DES DEMANDES
     socket.on('admin-init', () => { broadcastRefresh(); });
     socket.on('orga-init', () => { broadcastRefresh(); });
 
     // DEMANDE D'INSCRIPTION DU JOUEUR
     socket.on('player-request-registration', ({ nom, tel }) => {
-        const telNettoye = tel.trim().replace(/[^0-9]/g, "");
-        if (!nom || !telNettoye) return;
+        const telNettoye = (tel || "").trim().replace(/[^0-9]/g, "");
+        const nomNettoye = (nom || "").trim();
+        
+        if (!nomNettoye || !telNettoye) return;
 
+        // 1. Vérification si déjà validé
         const joueurExistant = Object.values(players).find(p => p.tel === telNettoye);
         if (joueurExistant) {
-            io.emit('admin-security-alert', { type: "FRAUDE_NUMERO_EXISTANT", tel: telNettoye, nomFraudeur: nom.trim(), nomProprietaire: joueurExistant.nom, codeAssocie: joueurExistant.code });
+            io.emit('admin-security-alert', { type: "FRAUDE_NUMERO_EXISTANT", tel: telNettoye, nomFraudeur: nomNettoye, nomProprietaire: joueurExistant.nom, codeAssocie: joueurExistant.code });
             return socket.emit('registration-status', { status: 'already_active', code: joueurExistant.code });
         }
 
-        const dejaEnAttente = pendingRegistrations.find(r => r.tel === telNettoye);
-        if (dejaEnAttente) return socket.emit('registration-status', { status: 'pending' });
-
-        pendingRegistrations.push({ id: Date.now(), nom: nom.trim(), tel: telNettoye, socketId: socket.id });
+        // 2. Ajout à la liste en attente
+        const nouvelleDemande = { id: Date.now(), nom: nomNettoye, tel: telNettoye, socketId: socket.id };
+        pendingRegistrations.push(nouvelleDemande);
+        
         socket.emit('registration-status', { status: 'submitted' });
+        
+        // Broadcast instantané pour que l'Admin et l'Orga voient la demande immédiatement !
         broadcastRefresh();
     });
 
-    // APPROBATION PAR L'ADMIN/ORGA -> GÉNÉRATION DU SEUL CODE VALIDE
+    // APPROBATION PAR L'ADMIN/ORGA
     socket.on('admin-approve-registration', (idReg) => {
         const idx = pendingRegistrations.findIndex(r => r.id === idReg);
         if (idx !== -1) {
             const reg = pendingRegistrations[idx];
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
             
-            // On enregistre formellement le joueur dans le système
             players[codeUniverselUnique] = {
                 nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", pdfUrl: null, pagesInfo: "", online: false, socketId: null
             };
@@ -82,7 +86,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 🔐 TENTATIVE DE CONNEXION JOUEUR (SÉCURITÉ STRICTE)
     socket.on('player-login', (code) => {
         if (!code || typeof code !== 'string') {
             return socket.emit('login-error', '❌ Veuillez saisir un code.');
@@ -90,17 +93,14 @@ io.on('connection', (socket) => {
 
         const codeVerif = code.trim().toUpperCase();
 
-        // VÉRIFICATION EN BDD : Est-ce que le code a VRAIMENT été généré ?
         if (players[codeVerif]) {
             players[codeVerif].online = true; 
             players[codeVerif].socketId = socket.id;
             
-            // Accès Autorisé
             socket.emit('login-success-dashboard', { player: players[codeVerif], liveHistory: drawnNumbers });
             socket.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
             broadcastRefresh();
         } else { 
-            // Accès Refusé : Le code est inventé ou a été effacé par un redémarrage
             socket.emit('login-error', '❌ ACCÈS REFUSÉ ! Ce code n\'a pas été créé par l\'organisation.'); 
         }
     });
@@ -119,14 +119,7 @@ io.on('connection', (socket) => {
         const codeClean = (code || "").trim().toUpperCase();
         if (players[codeClean] || codeClean === "ORGANISATEUR") { 
             const nomEmetteur = players[codeClean] ? players[codeClean].nom : "ORGANISATEUR";
-            orders.push({ 
-                id: Date.now(), 
-                code: codeClean, 
-                nom: nomEmetteur, 
-                type: type, 
-                qte: parseInt(qte), 
-                destinataire: destinataire 
-            }); 
+            orders.push({ id: Date.now(), code: codeClean, nom: nomEmetteur, type: type, qte: parseInt(qte), destinataire: destinataire }); 
             broadcastRefresh(); 
         }
     });
@@ -139,10 +132,7 @@ io.on('connection', (socket) => {
             if (players[codeClean]) { 
                 players[codeClean].pions += parseInt(o.qte); 
                 players[codeClean].totalPionsRecus += parseInt(o.qte);
-                
-                if (players[codeClean].socketId) {
-                    io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
-                }
+                if (players[codeClean].socketId) io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
                 io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
             }
             orders.splice(idx, 1);
@@ -157,12 +147,10 @@ io.on('connection', (socket) => {
         if (players[codeClean]) { 
             players[codeClean].pions += ajoutPions; 
             players[codeClean].totalPionsRecus += ajoutPions;
-            
             if (players[codeClean].socketId) {
                 io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
                 io.to(players[codeClean].socketId).emit('notification', `🎁 Rechargement : +${ajoutPions} Pions crédités !`);
             }
-
             io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
             broadcastRefresh(); 
         } else {
@@ -198,11 +186,8 @@ io.on('connection', (socket) => {
             
             historiqueVentes.unshift({ id: Date.now(), date: "Commande Directe", nomJoueur: players[codeClean].nom, codeJoueur: players[codeClean].code, quantite: qte, pionsDepenses: coutTotal, infoSérie: jeuActuel.titre });
             
-            if (players[codeClean].socketId) {
-                io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
-            }
+            if (players[codeClean].socketId) io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
             io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
-
             broadcastRefresh();
         }
     });
