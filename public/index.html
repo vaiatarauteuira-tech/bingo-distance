@@ -14,16 +14,22 @@
         .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
         .btn-purple { background: #a855f7; color: white; margin-top: 10px; }
         .box-demande { display: none; background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 10px; margin-top: 15px; }
+        
+        /* Navigation vers les interfaces Admin et Organisateur */
+        .staff-nav-box { margin-top: 25px; padding-top: 15px; border-top: 1px solid #222530; display: flex; justify-content: space-between; gap: 10px; }
+        .staff-link { color: #64748b; font-size: 11px; text-decoration: none; font-weight: bold; background: #1a1c26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3142; flex: 1; transition: 0.2s; }
+        .staff-link:hover { color: #f59e0b; border-color: #f59e0b; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <div class="logo">🎱 Ticket Bingo</div>
-        <div class="sub-logo">Saisissez votre code unique pour jouer</div>
+        <!-- VRAI NOM DU JEU -->
+        <div class="logo">🎱 BingoHome</div>
+        <div class="sub-logo">Espace Joueur - Entrez votre code unique</div>
 
-        <!-- FORMULAIRE DE CONNEXION -->
-        <input type="text" id="input-code" placeholder="Entrez votre Code (ex: BH-1234)">
+        <!-- FORMULAIRE DE CONNEXION JOUEUR -->
+        <input type="text" id="input-code" placeholder="Code Joueur (ex: BH-1234)">
         <button class="btn-gold" onclick="seConnecter()">🎮 S'identifier & Jouer</button>
 
         <hr style="border:0; border-top:1px solid #222530; margin: 20px 0;">
@@ -37,6 +43,12 @@
             <input type="text" id="reg-nom" placeholder="Votre Nom et Prénom">
             <input type="tel" id="reg-tel" placeholder="Votre Numéro de Téléphone">
             <button class="btn-gold" onclick="envoyerDemande()">Envoyer la demande à la régie</button>
+        </div>
+
+        <!-- ACCÈS DIRECTS ADMIN ET ORGANISATEUR -->
+        <div class="staff-nav-box">
+            <a href="/organisateur.html" class="staff-link">🎪 Accès Organisateur</a>
+            <a href="/admin.html" class="staff-link">🛡️ Accès Admin</a>
         </div>
     </div>
 
@@ -56,7 +68,6 @@
             window.location.href = '/joueur.html';
         });
 
-        // 🛑 SI LE CODE EST REJETÉ PAR LE SERVEUR
         socket.on('login-error', (msg) => {
             alert(msg || "❌ Code invalide !");
             sessionStorage.removeItem('joueurCode');
