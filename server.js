@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
             const reg = pendingRegistrations[idx];
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
             players[codeUniverselUnique] = {
-                nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", pdfUrl: null, online: false, socketId: null
+                nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", pdfUrl: null, pagesInfo: "", online: false, socketId: null
             };
             io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
             socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
@@ -142,27 +142,27 @@ io.on('connection', (socket) => {
             
             if (players[codeClean].socketId) {
                 io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]); 
-                io.to(players[codeClean].socketId).emit('notification', `🎁 Rechargement : +${ajoutPions} Pions crédités sur votre compte !`);
+                io.to(players[codeClean].socketId).emit('notification', `🎁 Rechargement : +${ajoutPions} Pions crédités !`);
             }
 
             io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
             broadcastRefresh(); 
         } else {
-            socket.emit('notification', `❌ Code joueur ${codeClean} introuvable ! Vérifiez la saisie.`);
+            socket.emit('notification', `❌ Code joueur ${codeClean} introuvable !`);
         }
     });
 
-    // 📄 DISTRIBUTION DE FICHIERS PDF PERSONNALISÉS PAR L'ORGANISATEUR
-    socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, qte }) => {
+    // 📄 DISTRIBUTION DES TICKETS PDF 1 PAR 1 OU PAR PLAGE
+    socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, pageDebut, pageFin }) => {
         const codeClean = (code || "").trim().toUpperCase();
         if (players[codeClean]) {
             players[codeClean].pdfUrl = fichierUrl;
             players[codeClean].seriesCartons = serie;
-            players[codeClean].nombreFiches += parseInt(qte) || 1;
+            players[codeClean].pagesInfo = (pageDebut === pageFin) ? `Page ${pageDebut}` : `Pages ${pageDebut} à ${pageFin}`;
 
             if (players[codeClean].socketId) {
                 io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
-                io.to(players[codeClean].socketId).emit('notification', '📄 Vos cartons PDF officiels sont disponibles !');
+                io.to(players[codeClean].socketId).emit('notification', `📄 Votre ticket (${players[codeClean].pagesInfo}) est disponible !`);
             }
             io.emit('update-dashboard-global', { code: codeClean, player: players[codeClean] });
             broadcastRefresh();
