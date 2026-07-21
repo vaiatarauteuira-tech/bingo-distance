@@ -9,6 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// BASE DE DONNÉES EN MÉMOIRE
 let players = {};              
 let pendingRegistrations = []; 
 let pool = Array.from({length: 75}, (_, i) => i + 1);
@@ -43,6 +44,7 @@ io.on('connection', (socket) => {
     socket.on('admin-init', () => { broadcastRefresh(); });
     socket.on('orga-init', () => { broadcastRefresh(); });
 
+    // DEMANDE D'INSCRIPTION DU JOUEUR
     socket.on('player-request-registration', ({ nom, tel }) => {
         const telNettoye = tel.trim().replace(/[^0-9]/g, "");
         if (!nom || !telNettoye) return;
@@ -61,14 +63,18 @@ io.on('connection', (socket) => {
         broadcastRefresh();
     });
 
+    // APPROBATION PAR L'ADMIN/ORGA -> GÉNÉRATION DU SEUL CODE VALIDE
     socket.on('admin-approve-registration', (idReg) => {
         const idx = pendingRegistrations.findIndex(r => r.id === idReg);
         if (idx !== -1) {
             const reg = pendingRegistrations[idx];
             const codeUniverselUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
+            
+            // On enregistre formellement le joueur dans le système
             players[codeUniverselUnique] = {
                 nom: reg.nom, tel: reg.tel, code: codeUniverselUnique, pions: 0, totalPionsRecus: 0, totalPionsDepenses: 0, nombreFiches: 0, seriesCartons: "", pdfUrl: null, pagesInfo: "", online: false, socketId: null
             };
+
             io.to(reg.socketId).emit('registration-approved', { code: codeUniverselUnique });
             socket.emit('admin-code-generated-display', { nom: reg.nom, tel: reg.tel, code: codeUniverselUnique });
             pendingRegistrations.splice(idx, 1);
@@ -76,15 +82,27 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 🔐 TENTATIVE DE CONNEXION JOUEUR (SÉCURITÉ STRICTE)
     socket.on('player-login', (code) => {
+        if (!code || typeof code !== 'string') {
+            return socket.emit('login-error', '❌ Veuillez saisir un code.');
+        }
+
         const codeVerif = code.trim().toUpperCase();
+
+        // VÉRIFICATION EN BDD : Est-ce que le code a VRAIMENT été généré ?
         if (players[codeVerif]) {
             players[codeVerif].online = true; 
             players[codeVerif].socketId = socket.id;
+            
+            // Accès Autorisé
             socket.emit('login-success-dashboard', { player: players[codeVerif], liveHistory: drawnNumbers });
             socket.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
             broadcastRefresh();
-        } else { socket.emit('login-error'); }
+        } else { 
+            // Accès Refusé : Le code est inventé ou a été effacé par un redémarrage
+            socket.emit('login-error', '❌ ACCÈS REFUSÉ ! Ce code n\'a pas été créé par l\'organisation.'); 
+        }
     });
 
     socket.on('toggle-vente-game', ({ active, titre, prix, orga, desc }) => {
@@ -152,7 +170,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 📄 DISTRIBUTION DES TICKETS PDF 1 PAR 1 OU PAR PLAGE
     socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, pageDebut, pageFin }) => {
         const codeClean = (code || "").trim().toUpperCase();
         if (players[codeClean]) {
