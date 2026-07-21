@@ -40,7 +40,7 @@
         </div>
 
         <div class="alert-banner">
-            C'est rétabli ! Distribution directe des fichiers PDF activée.
+            C'est rétabli ! Distribution des tickets PDF 1 par 1 activée.
         </div>
 
         <!-- ================= VOLET 1 : TICKETS & PDF ================= -->
@@ -67,23 +67,34 @@
                 </div>
             </div>
 
-            <!-- VALIDER ET ENVOYER LE FICHIER PDF CHOISI -->
+            <!-- VALIDER ET ENVOYER LE TICKET 1 PAR 1 -->
             <div class="card" style="border-left: 4px solid #a855f7;">
-                <h3>📥 Commandes Joueurs & Envoi de vos PDF</h3>
+                <h3>📥 Commandes Joueurs & Distribution 1 par 1</h3>
                 <div class="data-list" id="orga-pdf-orders">Aucune commande en attente.</div>
                 
                 <div style="background:#1a1c26; padding:10px; border-radius:8px; margin-top:10px;">
-                    <label style="font-size:11px; color:#94a3b8;">Série / Titre du carton :</label>
+                    <label style="font-size:11px; color:#94a3b8;">Nom de la Série / Jeu :</label>
                     <input type="text" id="pdf-serie" placeholder="ex: Série A Gros Lots">
 
-                    <label style="font-size:11px; color:#94a3b8;">Sélectionner le fichier PDF sur le serveur :</label>
+                    <label style="font-size:11px; color:#94a3b8;">Fichier PDF source :</label>
                     <select id="pdf-menu">
-                        <option value="serie_A.pdf">Série A - Grilles Standard (serie_A.pdf)</option>
-                        <option value="serie_B.pdf">Série B - Spéciale (serie_B.pdf)</option>
+                        <option value="serie_A.pdf">Série A (serie_A.pdf)</option>
+                        <option value="serie_B.pdf">Série B (serie_B.pdf)</option>
                         <option value="special_gros_lots.pdf">Gros Lots (special_gros_lots.pdf)</option>
                     </select>
 
-                    <button class="btn-purple" onclick="validerEtLivrerPDF()">📄 Transmettre le fichier PDF au joueur</button>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label style="font-size:11px; color:#94a3b8;">Page Début :</label>
+                            <input type="number" id="pdf-page-debut" value="1" min="1">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:11px; color:#94a3b8;">Page Fin :</label>
+                            <input type="number" id="pdf-page-fin" value="1" min="1">
+                        </div>
+                    </div>
+
+                    <button class="btn-purple" onclick="validerEtLivrerPDF()">📄 Attribuer ce(s) ticket(s) au Joueur</button>
                 </div>
             </div>
 
@@ -212,7 +223,6 @@
                 </div>`;
             });
 
-            // Affichage des Joueurs avec statut
             const pStatus = document.getElementById('orga-players-status');
             if (data.playersList && data.playersList.length > 0) {
                 pStatus.innerHTML = '';
@@ -250,16 +260,19 @@
 
         function validerEtLivrerPDF() {
             if (!commandeSelectionnee) return alert("Sélectionne d'abord une commande dans la liste.");
-            const serie = document.getElementById('pdf-serie').value || "Série A";
+            const serie = document.getElementById('pdf-serie').value || "Série Standard";
             const fichierPdf = document.getElementById('pdf-menu').value;
+            const pageDebut = document.getElementById('pdf-page-debut').value;
+            const pageFin = document.getElementById('pdf-page-fin').value;
             
             socket.emit('orga-deliver-pdf', {
                 code: commandeSelectionnee.code,
                 serie: serie,
                 fichierUrl: `/pdf/${fichierPdf}`,
-                qte: commandeSelectionnee.qte
+                pageDebut: pageDebut,
+                pageFin: pageFin
             });
-            alert(`Fichier PDF (${fichierPdf}) transmis instantanément au joueur ${commandeSelectionnee.code} !`);
+            alert(`Ticket(s) [Page ${pageDebut} à ${pageFin}] transmis à ${commandeSelectionnee.code} !`);
             commandeSelectionnee = null;
         }
 
