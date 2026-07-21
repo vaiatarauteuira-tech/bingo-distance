@@ -118,6 +118,7 @@
         }
 
         socket.on('refresh-admin', (data) =>
+{
 alert("Demandes reçues : " + JSON.stringify(data.pendingRegistrations)); document.getElementById('txt-stock-admin').textContent = `${data.stockFichesCount} Fiches`;
             document.getElementById('txt-credit-orga').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
             
