@@ -3,126 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BingoHome - Portail Officiel</title>
+    <title>BingoHome - Connexion</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 25px 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .header-zone { text-align: center; margin-bottom: 25px; }
-        .main-title { font-size: 2.4rem; font-weight: 900; background: linear-gradient(to right, #f59e0b, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; margin: 0; }
-        .subtitle { color: #64748b; font-size: 12px; margin-top: 6px; text-transform: uppercase; letter-spacing: 2px; }
-
-        .space-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 22px; margin-bottom: 18px; width: 100%; max-width: 400px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
-        .space-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
-        .card-joueur::before { background: #38bdf8; }
-        .card-orga::before { background: #a855f7; }
-        .card-admin::before { background: #f59e0b; }
-        .space-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #94a3b8; }
-
-        input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
-        
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .login-card { background: #12131a; border: 1px solid #222530; border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
+        .logo { font-size: 2rem; font-weight: 900; color: #f59e0b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .sub-logo { font-size: 12px; color: #94a3b8; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; font-weight: bold; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
         .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
-        .btn-cyan { background: #06b6d4; color: #05050a; }
-        .btn-dark { background: #1a1c26; color: #94a3b8; border: 1px solid #2d3142; }
+        .btn-purple { background: #a855f7; color: white; margin-top: 10px; }
+        .box-demande { display: none; background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="header-zone">
-        <span style="font-size:2.5rem;">🏠</span>
-        <h1 class="main-title">BingoHome</h1>
-        <div class="subtitle">Accès Vérifié & Sécurisé</div>
-    </div>
+    <div class="login-card">
+        <div class="logo">🎱 Ticket Bingo</div>
+        <div class="sub-logo">Saisissez votre code unique pour jouer</div>
 
-    <!-- 👤 SALON JOUEUR COMPLET -->
-    <div class="space-card card-joueur">
-        <div class="space-title">👤 Espace Joueurs</div>
-        
-        <!-- ÉTAPE A : DEMANDE D'INSCRIPTION -->
-        <div id="zone-inscription">
-            <p style="font-size:12px; color:#94a3b8; margin-top:0;">Étape 1 : Demandez votre accès à la caisse.</p>
-            <input type="text" id="reg-nom" placeholder="Votre nom complet">
-            <input type="tel" id="reg-tel" placeholder="Votre n° de téléphone">
-            <button class="btn-cyan" onclick="demanderInscription()">Soumettre ma demande d'accès</button>
-            <p id="reg-status" style="font-size:12px; color:#f59e0b; text-align:center; margin:5px 0 0 0; display:none;"></p>
+        <!-- FORMULAIRE DE CONNEXION -->
+        <input type="text" id="input-code" placeholder="Entrez votre Code (ex: BH-1234)">
+        <button class="btn-gold" onclick="seConnecter()">🎮 S'identifier & Jouer</button>
+
+        <hr style="border:0; border-top:1px solid #222530; margin: 20px 0;">
+
+        <div style="font-size:12px; color:#94a3b8;">Vous n'avez pas de code ?</div>
+        <button class="btn-purple" onclick="afficherDemande()">✍️ Demander un Code d'Accès</button>
+
+        <!-- FORMULAIRE DE DEMANDE D'INSCRIPTION -->
+        <div class="box-demande" id="box-demande">
+            <div style="font-size:13px; font-weight:bold; color:#a855f7; margin-bottom:10px;">Inscription Tournoi</div>
+            <input type="text" id="reg-nom" placeholder="Votre Nom et Prénom">
+            <input type="tel" id="reg-tel" placeholder="Votre Numéro de Téléphone">
+            <button class="btn-gold" onclick="envoyerDemande()">Envoyer la demande à la régie</button>
         </div>
-
-        <hr style="border: 0; border-top: 1px solid #222530; margin: 15px 0;">
-
-        <!-- ÉTAPE B : CONNEXION PAR CODE CLÉ UNIQUE -->
-        <div id="zone-connexion">
-            <p style="font-size:12px; color:#94a3b8; margin-top:0;">Étape 2 : Entrez le code clé validé par l'admin.</p>
-            <input type="text" id="login-code" placeholder="Ex: BH-1234">
-            <button class="btn-gold" onclick="connexionCodeSecurise()">🎯 Entrer dans le salon de jeu</button>
-        </div>
-    </div>
-
-    <!-- 🎙️ ANIMATEUR -->
-    <div class="space-card card-orga">
-        <div class="space-title">🎙️ Régie Animateur</div>
-        <input type="password" id="code-orga" placeholder="Clé d'activation organisateur">
-        <button class="btn-cyan" onclick="loginOrga()">Ouvrir la console de tirage</button>
-    </div>
-
-    <!-- 🛠️ CAISSE GENERALE -->
-    <div class="space-card card-admin">
-        <div class="space-title">🛠️ Direction / Caisse Générale</div>
-        <input type="password" id="code-admin" placeholder="Mot de passe Maître">
-        <button class="btn-gold" style="background: linear-gradient(135deg, #ec4899, #be185d); color: white;" onclick="loginAdmin()">Ouvrir le coffre-fort</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
 
-        function demanderInscription() {
+        function seConnecter() {
+            const codeInput = document.getElementById('input-code').value.trim().toUpperCase();
+            if (!codeInput) return alert("Veuillez saisir un code.");
+
+            sessionStorage.setItem('joueurCode', codeInput);
+            socket.emit('player-login', codeInput);
+        }
+
+        socket.on('login-success-dashboard', (data) => {
+            window.location.href = '/joueur.html';
+        });
+
+        // 🛑 SI LE CODE EST REJETÉ PAR LE SERVEUR
+        socket.on('login-error', (msg) => {
+            alert(msg || "❌ Code invalide !");
+            sessionStorage.removeItem('joueurCode');
+            document.getElementById('input-code').value = '';
+        });
+
+        function afficherDemande() {
+            const box = document.getElementById('box-demande');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function envoyerDemande() {
             const nom = document.getElementById('reg-nom').value.trim();
             const tel = document.getElementById('reg-tel').value.trim();
-            if(!nom || !tel) return alert("Veuillez remplir votre nom et votre numéro de téléphone.");
+
+            if (!nom || !tel) return alert("Remplissez tous les champs.");
 
             socket.emit('player-request-registration', { nom, tel });
         }
 
-        socket.on('registration-status', (data) => {
-            const statusEl = document.getElementById('reg-status');
-            statusEl.style.display = 'block';
-            if(data.status === 'submitted') {
-                statusEl.textContent = "⏳ Demande envoyée ! Attendez que l'admin valide votre fiche.";
-                statusEl.style.color = "#38bdf8";
-            } else if(data.status === 'pending') {
-                statusEl.textContent = "⏳ Une demande pour ce numéro est déjà en attente de validation.";
-                statusEl.style.color = "#f59e0b";
+        socket.on('registration-status', (res) => {
+            if (res.status === 'submitted') {
+                alert("✅ Demande transmise ! L'organisateur va valider votre compte et vous remettre votre code.");
+                document.getElementById('box-demande').style.display = 'none';
+            } else if (res.status === 'already_active') {
+                alert(`⚠️ Un compte existe déjà avec ce numéro ! Votre code est : ${res.code}`);
+                document.getElementById('input-code').value = res.code;
             }
         });
-
-        socket.on('registration-approved', (data) => {
-            const statusEl = document.getElementById('reg-status');
-            statusEl.innerHTML = `✅ Validé ! Votre code secret est : <strong style="font-size:1.1rem; color:#4ade80;">${data.code}</strong>. Recopiez-le ci-dessous.`;
-            document.getElementById('login-code').value = data.code;
-        });
-
-        function connexionCodeSecurise() {
-            const code = document.getElementById('login-code').value.trim().toUpperCase();
-            if(!code) return alert("Veuillez entrer votre code clé sécurisé.");
-            sessionStorage.setItem('joueurCode', code);
-            window.location.href = '/joueur.html';
-        }
-
-        function loginOrga() {
-            if(document.getElementById('code-orga').value.trim() === "ORGA2026") {
-                sessionStorage.setItem('orgaToken', 'valide'); window.location.href = '/organisateur.html';
-            } else alert("Clé invalide.");
-        }
-
-        function loginAdmin() {
-            if(document.getElementById('code-admin').value.trim() === "SUPERADMIN") {
-                sessionStorage.setItem('adminToken', 'valide'); window.location.href = '/admin.html';
-            } else alert("Mot de passe incorrect.");
-        }
-    </script>        socket.on('login-error', (message) => {
-            alert(message || "❌ Code refusé. Veuillez contacter l'administrateur ou l'organisateur pour obtenir un code valide.");
-            // Réinitialise la session
-            sessionStorage.removeItem('joueurCode');
-        });
-
+    </script>
 </body>
 </html>
