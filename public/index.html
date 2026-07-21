@@ -118,6 +118,11 @@
                 sessionStorage.setItem('adminToken', 'valide'); window.location.href = '/admin.html';
             } else alert("Mot de passe incorrect.");
         }
-    </script>
+    </script>        socket.on('login-error', (message) => {
+            alert(message || "❌ Code refusé. Veuillez contacter l'administrateur ou l'organisateur pour obtenir un code valide.");
+            // Réinitialise la session
+            sessionStorage.removeItem('joueurCode');
+        });
+
 </body>
 </html>
