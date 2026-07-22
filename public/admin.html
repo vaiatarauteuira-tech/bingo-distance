@@ -458,27 +458,27 @@ button:active {
     <div style="display:flex; flex-wrap:wrap; gap:10px;">
 
         <button class="btn-success" onclick="choisirEdition('classique')">
-            🎟️ Classique
+            🎟️Classique
         </button>
 
         <button class="btn-success" onclick="choisirEdition('diamond')">
-            💎 Diamond
+            💎Diamond
         </button>
 
         <button class="btn-success" onclick="choisirEdition('tiare')">
-            🌺 Tiaré
+            🌺Tiaré
         </button>
 
         <button class="btn-success" onclick="choisirEdition('lagon')">
-            🌊 Lagon
+            🌊Lagon
         </button>
 
         <button class="btn-success" onclick="choisirEdition('perle-noire')">
-            🖤 Perle Noire
+            🖤Perle Noire
         </button>
 
         <button class="btn-success" onclick="choisirEdition('cerf-volant')">
-            🪁 Cerf-volant
+            🪁Cerf-volant
         </button>
 
     </div>
@@ -493,45 +493,56 @@ button:active {
 
 <div class="card" style="border-top:4px solid #8b5cf6;">
 
+
+
     <h3>🌺 Bibliothèque PA'INA 987</h3>
 
+
+<div class="item-box">
+    🎟️Classique
+    <span id="count-classique">0 carton(s)</span>
+    <button class="btn-primary" onclick="voirEdition('classique')">
+        👁️Voir
+    </button>
+</div>
+
     <div class="item-box">
-        💎 Diamond
+        💎Diamond
         <span id="count-diamond">0 carton(s)</span>
         <button class="btn-primary" onclick="voirEdition('diamond')">
-            👁️ Voir
+            👁️Voir
         </button>
     </div>
 
     <div class="item-box">
-        🌺 Tiaré
+        🌺Tiaré
         <span id="count-tiare">0 carton(s)</span>
         <button class="btn-primary" onclick="voirEdition('tiare')">
-            👁️ Voir
+            👁️Voir
         </button>
     </div>
 
     <div class="item-box">
-        🌊 Lagon
+        🌊Lagon
         <span id="count-lagon">0 carton(s)</span>
         <button class="btn-primary" onclick="voirEdition('lagon')">
-            👁️ Voir
+            👁️Voir
         </button>
     </div>
 
     <div class="item-box">
-        🖤 Perle Noire
+        🖤Perle Noire
         <span id="count-perle-noire">0 carton(s)</span>
         <button class="btn-primary" onclick="voirEdition('perle-noire')">
-            👁️ Voir
+            👁️Voir
         </button>
     </div>
 
     <div class="item-box">
-        🪁 Cerf-volant
+        🪁Cerf-volant
         <span id="count-cerf-volant">0 carton(s)</span>
         <button class="btn-primary" onclick="voirEdition('cerf-volant')">
-            👁️ Voir
+            👁️Voir
         </button>
     </div>
 
@@ -540,7 +551,7 @@ button:active {
 
 
     <div class="card" style="border-top:4px solid #f59e0b;">
-        <h3>🎟️ Cartons disponibles</h3>
+        <h3>🎟️Cartons disponibles</h3>
 
         <div class="data-list" id="pdf-bingo-list">
     Aucun carton PDF importé.
