@@ -95,6 +95,20 @@ res.json({
 });
 
 
+// =========================
+// GENERATION CARTONS BINGO
+// =========================
+
+app.post("/generer-cartons-bingo", (req, res) => {
+
+    console.log("Demande de génération reçue");
+
+    res.json({
+        message: "Génération prête"
+    });
+
+});
+
 
 // =========================
 // DONNÉES DU JEU
