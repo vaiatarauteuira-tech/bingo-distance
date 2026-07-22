@@ -41,6 +41,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+let fichiersPDFBingo = [];
+
+
 
 // Route pour recevoir le PDF Bingo
 app.post("/upload-pdf-bingo", upload.single("pdf"), (req, res) => {
@@ -74,7 +77,6 @@ res.json({
 // =========================
 // DONNÉES DU JEU
 // =========================
-let fichiersPDFBingo = [];
 
 
 let players = {};
