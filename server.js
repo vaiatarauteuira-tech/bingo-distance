@@ -18,19 +18,29 @@ let historiqueVentes = [];
 let venteActive = false; 
 let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", desc: "1 boule pour 1 boule" };
 
+
+
 function broadcastRefresh() {
     const playersArray = Object.values(players);
-    
-  
+
+    io.emit('refresh-admin', { 
+        players: playersArray,
+        history: drawnNumbers,
+        orders: orders,
+        historiqueVentes: historiqueVentes,
+        pendingRegistrations: pendingRegistrations,
+        stockFichesCount: 0,
+        creditOrganisateur: 0
+    });
+
+    io.emit('refresh-orga', { 
+        playersList: playersArray,
+        orders: orders,
+        historiqueVentes: historiqueVentes
+    });
+}
 
 
-io.emit('refresh-admin', { 
-    players: playersArray, 
-    history: drawnNumbers, 
-    orders: orders, 
-    historiqueVentes: historiqueVentes,
-    pendingRegistrations: global.pendingRegistrations || []
-});
 
 
     });
@@ -156,7 +166,7 @@ socket.on('player-request-registration', ({ nom, tel }) => {
 
 let pendingRegistrations = [];
 
-socket.on('player-request-registration', ({ nom, tel }) => {
+
 
     const demande = {
         id: Date.now(),
