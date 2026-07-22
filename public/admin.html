@@ -3,212 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Console Maître Suprême - Admin BingoHome</title>
+    <title>BingoHome - Admin</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #05050a; color: #f8fafc; margin: 0; padding: 15px; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 1500px; margin: 0 auto; }
-        @media (max-width: 1024px) { .admin-grid { grid-template-columns: 1fr; } }
-        
-        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #222530; padding-bottom: 8px; text-transform: uppercase; }
-        
-        button { padding: 12px 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
-        .btn-success { background: #10b981; color: white; width: 100%; }
-        .btn-primary { background: #0284c7; color: white; width: 100%; }
-        .btn-purple { background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; width: 100%; }
-        
-        input, select, textarea { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; text-align: center; }
-        
-        .data-list { max-height: 180px; overflow-y: auto; background: #05050a; padding: 8px; border-radius: 6px; font-size: 13px; border: 1px solid #2d3142; }
-        .item-box { background: #12131a; padding: 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222530; }
-        
-        .stat-banner { display: flex; gap: 10px; margin-bottom: 15px; max-width: 1500px; margin: 0 auto 15px auto; }
-        .stat-box { background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 8px; flex: 1; text-align: center; font-size: 12px; color:#94a3b8; }
-        .stat-box strong { display: block; font-size: 1.4rem; color: #f59e0b; margin-top: 5px; }
-
-        .fraud-alert-box { background: rgba(239, 68, 68, 0.15); border: 2px dashed #ef4444; color: #f87171; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; font-weight: bold; text-align: center; display: none; }
-        
-        /* 📜 Cadre spécial d'affichage du Code unique généré */
-        .code-display-box { background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; display: none; }
-        .code-giant { font-size: 2rem; font-weight: 900; color: #10b981; letter-spacing: 2px; margin: 5px 0; background: #05050a; padding: 8px; border-radius: 6px; display: inline-block; border: 1px solid #222530; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 15px; }
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        button { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-draw { background: #ef4444; color: white; font-size: 1.5rem; width: 100%; }
+        .ball { display: inline-block; width: 35px; height: 35px; line-height: 35px; border-radius: 50%; background: #f59e0b; color: black; font-weight: bold; text-align: center; margin: 3px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { border: 1px solid #222530; padding: 8px; text-align: center; }
+        th { background: #1a1c26; color: #f59e0b; }
     </style>
 </head>
 <body>
 
-    <div style="text-align:center; margin-bottom:20px;">
-        <h2 style="margin:0; color:#f59e0b;">👑 CONSOLE DIRECTION GÉNÉRALE — BINGOHOME</h2>
-        <p style="margin:5px 0 0 0; color:#94a3b8; font-size:14px;">Certification des clés universelles uniques et blocage automatique de la fraude.</p>
+    <h2>🛡️ Administration & Boulier</h2>
+
+    <!-- BOULIER EN DIRECT -->
+    <div class="card" style="text-align: center;">
+        <button class="btn-draw" onclick="tirerBoule()">🔴 TIRER UNE BOULE</button>
+        <div style="margin-top:15px; font-size: 1.2rem;">Dernière boule : <span id="current-ball" style="font-size:2rem; color:#ef4444; font-weight:900;">--</span></div>
+        <div id="history-balls" style="margin-top:10px;"></div>
     </div>
 
-    <div class="stat-banner">
-        <div class="stat-box">Fiches Spéciales Stock Admin<strong id="txt-stock-admin">0 Fiches</strong></div>
-        <div class="stat-box">Solde Crédit Organisateur<strong id="txt-credit-orga">0 XPF</strong></div>
-        <div class="stat-box">Dernier Numéro Sorti<strong id="live-ball-top">-</strong></div>
-    </div>
-
-    <!-- 🚨 EN-TÊTE : CADRE D'ALERTE SÉCURITÉ ANTI-FRAUDE EN DIRECT -->
-    <div class="fraud-alert-box" id="fraud-gyrophare">
-        ⚠️ TENTATIVE DE FRAUDE DÉTECTÉE : <span id="fraud-details">Aucune alerte.</span> 
-        <button onclick="document.getElementById('fraud-gyrophare').style.display='none'" style="padding:4px 8px; font-size:11px; background:#ef4444; color:white; margin-left:10px; width:auto;">Fermer l'alerte</button>
-    </div>
-
-    <!-- 🔥 NOUVEAU MODULE : LE CADRE DE CODE GÉNÉRÉ POUR ENVOI PERSONNEL -->
-    <div class="code-display-box" id="code-generator-output-box">
-        <div style="font-weight: bold; font-size: 14px; color: #cbd5e1;">🎉 CODE UNIQUE CRÉÉ AVEC SUCCÈS !</div>
-        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;" id="code-owner-details">Joueur : -- | Tél : --</div>
-        <div><span class="code-giant" id="code-target-value">BH-0000</span></div>
-        <p style="font-size: 11px; color: #94a3b8; margin: 0 0 10px 0;">Copie ce code pour l'envoyer personnellement au joueur par SMS ou Messenger.</p>
-        <button onclick="copierCodeGenere()" style="background: #10b981; color: white; padding: 6px 15px; font-size: 12px; width: auto;">📋 Copier le code secret</button>
-        <button onclick="document.getElementById('code-generator-output-box').style.display='none'" style="background: transparent; color: #64748b; padding: 6px 15px; font-size: 12px; width: auto; border: 1px solid #222530; margin-left: 5px;">Masquer</button>
-    </div>
-
-    <div class="admin-grid">
-        <!-- COLONNE DE GAUCHE -->
-        <div>
-            <div class="card" style="border: 2px solid #38bdf8;">
-                <h3 style="color:#38bdf8;">🔑 Validation & Certification des Codes Joueurs</h3>
-                <div class="data-list" id="pending-registrations-list">Aucun dossier d'inscription en attente.</div>
-            </div>
-
-            <div class="card" style="border-top: 4px solid #f59e0b;">
-                <h3>🪙 Commandes de Pions Reçues (Caisse Admin)</h3>
-                <div class="data-list" id="admin-orders-list">Aucun ordre en attente.</div>
-            </div>
-
-            <div class="card" style="border-top: 4px solid #a855f7;">
-                <h3>📢 Message d'Informations du Tournoi</h3>
-                <textarea id="admin-tournoi-msg" rows="2" placeholder="Message affiché en haut de l'écran du joueur..."></textarea>
-                <button class="btn-purple" onclick="publierInfosTournoi()">⚡ Diffuser l'information</button>
-            </div>
-        </div>
-
-        <!-- COLONNE DE DROITE -->
-        <div>
-            <div class="card" style="border-top: 4px solid #ef4444; text-align:center;">
-                <h3>🎰 Boulier de Tirage Suprême</h3>
-                <div style="width:70px; height:70px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:bold; margin:10px auto;" id="live-ball-display">-</div>
-                <div id="live-history-text" style="font-size:12px; color:#cbd5e1; margin-bottom:12px;">Historique : Aucun tirage</div>
-                <button class="btn-danger" style="font-size:15px; padding:12px;" onclick="socket.emit('admin-draw')">🎲 TIRER UNE BOULE SÉCURISÉE</button>
-            </div>
-
-            <div class="card" style="border-top: 4px solid #06b6d4;">
-                <h3>🎟️ Intitulé du Jeu en Cours</h3>
-                <input type="text" id="admin-game-title-input" placeholder="Ex: Carton plein - Feuillet 1">
-                <button class="btn-primary" onclick="publierIntituleJeu()">📢 Activer la synchronisation PDF</button>
-            </div>
-
-            <div class="card">
-                <h3>📊 Grand Livre des Transactions de Cartons</h3>
-                <div class="data-list" id="admin-sales-list">Aucune transaction répertoriée.</div>
-            </div>
-        </div>
+    <!-- LISTE DES JOUEURS CRÉÉS -->
+    <div class="card">
+        <h3>👥 Joueurs Enregistrés</h3>
+        <table>
+            <thead><tr><th>Nom</th><th>Code</th><th>Pions</th><th>Statut</th></tr></thead>
+            <tbody id="table-joueurs"></tbody>
+        </table>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-
-
-
-socket.on('connect', () => {
-    alert("Admin connecté au serveur");
-});
-
-
-
-
         socket.emit('admin-init');
 
-        function getBingoFormat(num) {
-            if (num <= 15) return "B " + num;
-            if (num <= 30) return "I " + num;
-            if (num <= 45) return "N " + num;
-            if (num <= 60) return "G " + num;
-            if (num <= 75) return "O " + num;
-        }
+        function tirerBoule() { socket.emit('admin-draw'); }
 
-        socket.on('refresh-admin', (data) =>
-{
-    // Écoute de l'actualisation en direct
-socket.on('refresh-orga', (data) => {
-    afficherDemandesPions(data.orders);
-});
-
-socket.on('refresh-admin', (data) => {
-    afficherDemandesPions(data.orders);
-});
-
-// Écoute de l'alerte en direct
-socket.on('notification-staff', (msg) => {
-    console.log("🔔 ALERTE DIRECTE : " + msg);
-    // Optionnel : Jouer une petite alerte sonore
-    // const audio = new Audio('/alert.mp3'); audio.play();
-});
-
-alert("Demandes reçues : " + JSON.stringify(data.pendingRegistrations)); document.getElementById('txt-stock-admin').textContent = `${data.stockFichesCount} Fiches`;
-            document.getElementById('txt-credit-orga').textContent = `${data.creditOrganisateur.toLocaleString()} XPF`;
-            
-            const bouleActuelle = data.history[data.history.length - 1];
-            const formatBoule = bouleActuelle ? getBingoFormat(bouleActuelle) : "-";
-            document.getElementById('live-ball-top').textContent = formatBoule;
-            document.getElementById('live-ball-display').textContent = formatBoule;
-            document.getElementById('live-history-text').textContent = "Historique : " + (data.history.map(n => getBingoFormat(n)).slice(-6).join(' - ') || "Aucun numéro");
-
-            const regZone = document.getElementById('pending-registrations-list');
-            regZone.innerHTML = data.pendingRegistrations.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune demande de création de code unique.</div>' : '';
-            data.pendingRegistrations.forEach(r => {
-                regZone.innerHTML += `<div class="item-box" style="border-left: 4px solid #38bdf8;">
-                    <span>👤 Joueur : <strong>${r.nom}</strong><br>📱 Téléphone : ${r.tel}</span>
-                    <button class="btn-primary" style="width:auto; padding:6px 12px;" onclick="socket.emit('admin-approve-registration', ${r.id})">Certifier & Créer le Code</button>
-                </div>`;
-            });
-
-            const oZone = document.getElementById('admin-orders-list');
-            const ordresPourAdmin = data.orders.filter(o => o.destinataire.includes("Admin"));
-            oZone.innerHTML = ordresPourAdmin.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune commande en attente.</div>' : '';
-            ordresPourAdmin.forEach(o => {
-                oZone.innerHTML += `<div class="item-box"><span>👤 ${o.nom} (${o.code})<br>💵 ${o.type}</span><button class="btn-success" style="width:auto; padding:6px 14px;" onclick="socket.emit('admin-validate-order', ${o.id})">Valider</button></div>`;
-            });
-
-            const sZone = document.getElementById('admin-sales-list');
-            sZone.innerHTML = data.historiqueVentes.length === 0 ? '<div style="color:#475569;text-align:center;padding:10px;">Aucune vente.</div>' : '';
-            data.historiqueVentes.forEach(s => {
-                sZone.innerHTML += `<div class="item-box" style="border-left:4px solid #a855f7;"><span>🛒 <strong>${s.nomJoueur}</strong> [${s.codeJoueur}] a acquis ${s.quantite} ticket(s)</span><span style="font-weight:bold; color:#f59e0b;">-${s.pionsDepenses} Pions</span></div>`;
+        socket.on('new-ball', (data) => {
+            document.getElementById('current-ball').innerText = data.actuelle;
+            const container = document.getElementById('history-balls');
+            container.innerHTML = '';
+            data.historique.forEach(num => {
+                container.innerHTML += `<span class="ball">${num}</span>`;
             });
         });
 
-        // 🔥 CAPTEUR DU CODE UNIQUE ASSIGNÉ POUR AFFICHAGE CHEZ L'ADMIN
-        socket.on('admin-code-generated-display', (data) => {
-            document.getElementById('code-generator-output-box').style.display = 'block';
-            document.getElementById('code-owner-details').innerHTML = `Joueur : <strong>${data.nom.toUpperCase()}</strong> | Téléphone : <strong>${data.tel}</strong>`;
-            document.getElementById('code-target-value').textContent = data.code;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-       
-
-        function copierCodeGenere() {
-            const codeText = document.getElementById('code-target-value').textContent;
-            navigator.clipboard.writeText(codeText);
-            alert(`Clé universelle ${codeText} copiée dans le presse-papiers !`);
-        }
-
-        socket.on('admin-security-alert', (data) => {
-            const gyrophare = document.getElementById('fraud-gyrophare');
-            const details = document.getElementById('fraud-details');
-            gyrophare.style.display = 'block';
-            if(data.type === "FRAUDE_NUMERO_EXISTANT") {
-                details.innerHTML = `L'appareil de <strong>${data.nomFraudeur}</strong> tente d'extorquer un nouveau code avec le numéro <strong>${data.tel}</strong>. Ce numéro appartient déjà à <strong>${data.nomProprietaire}</strong> (Clé : ${data.codeAssocie}). ACTION : Tentative bloquée automatiquement.`;
-            } else {
-                details.innerHTML = `L'appareil de <strong>${data.nomFraudeur}</strong> harcèle le bouton d'inscription pour le numéro <strong>${data.tel}</strong>. Demande mise en sourdine.`;
-            }
-            if ('speechSynthesis' in window) {
-                const alerte = new SpeechSynthesisUtterance("Attention tentative de fraude bloquée");
-                alerte.lang = 'fr-FR'; window.speechSynthesis.speak(alerte);
-            }
+        socket.on('refresh-admin', (data) => {
+            const tbody = document.getElementById('table-joueurs');
+            tbody.innerHTML = '';
+            data.players.forEach(p => {
+                tbody.innerHTML += `<tr>
+                    <td>${p.nom}</td>
+                    <td><strong style="color:#10b981;">${p.code}</strong></td>
+                    <td>${p.pions}</td>
+                    <td>${p.online ? '🟢 En Ligne' : '🔴 Hors Ligne'}</td>
+                </tr>`;
+            });
         });
 
-        function publierInfosTournoi() { socket.emit('admin-send-flash', `🏆 INFOS TOURNOI : ${document.getElementById('admin-tournoi-msg').value}`); alert("Diffusé !"); }
-        function publierIntituleJeu() { socket.emit('admin-send-flash', `JEU:${document.getElementById('admin-game-title-input').value}`); alert("Synchronisé !"); }
+        socket.on('admin-receive-bingo', (data) => { alert(`🔥 ALERTE PAINA DE ${data.code} !`); });
     </script>
 </body>
 </html>
