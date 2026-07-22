@@ -15,6 +15,9 @@ const io = new Server(server, {
 app.use(express.static(path.join(__dirname, "public")));
 
 
+const multer = require("multer");
+
+
 // =========================
 // DONNÉES DU JEU
 // =========================
