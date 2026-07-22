@@ -47,6 +47,8 @@ const upload = multer({ storage: storage });
 
 let fichiersPDFBingo = [];
 
+let cartonsGeneres = [];
+
 
 const dossierBingo = path.join(__dirname, "public/uploads/bingo");
 
@@ -190,7 +192,13 @@ app.post("/generer-cartons-bingo", (req, res) => {
         }
 
 
-        doc.end();
+                doc.end();
+
+        cartonsGeneres.push({
+            nom: nomFichier,
+            theme: theme,
+            date: new Date()
+        });
 
     }
 
