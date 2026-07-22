@@ -49,12 +49,21 @@ app.post("/upload-pdf-bingo", upload.single("pdf"), (req, res) => {
         return res.status(400).send("Aucun fichier reçu");
     }
 
-    console.log("PDF reçu :", req.file.filename);
+    
+fichiersPDFBingo.push({
+    nom: req.file.originalname,
+    fichier: req.file.filename,
+    date: new Date()
+});
 
-    res.json({
-        message: "PDF importé avec succès",
-        fichier: req.file.filename
-    });
+console.log("PDF reçu :", req.file.filename);
+
+res.json({
+    message: "PDF importé avec succès",
+    fichier: req.file.filename
+});
+
+
 });
 
 
@@ -62,6 +71,8 @@ app.post("/upload-pdf-bingo", upload.single("pdf"), (req, res) => {
 // =========================
 // DONNÉES DU JEU
 // =========================
+let fichiersPDFBingo = [];
+
 
 let players = {};
 
