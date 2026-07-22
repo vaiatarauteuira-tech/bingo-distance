@@ -15,6 +15,48 @@ const io = new Server(server, {
 app.use(express.static(path.join(__dirname, "public")));
 
 
+const multer = require("multer");
+const fs = require("fs");
+
+
+// =========================
+// IMPORT DES CARTES BINGO PDF
+// =========================
+
+const uploadFolder = path.join(__dirname, "public", "uploads");
+
+// Créer le dossier uploads s'il n'existe pas
+if (!fs.existsSync(uploadFolder)) {
+    fs.mkdirSync(uploadFolder, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadFolder);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+
+// Route pour recevoir le PDF Bingo
+app.post("/upload-pdf-bingo", upload.single("pdf"), (req, res) => {
+
+    if (!req.file) {
+        return res.status(400).send("Aucun fichier reçu");
+    }
+
+    console.log("PDF reçu :", req.file.filename);
+
+    res.json({
+        message: "PDF importé avec succès",
+        fichier: req.file.filename
+    });
+});
+
 
 
 // =========================
