@@ -424,15 +424,39 @@ button:active {
 
 
 
-    <div class="card" style="border-top: 4px solid #06b6d4;">
+    <div id="tickets" class="tab-content">
+
+    <div class="card" style="border-top:4px solid #06b6d4;">
         <h3>🎟️ Intitulé du Jeu en Cours</h3>
+
         <input type="text" id="admin-game-title-input" placeholder="Ex: Carton plein - Feuillet 1">
+
         <button class="btn-primary" onclick="publierIntituleJeu()">
             📢 Activer la synchronisation PDF
         </button>
     </div>
 
-</div> 
+
+    <div class="card" style="border-top:4px solid #10b981;">
+        <h3>📄 Gestion des Cartes Bingo PDF</h3>
+
+        <input type="file" accept=".pdf" id="pdf-bingo-file">
+
+        <button class="btn-success">
+            ⬆️ Importer mes cartes Bingo PDF
+        </button>
+    </div>
+
+
+    <div class="card" style="border-top:4px solid #f59e0b;">
+        <h3>🎟️ Cartons disponibles</h3>
+
+        <div class="data-list">
+            Aucun carton PDF importé.
+        </div>
+    </div>
+
+</div>
 
 
 
