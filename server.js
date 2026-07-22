@@ -68,8 +68,6 @@ io.on('connection', (socket) => {
         broadcastRefresh(); // Met à jour l'admin et l'orga en direct
     });
 
-
-//Ajouter moiiii
 io.on('connection', (socket) => {     
     console.log("Connexion reçue :", socket.id);
 
