@@ -107,6 +107,16 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+
+
+
+socket.on('connect', () => {
+    alert("Admin connecté au serveur");
+});
+
+
+
+
         socket.emit('admin-init');
 
         function getBingoFormat(num) {
