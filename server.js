@@ -58,6 +58,9 @@ fichiersPDFBingo.push({
 
 console.log("PDF reçu :", req.file.filename);
 
+broadcastRefresh();
+
+
 res.json({
     message: "PDF importé avec succès",
     fichier: req.file.filename
