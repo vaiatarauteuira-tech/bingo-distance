@@ -55,8 +55,28 @@
         
         input, select, textarea { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; text-align: center; }
         
-        .data-list { max-height: 180px; overflow-y: auto; background: #05050a; padding: 8px; border-radius: 6px; font-size: 13px; border: 1px solid #2d3142; }
-        .item-box { background: #12131a; padding: 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222530; }
+        .data-list { 
+    max-height: 180px; 
+    overflow-y: auto; 
+    background: rgba(0,0,0,0.45); 
+    backdrop-filter: blur(5px);
+    padding: 8px; 
+    border-radius: 6px; 
+    font-size: 13px; 
+    border: 1px solid rgba(255,255,255,0.15); 
+}
+
+.item-box { 
+    background: rgba(18,19,26,0.65); 
+    backdrop-filter: blur(4px);
+    padding: 10px; 
+    border-radius: 6px; 
+    margin-bottom: 6px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border: 1px solid rgba(255,255,255,0.12); 
+}
         
         .stat-banner { display: flex; gap: 10px; margin-bottom: 15px; max-width: 1500px; margin: 0 auto 15px auto; }
         .stat-box { background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 8px; flex: 1; text-align: center; font-size: 12px; color:#94a3b8; }
