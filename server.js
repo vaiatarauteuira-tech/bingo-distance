@@ -38,7 +38,32 @@ function broadcastRefresh() {
     });
 }
 
-io.on('connection', (socket) => {
+io.on('connection', (socket) => {     // 🪙 DEMANDE DE PIONS DU JOUEUR (ENVOI INSTANTANÉ À L'ADMIN ET L'ORGA)
+    socket.on('player-request-pions', ({ code, qte }) => {
+        const codeClean = (code || "").trim().toUpperCase();
+        const quantite = parseInt(qte) || 0;
+
+        if (players[codeClean] && quantite > 0) {
+            const nouvelleDemande = {
+                id: Date.now(),
+                code: codeClean,
+                nom: players[codeClean].nom,
+                tel: players[codeClean].tel,
+                qte: quantite,
+                heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            // Ajout à la liste des commandes/recharges
+            orders.unshift(nouvelleDemande);
+
+            // Alerte sonore ou notification flash pour l'Admin et l'Organisateur
+            io.emit('notification-staff', `🪙 Nouvelle demande de pions : ${players[codeClean].nom} (${codeClean}) demande ${quantite} pions !`);
+
+            // Mettre à jour immédiatement les interfaces Admin & Organisateur
+            broadcastRefresh();
+        }
+    });
+
     
     // RENTRÉE ADMIN / ORGA -> SYNCHRONISATION IMMÉDIATE DES DEMANDES
     socket.on('admin-init', () => { broadcastRefresh(); });
