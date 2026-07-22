@@ -68,6 +68,14 @@ io.on('connection', (socket) => {
         broadcastRefresh(); // Met à jour l'admin et l'orga en direct
     });
 
+
+//Ajouter moiiii
+io.on('connection', (socket) => {     
+    console.log("Connexion reçue :", socket.id);
+
+    
+
+
     // 🪙 DEMANDE DE PIONS / RECHARGE DU JOUEUR (ARRIVE INSTANTANÉMENT)
     socket.on('player-request-pions', ({ code, qte }) => {
         const codeClean = (code || "").trim().toUpperCase();
