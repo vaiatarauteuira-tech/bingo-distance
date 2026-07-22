@@ -35,11 +35,15 @@ io.emit('refresh-admin', {
 
     });
 
-    io.emit('refresh-orga', { 
-        playersList: playersArray, 
-        orders: orders, 
-        historiqueVentes: historiqueVentes 
-    });
+    io.emit('refresh-admin', { 
+    players: playersArray, 
+    history: drawnNumbers, 
+    orders: orders,
+    historiqueVentes: historiqueVentes,
+    pendingRegistrations: pendingRegistrations,
+    stockFichesCount: 0,
+    creditOrganisateur: 0
+});
 }
 
 io.on('connection', (socket) => {
@@ -148,6 +152,26 @@ socket.on('player-request-registration', ({ nom, tel }) => {
             broadcastRefresh();
         }
     });
+
+
+let pendingRegistrations = [];
+
+socket.on('player-request-registration', ({ nom, tel }) => {
+
+    const demande = {
+        id: Date.now(),
+        nom: nom,
+        tel: tel
+    };
+
+    pendingRegistrations.push(demande);
+
+    io.emit('notification-staff', 
+        `📝 Nouvelle demande de code : ${nom}`
+    );
+
+    broadcastRefresh();
+});
 
     // 🔐 CONNEXION JOUEUR SÉCURISÉE
     socket.on('player-login', (code) => {
