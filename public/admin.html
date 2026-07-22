@@ -73,6 +73,29 @@ background-color: #0b3d4f;
     width: 100%;
 }
         
+
+/* 🌺 Perle noire de Tahiti au clic */
+.perle-tahiti{
+    position:fixed;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:99999;
+
+    background: radial-gradient(circle at 30% 30%,
+        #ffffff,
+        #8fe7ff 15%,
+        #5b4b8a 40%,
+        #1a1a1a 75%,
+        #000000);
+
+    box-shadow:
+        0 0 12px rgba(255,255,255,0.8),
+        inset -3px -3px 6px rgba(0,0,0,0.8);
+}
+
+
         input, select, textarea { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; text-align: center; }
         
         .data-list { 
