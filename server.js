@@ -13,7 +13,10 @@ let players = {};
 let pool = Array.from({length: 75}, (_, i) => i + 1);
 let drawnNumbers = [];
 let orders = [];
-let historiqueVentes = []; 
+
+
+let historiqueVentes = [];
+let pendingRegistrations = [];
 
 let venteActive = false; 
 let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", desc: "1 boule pour 1 boule" };
