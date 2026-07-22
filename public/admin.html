@@ -522,6 +522,34 @@ button:active {
             data.historiqueVentes.forEach(s => {
                 sZone.innerHTML += `<div class="item-box" style="border-left:4px solid #a855f7;"><span>🛒 <strong>${s.nomJoueur}</strong> [${s.codeJoueur}] a acquis ${s.quantite} ticket(s)</span><span style="font-weight:bold; color:#f59e0b;">-${s.pionsDepenses} Pions</span></div>`;
             });
+
+const pdfZone = document.querySelector("#tickets .data-list");
+
+if (pdfZone) {
+
+    pdfZone.innerHTML = "";
+
+    if (data.pdfBingo.length === 0) {
+
+        pdfZone.innerHTML = "Aucun carton PDF importé.";
+
+    } else {
+
+        data.pdfBingo.forEach(pdf => {
+
+            pdfZone.innerHTML += `
+                <div class="item-box">
+                    📄 ${pdf.nom}
+                </div>
+            `;
+
+        });
+
+    }
+
+}
+
+
         });
 
         // 🔥 CAPTEUR DU CODE UNIQUE ASSIGNÉ POUR AFFICHAGE CHEZ L'ADMIN
