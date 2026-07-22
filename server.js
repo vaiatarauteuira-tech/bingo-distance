@@ -14,6 +14,8 @@ const io = new Server(server, {
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(express.json());
+
 
 const multer = require("multer");
 const fs = require("fs");
@@ -101,8 +103,6 @@ res.json({
 
 
 
-
-app.use(express.json());
 
 app.post("/generer-cartons-bingo", (req, res) => {
 
