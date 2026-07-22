@@ -25,6 +25,23 @@
         <input type="text" id="input-code" placeholder="Code Joueur (ex: BH-1234)">
         <button class="btn-gold" onclick="seConnecter()">🎮 S'identifier & Jouer</button>
 
+<div style="font-size:12px; color:#94a3b8; margin-top:15px;">
+    Vous n'avez pas de code ?
+</div>
+
+<button class="btn-purple" onclick="afficherDemande()">
+    ✍️ Demander un Code d'Accès
+</button>
+
+<div id="box-demande" style="display:none; margin-top:15px;">
+    <input type="text" id="reg-nom" placeholder="Votre Nom et Prénom">
+    <input type="tel" id="reg-tel" placeholder="Votre Numéro de Téléphone">
+    <button class="btn-gold" onclick="envoyerDemande()">
+        Envoyer la demande à la régie
+    </button>
+</div>
+
+
         <div class="staff-nav-box">
             <button class="staff-btn" onclick="ouvrirStaff('orga')">🎪 Organisateur</button>
             <button class="staff-btn" onclick="ouvrirStaff('admin')">🛡️ Admin</button>
