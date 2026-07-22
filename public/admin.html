@@ -173,7 +173,7 @@ alert("Demandes reçues : " + JSON.stringify(data.pendingRegistrations)); docume
             document.getElementById('code-owner-details').innerHTML = `Joueur : <strong>${data.nom.toUpperCase()}</strong> | Téléphone : <strong>${data.tel}</strong>`;
             document.getElementById('code-target-value').textContent = data.code;
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        
+        });
        
 
         function copierCodeGenere() {
