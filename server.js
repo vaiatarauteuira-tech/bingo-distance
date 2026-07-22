@@ -12,17 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 let players = {};              
 let pool = Array.from({length: 75}, (_, i) => i + 1);
 let drawnNumbers = [];
-let orders = []; // Tableau des demandes de pions et recharges
+let orders = [];
 
 let venteActive = false; 
 let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", desc: "1 boule pour 1 boule" };
 let historiqueVentes = []; 
 
-// FONCTION DE SYNCHRONISATION GLOBALE INSTANTANÉE
 function broadcastRefresh() {
     const playersArray = Object.values(players);
     
-    // Envoi des données actualisées à l'Admin
     io.emit('refresh-admin', { 
         players: playersArray, 
         history: drawnNumbers, 
@@ -30,7 +28,6 @@ function broadcastRefresh() {
         historiqueVentes: historiqueVentes 
     });
 
-    // Envoi des données actualisées à l'Organisateur
     io.emit('refresh-orga', { 
         playersList: playersArray, 
         orders: orders, 
@@ -41,7 +38,7 @@ function broadcastRefresh() {
 io.on('connection', (socket) => {
     
     socket.on('admin-init', () => { broadcastRefresh(); });
-    
+    socket.on('orga-init', () => { broadcastRefresh(); });
 
     // ⚡ CRÉATION DIRECTE D'UN JOUEUR PAR L'ORGANISATEUR
     socket.on('orga-create-player-direct', ({ nom, tel }) => {
@@ -65,16 +62,10 @@ io.on('connection', (socket) => {
         };
 
         socket.emit('player-created-success', { nom: nomClean, code: codeUnique });
-        broadcastRefresh(); // Met à jour l'admin et l'orga en direct
+        broadcastRefresh();
     });
 
-io.on('connection', (socket) => {     
-    console.log("Connexion reçue :", socket.id);
-
-    
-
-
-    // 🪙 DEMANDE DE PIONS / RECHARGE DU JOUEUR (ARRIVE INSTANTANÉMENT)
+    // 🪙 DEMANDE DE PIONS DU JOUEUR
     socket.on('player-request-pions', ({ code, qte }) => {
         const codeClean = (code || "").trim().toUpperCase();
         const quantite = parseInt(qte) || 0;
@@ -88,17 +79,13 @@ io.on('connection', (socket) => {
                 type: "Demande de Pions"
             };
 
-            orders.unshift(nouvelleDemande); // Ajout en haut de la liste
-            
-            // Notification sonore ou visuelle pour le staff
+            orders.unshift(nouvelleDemande);
             io.emit('notification-staff', `🪙 ${players[codeClean].nom} (${codeClean}) demande ${quantite} pions !`);
-            
-            broadcastRefresh(); // Transmet instantanément à l'admin et l'orga
+            broadcastRefresh();
         }
     });
 
-    // VALIDATION D'UNE COMMANDE DE PIONS PAR L'ADMIN / ORGA
-    type="admin-validate-order"
+    // VALIDATION COMMANDE PIONS
     socket.on('admin-validate-order', (idOrder) => {
         const idx = orders.findIndex(o => o.id === idOrder);
         if (idx !== -1) {
@@ -109,15 +96,15 @@ io.on('connection', (socket) => {
                 players[codeClean].pions += parseInt(o.qte);
                 if (players[codeClean].socketId) {
                     io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
-                    io.to(players[codeClean].socketId).emit('notification', `✅ ${o.qte} pions ont été ajoutés à votre compte !`);
+                    io.to(players[codeClean].socketId).emit('notification', `✅ ${o.qte} pions ajoutés !`);
                 }
             }
-            orders.splice(idx, 1); // Supprime de la liste des en attente
+            orders.splice(idx, 1);
             broadcastRefresh();
         }
     });
 
-    // 🔐 CONNEXION DU JOUEUR
+    // 🔐 CONNEXION JOUEUR
     socket.on('player-login', (code) => {
         if (!code) return socket.emit('login-error', '❌ Saisis ton code.');
         const codeVerif = code.trim().toUpperCase();
@@ -142,7 +129,7 @@ io.on('connection', (socket) => {
         io.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
     });
 
-    // LIVRAISON DU PDF 1 PAR 1
+    // LIVRAISON PDF
     socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, pageDebut, pageFin }) => {
         const codeClean = (code || "").trim().toUpperCase();
         if (players[codeClean]) {
@@ -166,8 +153,16 @@ io.on('connection', (socket) => {
     });
 
     socket.on('player-announce-bingo', (data) => { io.emit('admin-receive-bingo', data); });
-    socket.on('admin-reset-all', () => { players = {}; pool = Array.from({length: 75}, (_, i) => i + 1); drawnNumbers = []; orders = []; venteActive = false; io.emit('game-reset'); broadcastRefresh(); });
+    socket.on('admin-reset-all', () => { 
+        players = {}; 
+        pool = Array.from({length: 75}, (_, i) => i + 1); 
+        drawnNumbers = []; 
+        orders = []; 
+        venteActive = false; 
+        io.emit('game-reset'); 
+        broadcastRefresh(); 
+    });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`Serveur BingoHome Prêt`); });
+server.listen(PORT, () => { console.log(`Serveur BingoHome Prêt sur le port ${PORT}`); });
