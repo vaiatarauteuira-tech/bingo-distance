@@ -75,6 +75,8 @@ io.on('connection', (socket) => {
         socket.emit('player-created-success', { nom: nomClean, code: codeUnique });
         broadcastRefresh();
     });
+io.on('connection', (socket) => {
+
 
 // 📝 DEMANDE DE CRÉATION DE CODE JOUEUR
 socket.on('player-request-registration', ({ nom, tel }) => {
@@ -86,11 +88,15 @@ socket.on('player-request-registration', ({ nom, tel }) => {
         statut: "en attente"
     };
 
-    if (!global.pendingRegistrations) {
-        global.pendingRegistrations = [];
-    }
+   
+pendingRegistrations.push(demande);
 
-    global.pendingRegistrations.push(demande);
+io.emit(
+    'notification-staff',
+    `📝 Nouvelle demande de code : ${nom.trim()}`
+); 
+
+
 
     console.log("Nouvelle demande joueur :", demande);
 
