@@ -41,7 +41,7 @@ function broadcastRefresh() {
 io.on('connection', (socket) => {
     
     socket.on('admin-init', () => { broadcastRefresh(); });
-    socket.on('orga-init', () => { broadcastRefresh(); });
+    
 
     // ⚡ CRÉATION DIRECTE D'UN JOUEUR PAR L'ORGANISATEUR
     socket.on('orga-create-player-direct', ({ nom, tel }) => {
