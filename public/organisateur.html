@@ -210,6 +210,22 @@
         }
 
         socket.on('refresh-orga', (data) => {
+            // Écoute de l'actualisation en direct
+socket.on('refresh-orga', (data) => {
+    afficherDemandesPions(data.orders);
+});
+
+socket.on('refresh-admin', (data) => {
+    afficherDemandesPions(data.orders);
+});
+
+// Écoute de l'alerte en direct
+socket.on('notification-staff', (msg) => {
+    console.log("🔔 ALERTE DIRECTE : " + msg);
+    // Optionnel : Jouer une petite alerte sonore
+    // const audio = new Audio('/alert.mp3'); audio.play();
+});
+
             document.getElementById('orga-solde-pions').textContent = `${data.fichesDisponibles || 0} Pions`;
 
             const pZone = document.getElementById('orga-pdf-orders');
