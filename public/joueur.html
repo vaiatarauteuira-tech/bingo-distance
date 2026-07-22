@@ -328,6 +328,22 @@
         socket.on('notification', (msg) => { alert(msg); });
 
         function demanderPionsCaisse() {
+            function demanderPions() {
+    const code = sessionStorage.getItem('joueurCode');
+    const qteInput = document.getElementById('qte-pions-input'); // Remplacez par votre ID de champ
+    const qte = qteInput ? qteInput.value : 0;
+
+    if (!qte || qte <= 0) {
+        return alert("Veuillez indiquer un nombre de pions valide.");
+    }
+
+    // Envoi instantané au serveur
+    socket.emit('player-request-pions', { code: code, qte: qte });
+
+    alert(`✅ Demande de ${qte} pions envoyée en direct à la régie !`);
+    if (qteInput) qteInput.value = '';
+}
+
             const qte = document.getElementById('pion-quantite').value;
             const dest = document.getElementById('pion-destinataire').value;
             const taux = document.getElementById('pion-taux-select').value;
