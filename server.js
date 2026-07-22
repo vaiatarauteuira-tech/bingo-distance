@@ -21,11 +21,18 @@ let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", d
 function broadcastRefresh() {
     const playersArray = Object.values(players);
     
-    io.emit('refresh-admin', { 
-        players: playersArray, 
-        history: drawnNumbers, 
-        orders: orders, 
-        historiqueVentes: historiqueVentes 
+  
+
+
+io.emit('refresh-admin', { 
+    players: playersArray, 
+    history: drawnNumbers, 
+    orders: orders, 
+    historiqueVentes: historiqueVentes,
+    pendingRegistrations: global.pendingRegistrations || []
+});
+
+
     });
 
     io.emit('refresh-orga', { 
@@ -64,6 +71,28 @@ io.on('connection', (socket) => {
         socket.emit('player-created-success', { nom: nomClean, code: codeUnique });
         broadcastRefresh();
     });
+
+// 📝 DEMANDE DE CRÉATION DE CODE JOUEUR
+socket.on('player-request-registration', ({ nom, tel }) => {
+
+    const demande = {
+        id: Date.now(),
+        nom: nom.trim(),
+        tel: tel.trim(),
+        statut: "en attente"
+    };
+
+    if (!global.pendingRegistrations) {
+        global.pendingRegistrations = [];
+    }
+
+    global.pendingRegistrations.push(demande);
+
+    console.log("Nouvelle demande joueur :", demande);
+
+    broadcastRefresh();
+});
+
 
     // 🪙 DEMANDE DE PIONS DU JOUEUR (Transmission instantanée)
     socket.on('player-request-pions', ({ code, qte }) => {
