@@ -46,19 +46,6 @@ function broadcastRefresh() {
 
 
 
-    });
-
-    io.emit('refresh-admin', { 
-    players: playersArray, 
-    history: drawnNumbers, 
-    orders: orders,
-    historiqueVentes: historiqueVentes,
-    pendingRegistrations: pendingRegistrations,
-    stockFichesCount: 0,
-    creditOrganisateur: 0
-});
-}
-
 io.on('connection', (socket) => {
     
     socket.on('admin-init', () => { broadcastRefresh(); });
@@ -166,25 +153,6 @@ socket.on('player-request-registration', ({ nom, tel }) => {
         }
     });
 
-
-let pendingRegistrations = [];
-
-
-
-    const demande = {
-        id: Date.now(),
-        nom: nom,
-        tel: tel
-    };
-
-    pendingRegistrations.push(demande);
-
-    io.emit('notification-staff', 
-        `📝 Nouvelle demande de code : ${nom}`
-    );
-
-    broadcastRefresh();
-});
 
     // 🔐 CONNEXION JOUEUR SÉCURISÉE
     socket.on('player-login', (code) => {
