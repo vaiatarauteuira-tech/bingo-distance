@@ -7,58 +7,33 @@
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .login-card { background: #12131a; border: 1px solid #222530; border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
-        .logo { font-size: 2rem; font-weight: 900; color: #f59e0b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .logo { font-size: 2rem; font-weight: 900; color: #f59e0b; margin-bottom: 5px; text-transform: uppercase; }
         .sub-logo { font-size: 12px; color: #94a3b8; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; font-weight: bold; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; }
-        .btn-purple { background: #a855f7; color: white; margin-top: 10px; }
-        .box-demande { display: none; background: #1a1c26; border: 1px solid #2d3142; padding: 12px; border-radius: 10px; margin-top: 15px; }
-        
-        /* Navigation vers les interfaces Staff */
         .staff-nav-box { margin-top: 25px; padding-top: 15px; border-top: 1px solid #222530; display: flex; justify-content: space-between; gap: 10px; }
-        .staff-btn { color: #64748b; font-size: 11px; font-weight: bold; background: #1a1c26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3142; flex: 1; cursor: pointer; transition: 0.2s; }
-        .staff-btn:hover { color: #f59e0b; border-color: #f59e0b; }
+        .staff-btn { color: #64748b; font-size: 11px; font-weight: bold; background: #1a1c26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3142; flex: 1; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <!-- VRAI NOM DU JEU -->
         <div class="logo">🎱 BingoHome</div>
         <div class="sub-logo">Espace Joueur - Entrez votre code unique</div>
 
-        <!-- FORMULAIRE DE CONNEXION JOUEUR -->
         <input type="text" id="input-code" placeholder="Code Joueur (ex: BH-1234)">
         <button class="btn-gold" onclick="seConnecter()">🎮 S'identifier & Jouer</button>
 
-        <hr style="border:0; border-top:1px solid #222530; margin: 20px 0;">
-
-        <div style="font-size:12px; color:#94a3b8;">Vous n'avez pas de code ?</div>
-        <button class="btn-purple" onclick="afficherDemande()">✍️ Demander un Code d'Accès</button>
-
-        <!-- FORMULAIRE DE DEMANDE D'INSCRIPTION -->
-        <div class="box-demande" id="box-demande">
-            <div style="font-size:13px; font-weight:bold; color:#a855f7; margin-bottom:10px;">Inscription Tournoi</div>
-            <input type="text" id="reg-nom" placeholder="Votre Nom et Prénom">
-            <input type="tel" id="reg-tel" placeholder="Votre Numéro de Téléphone">
-            <button class="btn-gold" onclick="envoyerDemande()">Envoyer la demande à la régie</button>
-        </div>
-
-        <!-- ACCÈS SÉCURISÉS ADMIN ET ORGANISATEUR -->
         <div class="staff-nav-box">
-            <button class="staff-btn" onclick="ouvrirEspaceStaff('orga')">🎪 Accès Organisateur</button>
-            <button class="staff-btn" onclick="ouvrirEspaceStaff('admin')">🛡️ Accès Admin</button>
+            <button class="staff-btn" onclick="ouvrirStaff('orga')">🎪 Organisateur</button>
+            <button class="staff-btn" onclick="ouvrirStaff('admin')">🛡️ Admin</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-
-        // MOTS DE PASSE DE SÉCURITÉ POUR LA RÈGIE
-        const MDP_ORGANISATEUR = "ORGA2026";
-        const MDP_ADMIN = "ADMIN2026";
 
         function seConnecter() {
             const codeInput = document.getElementById('input-code').value.trim().toUpperCase();
@@ -73,52 +48,15 @@
         });
 
         socket.on('login-error', (msg) => {
-            alert(msg || "❌ Code invalide !");
+            alert(msg);
             sessionStorage.removeItem('joueurCode');
-            document.getElementById('input-code').value = '';
         });
 
-        function afficherDemande() {
-            const box = document.getElementById('box-demande');
-            box.style.display = box.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function envoyerDemande() {
-            const nom = document.getElementById('reg-nom').value.trim();
-            const tel = document.getElementById('reg-tel').value.trim();
-
-            if (!nom || !tel) return alert("Remplissez tous les champs.");
-
-            socket.emit('player-request-registration', { nom, tel });
-        }
-
-        socket.on('registration-status', (res) => {
-            if (res.status === 'submitted') {
-                alert("✅ Demande transmise ! L'organisateur va valider votre compte et vous remettre votre code.");
-                document.getElementById('box-demande').style.display = 'none';
-            } else if (res.status === 'already_active') {
-                alert(`⚠️ Un compte existe déjà avec ce numéro ! Votre code est : ${res.code}`);
-                document.getElementById('input-code').value = res.code;
-            }
-        });
-
-        // 🔒 VÉRIFICATION DU MOT DE PASSE POUR ORGANISATEUR & ADMIN
-        function ouvrirEspaceStaff(type) {
-            if (type === 'orga') {
-                const pass = prompt("🔑 Entrez le mot de passe Organisateur :");
-                if (pass === MDP_ORGANISATEUR) {
-                    window.location.href = '/organisateur.html';
-                } else if (pass !== null) {
-                    alert("❌ Mot de passe Organisateur incorrect !");
-                }
-            } else if (type === 'admin') {
-                const pass = prompt("🔑 Entrez le mot de passe Administrateur :");
-                if (pass === MDP_ADMIN) {
-                    window.location.href = '/admin.html';
-                } else if (pass !== null) {
-                    alert("❌ Mot de passe Administrateur incorrect !");
-                }
-            }
+        function ouvrirStaff(type) {
+            const mdp = prompt(`🔑 Mot de passe ${type.toUpperCase()} :`);
+            if (type === 'orga' && mdp === 'ORGA2026') window.location.href = '/organisateur.html';
+            else if (type === 'admin' && mdp === 'ADMIN2026') window.location.href = '/admin.html';
+            else if (mdp !== null) alert("❌ Mot de passe incorrect !");
         }
     </script>
 </body>
