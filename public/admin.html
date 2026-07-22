@@ -542,6 +542,19 @@ document.querySelectorAll("button").forEach(btn => {
 });
 
 
+// 🌺 Gestion des onglets PA'INA 987
+function openTab(tabName) {
+
+    document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.style.display = "none";
+    });
+
+    const page = document.getElementById(tabName);
+
+    if (page) {
+        page.style.display = "block";
+    }
+}
 
  
 
