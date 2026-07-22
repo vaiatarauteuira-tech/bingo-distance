@@ -64,17 +64,16 @@ function afficherDemande() {
     box.style.display = box.style.display === 'block' ? 'none' : 'block';
 }
 
+
+
+
 function envoyerDemande() {
+    alert("La fonction est appelée !");
+
     const nom = document.getElementById('reg-nom').value.trim();
     const tel = document.getElementById('reg-tel').value.trim();
 
-    if (!nom || !tel) {
-        alert("Remplissez tous les champs.");
-        return;
-    }
-
-    socket.emit('player-request-registration', { nom, tel });
-    alert("Demande envoyée à la régie !");
+    alert("Nom: " + nom + " Téléphone: " + tel);
 }
 
 
