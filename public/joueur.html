@@ -3,356 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BingoHome - Espace Joueur</title>
+    <title>BingoHome - Joueur</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 12px; padding-bottom: 85px; }
-        .main-container { max-width: 450px; margin: 0 auto; }
-        .admin-info-banner { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15)); border: 2px solid #a855f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #e2e8f0; text-align: center; }
-        
-        .ticket-order-gold-card {
-            background: rgba(245, 158, 11, 0.08);
-            border: 2px solid #f59e0b;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 15px;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-            position: relative;
-        }
-
-        .status-badge-sale {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-        .status-badge-sale.open { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
-        .status-badge-sale.closed { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-
-        .ticket-game-title { font-size: 1.4rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.5px; padding-right: 90px; }
-        .ticket-price-sub { font-size: 14px; font-weight: bold; color: #f59e0b; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-        .ticket-mode-sub { font-size: 12px; color: #94a3b8; margin-bottom: 12px; }
-        .ticket-orga-name { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 12px; }
-        
-        .order-input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-        .order-qty-input { width: 100px !important; margin-bottom: 0 !important; font-size: 16px !important; font-weight: bold !important; text-align: center; }
-        .order-calc-label { font-size: 15px; font-weight: bold; color: #f59e0b; }
-
-        button.btn-orange-gold {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #05050a;
-            font-size: 15px;
-            font-weight: 800;
-            padding: 14px;
-            width: 100%;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        button.btn-orange-gold:disabled {
-            background: #1e202e !important;
-            color: #64748b !important;
-            border: 1px solid #2d3142 !important;
-            box-shadow: none !important;
-            cursor: not-allowed !important;
-        }
-
-        .game-title-card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
-        .welcome-player-text { font-size: 14px; color: #a855f7; font-weight: bold; margin: 0; }
-
-        .pdf-delivery-box { background: #1a1c26; border: 1px solid #2d3142; border-radius: 10px; padding: 12px; margin-top: 12px; display: none; }
-        .pdf-title { color: #f59e0b; font-weight: bold; font-size: 13px; margin-bottom: 6px; }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        h3 { margin-top: 0; color: #38bdf8; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 12px; }
-
-        button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        button.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #05050a; width: 100%; }
-        button.btn-purple { background: #a855f7; color: white; width: 100%; text-decoration: none; }
-        
-        button.paina-trigger-btn { background: linear-gradient(135deg, #ec4899, #ef4444); color: white; font-size: 1.6rem; font-weight: 900; padding: 16px; width: 100%; margin-bottom: 15px; border-radius: 50px; border: 2px solid #fff; }
-
-        input, select { width: 100%; padding: 12px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 12px; font-size: 15px; text-align: center; }
-
-        .verif-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; background: #1a1c26; padding: 8px; border-radius: 8px; }
-        @media (max-width: 600px) { .verif-grid { grid-template-columns: repeat(10, 1fr); } }
-        .verif-num { background: #12131a; border: 1px solid #222530; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 3px; color: #475569; font-weight: bold; }
-        .verif-num.out { background: #ef4444; color: white; border-color: #f87171; }
-
-        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #12131a; border-top: 1px solid #222530; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; font-weight: bold; cursor: pointer; width: 23%; text-align: center; }
-        .nav-item.active { color: #f59e0b; }
-        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 15px; }
+        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .btn-violet { background: #a855f7; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
+        .btn-gold { background: #f59e0b; color: black; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .paina-btn { background: #ef4444; color: white; font-size: 1.8rem; font-weight: 900; padding: 15px; border-radius: 12px; border: none; width: 100%; cursor: pointer; }
+        input { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="admin-info-banner" id="admin-info-box">
-            🏆 INFOS TOURNOI : Bienvenue sur BingoHome ! En attente d'annonces...
-        </div>
-
-        <div id="view-jouer" class="tab-content active">
-            <div class="ticket-order-gold-card">
-                <div class="status-badge-sale closed" id="badge-sale-status">🔒 Fermé</div>
-
-                <div class="ticket-game-title" id="card-game-title">500 FRANCS</div>
-                <div class="ticket-price-sub">💰 <span id="card-ticket-price">100</span> XPF / ticket</div>
-                <div class="ticket-mode-sub" id="card-ticket-desc">1 boule pour 1 boule</div>
-                <div class="ticket-orga-name">Organisateur : <span id="card-orga-name" style="color:#f59e0b; font-weight:bold;">VAHINE</span></div>
-                
-                <div class="order-input-row">
-                    <input type="number" id="ticket-order-qty" class="order-qty-input" value="1" min="1" oninput="actualiserCalculPions()">
-                    <span class="order-calc-label" id="card-calc-total">× 100 XPF</span>
-                </div>
-
-                <button class="btn-orange-gold" id="btn-submit-order" onclick="validerCommandeTicketPions()" disabled>
-                    🔒 Ventes actuellement fermées
-                </button>
-            </div>
-
-            <div class="game-title-card">
-                <div class="welcome-player-text" id="lbl-welcome-player">BIENVENUE (JOUEUR)</div>
-                
-                <!-- DÉTAIL DES TICKETS 1 PAR 1 ATTRIBUÉS AU JOUEUR -->
-                <div class="pdf-delivery-box" id="pdf-container-card">
-                    <div class="pdf-title" id="pdf-card-title">📄 Carton PDF officiel attribué</div>
-                    <a href="#" id="pdf-download-btn" target="_blank" class="btn-purple" style="display:block; text-align:center; padding:10px; margin-top:8px; border-radius:8px;">
-                        👁️ Ouvrir mes cartons PDF
-                    </a>
-                </div>
-            </div>
-
-            <button class="paina-trigger-btn" onclick="annoncerPainaDirect()">💥 PAINA ! 💥</button>
-
-            <div class="card" style="border-left: 4px solid #ef4444;">
-                <h3>🎰 Boules tirées en direct</h3>
-                <div style="display:flex; align-items:center; gap:15px; background:#1a1c26; padding:12px; border-radius:10px;">
-                    <div style="width:55px; height:55px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold;" id="live-ball">-</div>
-                    <div style="font-size:12px; color:#cbd5e1; overflow-x:auto; white-space:nowrap;" id="history">En attente de boules...</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>📋 Grille de Contrôle Générale (1 à 75)</h3>
-                <div class="verif-grid" id="tableau-verification"></div>
-            </div>
-        </div>
-
-        <div id="view-pions" class="tab-content">
-            <div class="card" style="border-left: 4px solid #f59e0b;">
-                <h3>💰 Pions Actuels Disponibles</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1c26; padding:12px; border-radius:8px;">
-                    <span style="font-size:13px; color:#94a3b8;">Votre solde :</span>
-                    <span style="font-size:1.5rem; font-weight:bold; color:#f59e0b;" id="solde-pions">0 Pions</span>
-                </div>
-            </div>
-
-            <div class="card" style="border: 1px solid #10b981;">
-                <h3>💳 Commander des Pions</h3>
-                <label style="font-size:12px; color:#94a3b8;">Taux unitaire :</label>
-                <select id="pion-taux-select" onchange="calculerPions()">
-                    <option value="50">1 pion pour 50fr</option>
-                    <option value="100">1 pion pour 100fr</option>
-                </select>
-                
-                <label style="font-size:12px; color:#94a3b8;">Nombre de pions :</label>
-                <input type="number" id="pion-quantite" value="10" min="1" oninput="calculerPions()">
-                
-                <label style="font-size:12px; color:#94a3b8;">Destinataire :</label>
-                <select id="pion-destinataire">
-                    <option value="Admin Principal">Direction / Administrateur Général</option>
-                    <option value="Organisateur Local">Animateur / Organisateur</option>
-                </select>
-                
-                <div id="pion-prix-calcule" style="background:#0f172a; padding:10px; border-radius:6px; text-align:center; font-weight:bold; margin-bottom:12px; color:#10b981;">Montant à régler : 500 fr</div>
-                <button class="btn-gold" onclick="demanderPionsCaisse()">Soumettre la commande</button>
-            </div>
-        </div>
-
-        <div id="view-releve" class="tab-content">
-            <div class="card" style="border-top: 4px solid #06b6d4;">
-                <h3>📊 Historique & Relevé</h3>
-                <div id="releve-mouvements-list" style="max-height: 300px; overflow-y: auto; background:#05050a; padding:8px; border-radius:6px;">
-                    Aucune transaction.
-                </div>
-            </div>
-        </div>
+    <div class="card" style="text-align: center;">
+        <h2 id="display-nom" style="margin:0; color:#f59e0b;">Joueur</h2>
+        <p id="display-code" style="margin:5px 0; color:#94a3b8; font-size:12px;">CODE: -</p>
+        <div style="font-size: 1.2rem; font-weight: bold; margin-top:10px;">🪙 Pions : <span id="display-pions" style="color:#10b981;">0</span></div>
     </div>
 
-    <div class="bottom-nav-bar">
-        <div class="nav-item active" id="nav-jouer" onclick="switchTab('joueur')"><div class="nav-icon">🎮</div><span>Jouer</span></div>
-        <div class="nav-item" id="nav-pions" onclick="switchTab('pions')"><div class="nav-icon">🪙</div><span>Pions</span></div>
-        <div class="nav-item" id="nav-releve" onclick="switchTab('releve')"><div class="nav-icon">📊</div><span>Relevé</span></div>
+    <!-- CARTE PDF LIVRÉE -->
+    <div class="card">
+        <h3>📄 Mon Ticket de Jeu</h3>
+        <p id="display-pages-info" style="font-size:12px; color:#94a3b8;">Aucun ticket attribué pour le moment.</p>
+        <a id="btn-open-pdf" href="#" target="_blank" class="btn-violet" style="display:none;">👁️ AFFICHER MON TICKET PDF</a>
+    </div>
+
+    <!-- DEMANDE DE RECHARGEMENT PIONS -->
+    <div class="card">
+        <h3>🪙 Demander des Pions</h3>
+        <input type="number" id="input-qte-pions" placeholder="Nombre de pions souhaités" min="1">
+        <button class="btn-gold" onclick="envoyerDemandePions()">Envoyer la demande à la régie</button>
+    </div>
+
+    <!-- BOUTON PAINA -->
+    <div class="card">
+        <button class="paina-btn" onclick="crierPaina()">🔥 PAINA !</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         const monCode = sessionStorage.getItem('joueurCode');
-        let monNom = ""; let prixUnitaireTicket = 100; let soldeActuelPions = 0; let venteActiveActuelle = false;
 
-        if(!monCode) { window.location.href = '/'; } else { socket.emit('player-login', monCode); }
+        if (!monCode) { window.location.href = '/'; }
 
-        function getBingoFormat(num) {
-            if (num <= 15) return "B " + num;
-            if (num <= 30) return "I " + num;
-            if (num <= 45) return "N " + num;
-            if (num <= 60) return "G " + num;
-            return "O " + num;
-        }
+        socket.emit('player-login', monCode);
 
-        function switchTab(onglet) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if(onglet === 'joueur') { document.getElementById('view-jouer').classList.add('active'); document.getElementById('nav-jouer').classList.add('active'); }
-            else if(onglet === 'pions') { document.getElementById('view-pions').classList.add('active'); document.getElementById('nav-pions').classList.add('active'); }
-            else { document.getElementById('view-releve').classList.add('active'); document.getElementById('nav-releve').classList.add('active'); }
-        }
+        socket.on('update-dashboard', (player) => {
+            document.getElementById('display-nom').innerText = player.nom;
+            document.getElementById('display-code').innerText = `CODE: ${player.code}`;
+            document.getElementById('display-pions').innerText = player.pions;
 
-        function actualiserCalculPions() {
-            const qte = parseInt(document.getElementById('ticket-order-qty').value) || 1;
-            document.getElementById('card-calc-total').textContent = `× ${qte * prixUnitaireTicket} XPF`;
-        }
-
-        function mettreAJourCartonsPDF(player) {
             if (player.pdfUrl) {
-                const boxPdf = document.getElementById('pdf-container-card');
-                boxPdf.style.display = 'block';
-                const detailsPages = player.pagesInfo ? `(${player.pagesInfo})` : "";
-                document.getElementById('pdf-card-title').textContent = `📄 ${player.seriesCartons || "Carton Officiel"} ${detailsPages}`;
-                const btnPdf = document.getElementById('pdf-download-btn');
+                document.getElementById('display-pages-info').innerText = `Série : ${player.seriesCartons} (${player.pagesInfo})`;
+                const btnPdf = document.getElementById('btn-open-pdf');
                 btnPdf.href = player.pdfUrl;
+                btnPdf.style.display = 'block';
             }
-        }
-
-        socket.on('sync-vente-status', (data) => {
-            const badge = document.getElementById('badge-sale-status');
-            const btn = document.getElementById('btn-submit-order');
-
-            venteActiveActuelle = data.active;
-            document.getElementById('card-game-title').textContent = data.jeu.titre;
-            document.getElementById('card-ticket-price').textContent = data.jeu.prix;
-            document.getElementById('card-ticket-desc').textContent = data.jeu.desc;
-            document.getElementById('card-orga-name').textContent = data.jeu.orga;
-            
-            prixUnitaireTicket = data.jeu.prix;
-            actualiserCalculPions();
-
-            if (data.active) {
-                badge.className = "status-badge-sale open";
-                badge.textContent = "🔓 Ouvert";
-                btn.disabled = false;
-                btn.innerHTML = "🎫 Commander ce jeu avec mes pions";
-            } else {
-                badge.className = "status-badge-sale closed";
-                badge.textContent = "🔒 Fermé";
-                btn.disabled = true;
-                btn.innerHTML = "🔒 Ventes actuellement fermées";
-            }
-        });
-
-        function validerCommandeTicketPions() {
-            if(!venteActiveActuelle) return alert("❌ Ventes fermées.");
-            const qte = parseInt(document.getElementById('ticket-order-qty').value) || 1;
-            const coutTotal = qte * prixUnitaireTicket;
-            
-            if(soldeActuelPions < coutTotal) {
-                return alert(`❌ SOLDE INSUFFISANT !\n\nCoût : ${coutTotal} Pions\nSolde : ${soldeActuelPions} Pions`);
-            }
-
-            const titreJeu = document.getElementById('card-game-title').textContent;
-            const orgaNom = document.getElementById('card-orga-name').textContent;
-            
-            if(confirm(`📋 CONFIRMATION COMMANDE\n\n🎯 Jeu : ${titreJeu}\n👤 Organisateur : ${orgaNom}\n🎟️ Quantité : ${qte}\n💰 Total : ${coutTotal} Pions\n\nValider ?`)) {
-                socket.emit('player-buy-fiches-from-orga', { code: monCode, qte: qte });
-                alert("✅ Commande envoyée à votre organisateur !");
-            }
-        }
-
-        function calculerPions() {
-            const qte = document.getElementById('pion-quantite').value || 0;
-            const taux = document.getElementById('pion-taux-select').value;
-            document.getElementById('pion-prix-calcule').textContent = `Montant à régler : ${(qte * taux).toLocaleString()} fr`;
-        }
-
-        function initialiserTableau() {
-            const grid = document.getElementById('tableau-verification'); grid.innerHTML = '';
-            for(let i=1; i<=75; i++) { const box = document.createElement('div'); box.className = 'verif-num'; box.id = `verif-${i}`; box.textContent = i; grid.appendChild(box); }
-        }
-
-        socket.on('login-success-dashboard', (data) => {
-            monNom = data.player.nom;
-            soldeActuelPions = data.player.pions || 0;
-            document.getElementById('lbl-welcome-player').textContent = `BIENVENUE ${monNom.toUpperCase()} (${data.player.code})`;
-            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
-            initialiserTableau();
-            mettreAJourCartonsPDF(data.player);
-        });
-
-        socket.on('update-dashboard', (player) => { 
-            soldeActuelPions = player.pions || 0;
-            document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
-            mettreAJourCartonsPDF(player);
-        });
-
-        socket.on('update-dashboard-global', (data) => {
-            if (data.code === monCode) {
-                soldeActuelPions = data.player.pions || 0;
-                document.getElementById('solde-pions').textContent = `${soldeActuelPions} Pions`;
-                mettreAJourCartonsPDF(data.player);
-            }
-        });
-
-        socket.on('new-ball', (data) => {
-            const boule = data.actuelle;
-            const formatted = getBingoFormat(boule);
-            document.getElementById('live-ball').textContent = formatted;
-            const histFormat = data.historique.map(n => getBingoFormat(n)).slice(-4).join(' - ');
-            document.getElementById('history').textContent = "Boules : " + histFormat;
-            const el = document.getElementById(`verif-${boule}`); if(el) el.classList.add('out');
         });
 
         socket.on('notification', (msg) => { alert(msg); });
 
-        function demanderPionsCaisse() {
-            function demanderPions() {
-    const code = sessionStorage.getItem('joueurCode');
-    const qteInput = document.getElementById('qte-pions-input'); // Remplacez par votre ID de champ
-    const qte = qteInput ? qteInput.value : 0;
-
-    if (!qte || qte <= 0) {
-        return alert("Veuillez indiquer un nombre de pions valide.");
-    }
-
-    // Envoi instantané au serveur
-    socket.emit('player-request-pions', { code: code, qte: qte });
-
-    alert(`✅ Demande de ${qte} pions envoyée en direct à la régie !`);
-    if (qteInput) qteInput.value = '';
-}
-
-            const qte = document.getElementById('pion-quantite').value;
-            const dest = document.getElementById('pion-destinataire').value;
-            const taux = document.getElementById('pion-taux-select').value;
-            socket.emit('player-order', { code: monCode, type: `Achat via ${dest} (${taux}fr/pion)`, qte: qte, destinataire: dest });
-            alert(`Demande soumise !`);
+        function envoyerDemandePions() {
+            const qte = document.getElementById('input-qte-pions').value;
+            if (!qte || qte <= 0) return alert("Indique un nombre de pions valide.");
+            socket.emit('player-request-pions', { code: monCode, qte: qte });
+            alert("✅ Demande envoyée à la régie !");
+            document.getElementById('input-qte-pions').value = '';
         }
 
-        function annoncerPainaDirect() { 
-            if(confirm("💥 Déclencher PAINA ?")) { socket.emit('player-announce-bingo', { code: monCode, nom: monNom }); } 
+        function crierPaina() {
+            socket.emit('player-announce-bingo', { code: monCode });
+            alert("📣 PAINA signalé à l'organisateur !");
         }
     </script>
 </body>
