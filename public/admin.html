@@ -526,13 +526,19 @@ button:active {
                 sZone.innerHTML += `<div class="item-box" style="border-left:4px solid #a855f7;"><span>🛒 <strong>${s.nomJoueur}</strong> [${s.codeJoueur}] a acquis ${s.quantite} ticket(s)</span><span style="font-weight:bold; color:#f59e0b;">-${s.pionsDepenses} Pions</span></div>`;
             });
 
-const pdfZone = document.querySelector("#tickets .data-list");
+
+const pdfZone = document.getElementById('pdf-bingo-list');
+
+
 
 if (pdfZone) {
 
     pdfZone.innerHTML = "";
 
-    if (data.pdfBingo.length === 0) {
+    
+if (!data.pdfBingo || data.pdfBingo.length === 0) {
+
+
 
         pdfZone.innerHTML = "Aucun carton PDF importé.";
 
