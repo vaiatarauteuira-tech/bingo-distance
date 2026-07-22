@@ -528,6 +528,22 @@ button:active {
         const socket = io();
         socket.emit('admin-init');
 
+
+let editionChoisie = null;
+
+function choisirEdition(theme) {
+
+    editionChoisie = theme;
+
+    document.getElementById("edition-active").textContent =
+    "🌺 Édition active : " + theme.toUpperCase();
+
+    console.log("Édition sélectionnée :", editionChoisie);
+
+}
+
+
+
         function getBingoFormat(num) {
             if (num <= 15) return "B " + num;
             if (num <= 30) return "I " + num;
