@@ -323,32 +323,50 @@ socket.on('new-ball', (data) => {
         function publierIntituleJeu() { socket.emit('admin-send-flash', `JEU:${document.getElementById('admin-game-title-input').value}`); alert("Synchronisé !"); }
 
 
+
+
+
+// 🌺 Perle noire de Tahiti au clic
 document.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", function (e) {
 
-        const perle = document.createElement("span");
-        perle.innerHTML = "⚪";
+    btn.addEventListener("click", function(e){
 
-        perle.style.position = "fixed";
-        perle.style.left = e.clientX + "px";
-        perle.style.top = e.clientY + "px";
-        perle.style.fontSize = "18px";
-        perle.style.pointerEvents = "none";
-        perle.style.transition = "all 0.8s ease";
-        perle.style.zIndex = "99999";
+        const perle = document.createElement("div");
+        perle.className = "perle-tahiti";
+
+        perle.style.left = (e.clientX - 9) + "px";
+        perle.style.top = (e.clientY - 9) + "px";
 
         document.body.appendChild(perle);
 
-        setTimeout(() => {
-            perle.style.transform = "translateY(-60px) scale(1.8)";
-            perle.style.opacity = "0";
-        }, 10);
+        perle.animate(
+            [
+                {
+                    transform: "translateY(0) scale(1)",
+                    opacity: 1
+                },
+                {
+                    transform: "translateY(-80px) scale(1.8) rotate(360deg)",
+                    opacity: 0
+                }
+            ],
+            {
+                duration: 900,
+                easing: "ease-out"
+            }
+        );
 
         setTimeout(() => {
             perle.remove();
-        }, 800);
+        }, 900);
+
     });
+
 });
+
+
+
+ 
 
     </script>
 </body>
