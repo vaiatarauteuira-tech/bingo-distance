@@ -74,16 +74,20 @@ function afficherDemande() {
 }
 
 
-
-
 function envoyerDemande() {
-    alert("La fonction est appelée !");
-
     const nom = document.getElementById('reg-nom').value.trim();
     const tel = document.getElementById('reg-tel').value.trim();
 
-    alert("Nom: " + nom + " Téléphone: " + tel);
+    if (!nom || !tel) {
+        alert("Remplissez tous les champs.");
+        return;
+    }
+
+    socket.emit('player-request-registration', { nom, tel });
+
+    alert("Demande envoyée à la régie !");
 }
+
 
 
         socket.on('login-success-dashboard', (data) => {
