@@ -298,6 +298,35 @@ socket.on('new-ball', (data) => {
 
         function publierInfosTournoi() { socket.emit('admin-send-flash', `🏆 INFOS TOURNOI : ${document.getElementById('admin-tournoi-msg').value}`); alert("Diffusé !"); }
         function publierIntituleJeu() { socket.emit('admin-send-flash', `JEU:${document.getElementById('admin-game-title-input').value}`); alert("Synchronisé !"); }
+
+
+document.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", function (e) {
+
+        const perle = document.createElement("span");
+        perle.innerHTML = "⚪";
+
+        perle.style.position = "fixed";
+        perle.style.left = e.clientX + "px";
+        perle.style.top = e.clientY + "px";
+        perle.style.fontSize = "18px";
+        perle.style.pointerEvents = "none";
+        perle.style.transition = "all 0.8s ease";
+        perle.style.zIndex = "99999";
+
+        document.body.appendChild(perle);
+
+        setTimeout(() => {
+            perle.style.transform = "translateY(-60px) scale(1.8)";
+            perle.style.opacity = "0";
+        }, 10);
+
+        setTimeout(() => {
+            perle.remove();
+        }, 800);
+    });
+});
+
     </script>
 </body>
 </html>
