@@ -793,6 +793,43 @@ function importerPDFBingo() {
 
 
 
+function genererCartonsBingo() {
+
+    const theme = document.getElementById("generation-theme").value;
+    const nombre = document.getElementById("nombre-cartons").value;
+
+    fetch("/generer-cartons-bingo", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            theme: theme,
+            nombre: nombre
+        })
+
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        alert("✅ " + data.message);
+
+    })
+
+    .catch(err => {
+
+        console.error(err);
+        alert("❌ Erreur pendant la génération");
+
+    });
+
+}
+
 
 // 🌺 Perle noire de Tahiti au clic
 document.querySelectorAll("button").forEach(btn => {
