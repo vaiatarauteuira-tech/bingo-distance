@@ -120,8 +120,9 @@ function broadcastRefresh() {
 
         pendingRegistrations: pendingRegistrations,
 
-        stockFichesCount: 0,
+        pdfBingo: fichiersPDFBingo,
 
+        stockFichesCount: 0,
         creditOrganisateur: 0
 
     });
