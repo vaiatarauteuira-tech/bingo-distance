@@ -643,7 +643,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, ()=>{
 
     console.log(
-        `🎱 BingoHome serveur actif sur le port ${PORT}`
+        `🎱🌺🥥 PA'INA 987 🥥🌺 serveur actif sur le port ${PORT}`
     );
 
 });
