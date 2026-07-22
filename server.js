@@ -62,7 +62,7 @@ function broadcastRefresh() {
 io.on('connection', (socket) => {
     
     socket.on('admin-init', () => { broadcastRefresh(); });
-    socket.on('orga-init', () => { broadcastRefresh(); });
+    
 
     // ⚡ CRÉATION DIRECTE DU JOUEUR (Code unique BH-XXXX)
     socket.on('orga-create-player-direct', ({ nom, tel }) => {
@@ -211,16 +211,22 @@ let pendingRegistrations = [];
     });
 
     socket.on('player-announce-bingo', (data) => { io.emit('admin-receive-bingo', data); });
-    
-    socket.on('admin-reset-all', () => { 
-        players = {}; 
-        pool = Array.from({length: 75}, (_, i) => i + 1); 
-        drawnNumbers = []; 
-        orders = []; 
-        venteActive = false; 
-        io.emit('game-reset'); 
-        broadcastRefresh(); 
-    });
+   
+
+
+socket.on('admin-reset-all', () => {
+    players = {};
+    pendingRegistrations = [];
+    pool = Array.from({ length: 75 }, (_, i) => i + 1);
+    drawnNumbers = [];
+    orders = [];
+    historiqueVentes = [];
+    venteActive = false;
+
+    io.emit('game-reset');
+    broadcastRefresh();
+});
+
 });
 
 const PORT = process.env.PORT || 3000;
