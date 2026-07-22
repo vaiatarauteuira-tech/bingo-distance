@@ -1,207 +1,649 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
 
-app.use(express.static(path.join(__dirname, 'public')));
+const io = new Server(server, {
+    cors: {
+        origin: "*"
+    }
+});
 
-let players = {};              
-let pool = Array.from({length: 75}, (_, i) => i + 1);
-let drawnNumbers = [];
-let orders = [];
+app.use(express.static(path.join(__dirname, "public")));
 
 
-let historiqueVentes = [];
+// =========================
+// DONNÉES DU JEU
+// =========================
+
+let players = {};
+
 let pendingRegistrations = [];
 
-let venteActive = false; 
-let jeuActuel = { titre: "EN ATTENTE DU JEU", prix: 100, orga: "ADMIN / ORGA", desc: "1 boule pour 1 boule" };
+let pool = Array.from(
+    { length: 75 },
+    (_, i) => i + 1
+);
+
+let drawnNumbers = [];
+
+let orders = [];
+
+let historiqueVentes = [];
+
+let venteActive = false;
+
+let jeuActuel = {
+    titre: "EN ATTENTE DU JEU",
+    prix: 100,
+    orga: "ADMIN / ORGA",
+    desc: "1 boule pour 1 boule"
+};
 
 
+// =========================
+// SYNCHRONISATION ADMIN / ORGA
+// =========================
 
 function broadcastRefresh() {
+
     const playersArray = Object.values(players);
 
-    io.emit('refresh-admin', { 
+
+    io.emit("refresh-admin", {
+
         players: playersArray,
+
         history: drawnNumbers,
+
         orders: orders,
+
         historiqueVentes: historiqueVentes,
+
         pendingRegistrations: pendingRegistrations,
+
         stockFichesCount: 0,
+
         creditOrganisateur: 0
+
     });
 
-    io.emit('refresh-orga', { 
+
+    io.emit("refresh-orga", {
+
         playersList: playersArray,
+
         orders: orders,
+
         historiqueVentes: historiqueVentes
+
     });
+
 }
 
 
 
+// =========================
+// CONNEXION SOCKET
+// =========================
 
-io.on('connection', (socket) => {
-    
-    socket.on('admin-init', () => { broadcastRefresh(); });
-    
+io.on("connection", (socket) => {
 
-    // ⚡ CRÉATION DIRECTE DU JOUEUR (Code unique BH-XXXX)
-    socket.on('orga-create-player-direct', ({ nom, tel }) => {
+
+    console.log("Utilisateur connecté :", socket.id);
+
+
+
+    socket.on("admin-init", () => {
+
+        broadcastRefresh();
+
+    });
+
+
+
+    socket.on("orga-init", () => {
+
+        broadcastRefresh();
+
+    });
+
+    // =========================
+    // DEMANDE DE CRÉATION DE CODE JOUEUR
+    // =========================
+
+    socket.on("player-request-registration", ({ nom, tel }) => {
+
         const nomClean = (nom || "").trim();
         const telClean = (tel || "").trim();
-        if (!nomClean) return;
 
-        const codeUnique = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        players[codeUnique] = {
+        if (!nomClean || !telClean) return;
+
+
+        const demande = {
+
+            id: Date.now(),
+
             nom: nomClean,
+
             tel: telClean,
-            code: codeUnique,
-            pions: 0,
-            nombreFiches: 0,
-            seriesCartons: "",
-            pdfUrl: null,
-            pagesInfo: "",
-            online: false,
-            socketId: null
+
+            socketId: socket.id,
+
+            statut: "en attente"
+
         };
 
-        socket.emit('player-created-success', { nom: nomClean, code: codeUnique });
+
+        pendingRegistrations.push(demande);
+
+
+        io.emit(
+            "notification-staff",
+            `📝 Nouvelle demande de code : ${nomClean}`
+        );
+
+
         broadcastRefresh();
+
     });
-io.on('connection', (socket) => {
-
-
-// 📝 DEMANDE DE CRÉATION DE CODE JOUEUR
-socket.on('player-request-registration', ({ nom, tel }) => {
-
-    const demande = {
-        id: Date.now(),
-        nom: nom.trim(),
-        tel: tel.trim(),
-        statut: "en attente"
-    };
-
-   
-pendingRegistrations.push(demande);
-
-io.emit(
-    'notification-staff',
-    `📝 Nouvelle demande de code : ${nom.trim()}`
-); 
 
 
 
-    console.log("Nouvelle demande joueur :", demande);
+    // =========================
+    // VALIDATION ADMIN DU CODE
+    // =========================
 
-    broadcastRefresh();
-});
+    socket.on("admin-approve-registration", (id) => {
 
 
-    // 🪙 DEMANDE DE PIONS DU JOUEUR (Transmission instantanée)
-    socket.on('player-request-pions', ({ code, qte }) => {
-        const codeClean = (code || "").trim().toUpperCase();
-        const quantite = parseInt(qte) || 0;
+        const index = pendingRegistrations.findIndex(
+            r => r.id === id
+        );
+
+
+        if (index === -1) return;
+
+
+
+        const demande = pendingRegistrations[index];
+
+
+
+        let code;
+
+
+        do {
+
+            code = `BH-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        } while (players[code]);
+
+
+
+        players[code] = {
+
+            nom: demande.nom,
+
+            tel: demande.tel,
+
+            code: code,
+
+            pions: 0,
+
+            nombreFiches: 0,
+
+            seriesCartons: "",
+
+            pdfUrl: null,
+
+            pagesInfo: "",
+
+            online: false,
+
+            socketId: null
+
+        };
+
+
+
+        io.to(demande.socketId).emit(
+            "registration-approved",
+            {
+                code: code
+            }
+        );
+
+
+
+        socket.emit(
+            "admin-code-generated-display",
+            {
+                nom: demande.nom,
+
+                tel: demande.tel,
+
+                code: code
+            }
+        );
+
+
+
+        pendingRegistrations.splice(index, 1);
+
+
+
+        broadcastRefresh();
+
+
+    });
+
+
+
+
+    // =========================
+    // CONNEXION JOUEUR
+    // =========================
+
+    socket.on("player-login", (code) => {
+
+
+        if (!code) {
+
+            socket.emit(
+                "login-error",
+                "❌ Saisis ton code"
+            );
+
+            return;
+
+        }
+
+
+
+        const codeClean = code
+            .trim()
+            .toUpperCase();
+
+
+
+        if (players[codeClean]) {
+
+
+            players[codeClean].online = true;
+
+            players[codeClean].socketId = socket.id;
+
+
+
+            socket.emit(
+                "login-success-dashboard",
+                {
+                    player: players[codeClean],
+
+                    liveHistory: drawnNumbers
+                }
+            );
+
+
+
+            socket.emit(
+                "sync-vente-status",
+                {
+                    active: venteActive,
+
+                    jeu: jeuActuel
+                }
+            );
+
+
+
+            broadcastRefresh();
+
+
+
+        } else {
+
+
+            socket.emit(
+                "login-error",
+                "❌ Code joueur inexistant"
+            );
+
+
+        }
+
+
+    });
+
+
+    // =========================
+    // DEMANDE DE PIONS
+    // =========================
+
+    socket.on("player-request-pions", ({ code, qte }) => {
+
+        const codeClean = (code || "")
+            .trim()
+            .toUpperCase();
+
+
+        const quantite = Number(qte) || 0;
+
 
         if (players[codeClean] && quantite > 0) {
-            const nouvelleDemande = {
+
+
+            const demande = {
+
                 id: Date.now(),
+
                 code: codeClean,
+
                 nom: players[codeClean].nom,
+
                 qte: quantite,
-                heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+
+                heure: new Date()
+                    .toLocaleTimeString("fr-FR")
+
             };
 
-            orders.unshift(nouvelleDemande);
-            io.emit('notification-staff', `🪙 ${players[codeClean].nom} (${codeClean}) demande ${quantite} pions !`);
+
+            orders.unshift(demande);
+
+
+            io.emit(
+                "notification-staff",
+                `🪙 ${demande.nom} demande ${quantite} pions`
+            );
+
+
             broadcastRefresh();
+
         }
+
     });
 
-    // 🎁 VALIDATION DE PIONS PAR L'ADMIN / ORGA
-    socket.on('admin-validate-order', (idOrder) => {
-        const idx = orders.findIndex(o => o.id === idOrder);
-        if (idx !== -1) {
-            const o = orders[idx];
-            const codeClean = (o.code || "").trim().toUpperCase();
-            
-            if (players[codeClean]) {
-                players[codeClean].pions += parseInt(o.qte);
-                if (players[codeClean].socketId) {
-                    io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
-                    io.to(players[codeClean].socketId).emit('notification', `🎁 +${o.qte} Pions ajoutés !`);
-                }
+
+
+
+
+    // =========================
+    // VALIDATION DES PIONS
+    // =========================
+
+    socket.on("admin-validate-order", (idOrder) => {
+
+
+        const index = orders.findIndex(
+            o => o.id === idOrder
+        );
+
+
+        if (index === -1) return;
+
+
+
+        const commande = orders[index];
+
+
+        if (players[commande.code]) {
+
+
+            players[commande.code].pions += Number(
+                commande.qte
+            );
+
+
+            if(players[commande.code].socketId){
+
+
+                io.to(players[commande.code].socketId)
+                .emit(
+                    "update-dashboard",
+                    players[commande.code]
+                );
+
+
+                io.to(players[commande.code].socketId)
+                .emit(
+                    "notification",
+                    `🎁 +${commande.qte} pions ajoutés`
+                );
+
             }
-            orders.splice(idx, 1);
-            broadcastRefresh();
+
+
         }
+
+
+
+        orders.splice(index,1);
+
+
+        broadcastRefresh();
+
+
     });
 
-    // 📄 LIVRAISON DU PDF 1 PAR 1
-    socket.on('orga-deliver-pdf', ({ code, serie, fichierUrl, pageDebut, pageFin }) => {
-        const codeClean = (code || "").trim().toUpperCase();
-        if (players[codeClean]) {
+
+
+
+
+    // =========================
+    // LIVRAISON PDF CARTONS
+    // =========================
+
+    socket.on(
+        "orga-deliver-pdf",
+        ({code, serie, fichierUrl, pageDebut, pageFin}) => {
+
+
+        const codeClean = code
+        .trim()
+        .toUpperCase();
+
+
+
+        if(players[codeClean]){
+
+
             players[codeClean].pdfUrl = fichierUrl;
+
             players[codeClean].seriesCartons = serie;
-            players[codeClean].pagesInfo = (pageDebut === pageFin) ? `Page ${pageDebut}` : `Pages ${pageDebut} à ${pageFin}`;
 
-            if (players[codeClean].socketId) {
-                io.to(players[codeClean].socketId).emit('update-dashboard', players[codeClean]);
-                io.to(players[codeClean].socketId).emit('notification', `📄 Votre ticket (${players[codeClean].pagesInfo}) est disponible !`);
+
+            players[codeClean].pagesInfo =
+            pageDebut === pageFin
+            ? `Page ${pageDebut}`
+            : `Pages ${pageDebut} à ${pageFin}`;
+
+
+
+            if(players[codeClean].socketId){
+
+                io.to(players[codeClean].socketId)
+                .emit(
+                    "update-dashboard",
+                    players[codeClean]
+                );
+
             }
+
+
             broadcastRefresh();
+
         }
+
     });
 
 
-    // 🔐 CONNEXION JOUEUR SÉCURISÉE
-    socket.on('player-login', (code) => {
-        if (!code) return socket.emit('login-error', '❌ Saisis ton code.');
-        const codeVerif = code.trim().toUpperCase();
 
-        if (players[codeVerif]) {
-            players[codeVerif].online = true; 
-            players[codeVerif].socketId = socket.id;
-            socket.emit('login-success-dashboard', { player: players[codeVerif], liveHistory: drawnNumbers });
-            socket.emit('sync-vente-status', { active: venteActive, jeu: jeuActuel });
-            broadcastRefresh();
-        } else { 
-            socket.emit('login-error', '❌ ACCÈS REFUSÉ ! Ce code n\'existe pas dans le système.'); 
+
+
+    // =========================
+    // TIRAGE BINGO
+    // =========================
+
+    socket.on("admin-draw", () => {
+
+
+        if(pool.length === 0) return;
+
+
+
+        const index = Math.floor(
+            Math.random() * pool.length
+        );
+
+
+        const numero = pool.splice(index,1)[0];
+
+
+        drawnNumbers.push(numero);
+
+
+
+        io.emit(
+            "new-ball",
+            {
+                actuelle: numero,
+
+                historique: drawnNumbers
+            }
+        );
+
+
+    });
+
+
+
+
+
+    // =========================
+    // BINGO ANNONCÉ
+    // =========================
+
+    socket.on(
+        "player-announce-bingo",
+        (data)=>{
+
+            io.emit(
+                "admin-receive-bingo",
+                data
+            );
+
         }
+    );
+
+
+
+
+
+    // =========================
+    // MESSAGE ADMIN
+    // =========================
+
+    socket.on(
+        "admin-send-flash",
+        (message)=>{
+
+            io.emit(
+                "notification",
+                message
+            );
+
+        }
+    );
+
+
+
+
+
+    // =========================
+    // RESET JEU
+    // =========================
+
+    socket.on("admin-reset-all", ()=>{
+
+
+        players = {};
+
+        pendingRegistrations = [];
+
+        pool = Array.from(
+            {length:75},
+            (_,i)=>i+1
+        );
+
+        drawnNumbers = [];
+
+        orders = [];
+
+        historiqueVentes = [];
+
+        venteActive = false;
+
+
+
+        io.emit(
+            "game-reset"
+        );
+
+
+        broadcastRefresh();
+
+
     });
 
-    // BOULIER EN DIRECT
-    socket.on('admin-draw', () => { 
-        if (pool.length === 0) return; 
-        const num = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; 
-        drawnNumbers.push(num); 
-        io.emit('new-ball', { actuelle: num, historique: drawnNumbers }); 
+
+
+    socket.on("disconnect", ()=>{
+
+
+        Object.values(players).forEach(player=>{
+
+
+            if(player.socketId === socket.id){
+
+                player.online = false;
+
+                player.socketId = null;
+
+            }
+
+
+        });
+
+
+        broadcastRefresh();
+
+
     });
 
-    socket.on('player-announce-bingo', (data) => { io.emit('admin-receive-bingo', data); });
-   
 
-
-socket.on('admin-reset-all', () => {
-    players = {};
-    pendingRegistrations = [];
-    pool = Array.from({ length: 75 }, (_, i) => i + 1);
-    drawnNumbers = [];
-    orders = [];
-    historiqueVentes = [];
-    venteActive = false;
-
-    io.emit('game-reset');
-    broadcastRefresh();
 });
 
-});
+
+
+
+
+// =========================
+// LANCEMENT SERVEUR
+// =========================
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`Serveur BingoHome Prêt sur le port ${PORT}`); });
+
+
+server.listen(PORT, ()=>{
+
+    console.log(
+        `🎱 BingoHome serveur actif sur le port ${PORT}`
+    );
+
+});
