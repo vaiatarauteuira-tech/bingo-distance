@@ -571,6 +571,34 @@ socket.on('new-ball', (data) => {
 
 
 
+function importerPDFBingo() {
+
+    const fichier = document.getElementById("pdf-bingo-file").files[0];
+
+    if (!fichier) {
+        alert("Choisis d'abord un fichier PDF");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("pdf", fichier);
+
+    fetch("/upload-pdf-bingo", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("✅ PDF importé : " + data.fichier);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Erreur pendant l'import");
+    });
+
+}
+
+
 
 
 // 🌺 Perle noire de Tahiti au clic
