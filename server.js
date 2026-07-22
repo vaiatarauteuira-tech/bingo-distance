@@ -99,15 +99,107 @@ res.json({
 // GENERATION CARTONS BINGO
 // =========================
 
+
+
+
+app.use(express.json());
+
 app.post("/generer-cartons-bingo", (req, res) => {
 
-    console.log("Demande de génération reçue");
+    const theme = req.body.theme || "classique";
+    const nombre = Number(req.body.nombre) || 1;
+
+    const dossier = path.join(
+        __dirname,
+        "public/uploads/bingo",
+        theme
+    );
+
+    if (!fs.existsSync(dossier)) {
+        fs.mkdirSync(dossier, { recursive: true });
+    }
+
+
+    for (let i = 1; i <= nombre; i++) {
+
+        const nomFichier =
+        `${theme.toUpperCase()}_${Date.now()}_${i}.pdf`;
+
+        const chemin = path.join(dossier, nomFichier);
+
+
+        const doc = new PDFDocument();
+
+        doc.pipe(fs.createWriteStream(chemin));
+
+
+        doc.fontSize(22)
+        .text("🌺 PA'INA 987 BINGO", {
+            align:"center"
+        });
+
+
+        doc.moveDown();
+
+
+        doc.fontSize(16)
+        .text(theme.toUpperCase(), {
+            align:"center"
+        });
+
+
+        doc.moveDown();
+
+
+        const lettres = ["B","I","N","G","O"];
+
+        lettres.forEach((lettre, index)=>{
+
+            doc.text(
+                lettre + "     ",
+                100 + index*80,
+                180
+            );
+
+        });
+
+
+        let y = 220;
+
+        for(let ligne=0; ligne<5; ligne++){
+
+            let texte = "";
+
+            for(let colonne=0; colonne<5; colonne++){
+
+                const numero =
+                Math.floor(Math.random()*75)+1;
+
+                texte += numero + "     ";
+
+            }
+
+            doc.text(
+                texte,
+                80,
+                y
+            );
+
+            y += 50;
+        }
+
+
+        doc.end();
+
+    }
+
 
     res.json({
-        message: "Génération prête"
+        message: `${nombre} carton(s) créé(s) pour ${theme}`
     });
 
 });
+
 
 
 // =========================
