@@ -388,13 +388,24 @@ button:active {
         </div>
 
 
+
 </div>
 
 
+</div> <!-- fin onglet Joueurs -->
+
+
+<div id="jeu" class="tab-content">
+
         <!-- COLONNE DE DROITE -->
         <div>
+
+
             <div class="card" style="border-top: 4px solid #ef4444; text-align:center;">
-                <h3>🎰 Boulier de Tirage Suprême</h3>
+               
+
+
+ <h3>🎰 Boulier de Tirage Suprême</h3>
                 <div style="width:70px; height:70px; background:#ef4444; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:bold; margin:10px auto;" id="live-ball-display">-</div>
                 <div id="live-history-text" style="font-size:12px; color:#cbd5e1; margin-bottom:12px;">Historique : Aucun tirage</div>
                 <button class="btn-danger" style="font-size:15px; padding:12px;" onclick="socket.emit('admin-draw')">🎲 TIRER UNE BOULE SÉCURISÉE</button>
