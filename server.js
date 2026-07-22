@@ -17,6 +17,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const multer = require("multer");
 const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
 
 // =========================
@@ -43,6 +44,27 @@ const upload = multer({ storage: storage });
 
 let fichiersPDFBingo = [];
 
+
+const dossierBingo = path.join(__dirname, "public/uploads/bingo");
+
+const themesBingo = [
+    "classique",
+    "diamond",
+    "tiare",
+    "lagon",
+    "perle-noire",
+    "cerf-volant"
+];
+
+themesBingo.forEach(theme => {
+
+    const dossierTheme = path.join(dossierBingo, theme);
+
+    if (!fs.existsSync(dossierTheme)) {
+        fs.mkdirSync(dossierTheme, { recursive: true });
+    }
+
+});
 
 
 // Route pour recevoir le PDF Bingo
