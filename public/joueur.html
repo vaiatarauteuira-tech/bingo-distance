@@ -95,6 +95,37 @@ socket.on("new-ball", (data) => {
 });
 
 
+const zone = document.getElementById("historique-tirage");
+
+zone.innerHTML = "";
+
+data.historique.forEach(n => {
+
+    let l = "";
+
+    if (n >= 1 && n <= 15) l = "B";
+    else if (n <= 30) l = "I";
+    else if (n <= 45) l = "N";
+    else if (n <= 60) l = "G";
+    else l = "O";
+
+    zone.innerHTML += `
+        <div style="
+            background:#f59e0b;
+            color:black;
+            padding:10px;
+            border-radius:8px;
+            text-align:center;
+            font-weight:bold;
+        ">
+            ${l} ${n}
+        </div>
+    `;
+
+});
+
+
+
         function envoyerDemandePions() {
             const qte = document.getElementById('input-qte-pions').value;
             if (!qte || qte <= 0) return alert("Indique un nombre de pions valide.");
