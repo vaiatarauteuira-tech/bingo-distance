@@ -21,6 +21,17 @@
         <div style="font-size: 1.2rem; font-weight: bold; margin-top:10px;">🪙 Pions : <span id="display-pions" style="color:#10b981;">0</span></div>
     </div>
 
+
+<div class="card" style="text-align:center;">
+    <h3>🎱 Dernier numéro tiré</h3>
+
+    <div id="numero-tire"
+         style="font-size:70px;font-weight:900;color:#f59e0b;">
+        -
+    </div>
+</div>
+
+
     <!-- CARTE PDF LIVRÉE -->
     <div class="card">
         <h3>📄 Mon Ticket de Jeu</h3>
@@ -63,6 +74,14 @@
         });
 
         socket.on('notification', (msg) => { alert(msg); });
+
+socket.on("new-ball", (data) => {
+
+    document.getElementById("numero-tire").innerText =
+        data.actuelle;
+
+});
+
 
         function envoyerDemandePions() {
             const qte = document.getElementById('input-qte-pions').value;
