@@ -75,10 +75,22 @@
 
         socket.on('notification', (msg) => { alert(msg); });
 
+
+
 socket.on("new-ball", (data) => {
 
+    const numero = data.actuelle;
+
+    let lettre = "";
+
+    if (numero >= 1 && numero <= 15) lettre = "B";
+    else if (numero >= 16 && numero <= 30) lettre = "I";
+    else if (numero >= 31 && numero <= 45) lettre = "N";
+    else if (numero >= 46 && numero <= 60) lettre = "G";
+    else lettre = "O";
+
     document.getElementById("numero-tire").innerText =
-        data.actuelle;
+        lettre + " " + numero;
 
 });
 
