@@ -1,143 +1,75 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌺 PA'INA 987 🌺 - Joueur</title>
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #05050a; color: #f1f5f9; margin: 0; padding: 15px; }
-        .card { background: #12131a; border: 1px solid #222530; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .btn-violet { background: #a855f7; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
-        .btn-gold { background: #f59e0b; color: black; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
-        .paina-btn { background: #ef4444; color: white; font-size: 1.8rem; font-weight: 900; padding: 15px; border-radius: 12px; border: none; width: 100%; cursor: pointer; }
-        input { width: 100%; padding: 10px; background: #1a1c26; border: 1px solid #2d3142; border-radius: 6px; color: white; box-sizing: border-box; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PA'INA 987 - Joueur</title>
+<style>
+body{font-family:Segoe UI,sans-serif;background:#05050a;color:#fff;margin:0;padding:15px}
+.card{background:#12131a;border:1px solid #222530;border-radius:12px;padding:15px;margin-bottom:15px}
+#grille-bingo{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.case,.head{padding:8px;text-align:center;border-radius:6px}
+.case{background:#1a1c26;border:1px solid #333}
+.head{background:#f59e0b;color:#000;font-weight:bold}
+.active{background:#16a34a!important;color:#fff!important;font-weight:bold}
+</style>
 </head>
 <body>
-
-    <div class="card" style="text-align: center;">
-        <h2 id="display-nom" style="margin:0; color:#f59e0b;">Joueur</h2>
-        <p id="display-code" style="margin:5px 0; color:#94a3b8; font-size:12px;">CODE: -</p>
-        <div style="font-size: 1.2rem; font-weight: bold; margin-top:10px;">🪙 Pions : <span id="display-pions" style="color:#10b981;">0</span></div>
-    </div>
-
-
-<div class="card" style="text-align:center;">
-    <h3>🎱 Dernier numéro tiré</h3>
-
-    <div id="numero-tire"
-         style="font-size:70px;font-weight:900;color:#f59e0b;">
-        -
-    </div>
+<div class="card" style="text-align:center">
+<h2 id="display-nom">Joueur</h2>
+<p id="display-code">CODE:-</p>
+<div>🪙 <span id="display-pions">0</span> pions</div>
 </div>
 
+<div class="card" style="text-align:center">
+<h3>🎱 Dernier numéro</h3>
+<div id="numero-tire" style="font-size:64px;color:#f59e0b;font-weight:bold">-</div>
+</div>
 
-    <!-- CARTE PDF LIVRÉE -->
-    <div class="card">
-        <h3>📄 Mon Ticket de Jeu</h3>
-        <p id="display-pages-info" style="font-size:12px; color:#94a3b8;">Aucun ticket attribué pour le moment.</p>
-        <a id="btn-open-pdf" href="#" target="_blank" class="btn-violet" style="display:none;">👁️ AFFICHER MON TICKET PDF</a>
-    </div>
+<div class="card">
+<h3>🎱 Tableau BINGO</h3>
+<div id="grille-bingo"></div>
+</div>
 
-    <!-- DEMANDE DE RECHARGEMENT PIONS -->
-    <div class="card">
-        <h3>🪙 Demander des Pions</h3>
-        <input type="number" id="input-qte-pions" placeholder="Nombre de pions souhaités" min="1">
-        <button class="btn-gold" onclick="envoyerDemandePions()">Envoyer la demande à la régie</button>
-    </div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket=io();
+const monCode=sessionStorage.getItem("joueurCode");
+if(!monCode) location.href="/";
+socket.emit("player-login",monCode);
 
-    <!-- BOUTON PAINAHIA -->
-    <div class="card">
-        <button class="paina-btn" onclick="crierPaina()"> PAINAHIA🎉 !</button>
-    </div>
+function creerGrille(){
+ const g=document.getElementById("grille-bingo");
+ g.innerHTML="";
+ [["B",1,15],["I",16,30],["N",31,45],["G",46,60],["O",61,75]].forEach(c=>{
+   const h=document.createElement("div");h.className="head";h.textContent=c[0];g.appendChild(h);
+   for(let i=c[1];i<=c[2];i++){let d=document.createElement("div");d.className="case";d.id="case-"+i;d.textContent=i;g.appendChild(d);}
+ });
+}
+creerGrille();
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const monCode = sessionStorage.getItem('joueurCode');
-
-        if (!monCode) { window.location.href = '/'; }
-
-        socket.emit('player-login', monCode);
-
-        socket.on('update-dashboard', (player) => {
-            document.getElementById('display-nom').innerText = player.nom;
-            document.getElementById('display-code').innerText = `CODE: ${player.code}`;
-            document.getElementById('display-pions').innerText = player.pions;
-
-            if (player.pdfUrl) {
-                document.getElementById('display-pages-info').innerText = `Série : ${player.seriesCartons} (${player.pagesInfo})`;
-                const btnPdf = document.getElementById('btn-open-pdf');
-                btnPdf.href = player.pdfUrl;
-                btnPdf.style.display = 'block';
-            }
-        });
-
-        socket.on('notification', (msg) => { alert(msg); });
-
-
-
-socket.on("new-ball", (data) => {
-
-    const numero = data.actuelle;
-
-    let lettre = "";
-
-    if (numero <= 15) lettre = "B";
-    else if (numero <= 30) lettre = "I";
-    else if (numero <= 45) lettre = "N";
-    else if (numero <= 60) lettre = "G";
-    else lettre = "O";
-
-    document.getElementById("numero-tire").innerText =
-        lettre + " " + numero;
-
-    const zone = document.getElementById("historique-tirage");
-
-    zone.innerHTML = "";
-
-    data.historique.forEach(n => {
-
-        let l = "";
-
-        if (n <= 15) l = "B";
-        else if (n <= 30) l = "I";
-        else if (n <= 45) l = "N";
-        else if (n <= 60) l = "G";
-        else l = "O";
-
-        zone.innerHTML += `
-            <div style="
-                background:#f59e0b;
-                color:black;
-                padding:10px;
-                border-radius:8px;
-                text-align:center;
-                font-weight:bold;
-            ">
-                ${l} ${n}
-            </div>
-        `;
-
-    });
-
+function lettre(n){if(n<=15)return"B";if(n<=30)return"I";if(n<=45)return"N";if(n<=60)return"G";return"O";}
+function colorer(hist){
+ hist.forEach(n=>{
+   const c=document.getElementById("case-"+n);
+   if(c)c.classList.add("active");
+ });
+}
+socket.on("login-success-dashboard",data=>{
+ const p=data.player;
+ display_nom.textContent=p.nom;
+ display_code.textContent="CODE: "+p.code;
+ display_pions.textContent=p.pions;
+ colorer(data.liveHistory||[]);
 });
- 
-
-
-
-        function envoyerDemandePions() {
-            const qte = document.getElementById('input-qte-pions').value;
-            if (!qte || qte <= 0) return alert("Indique un nombre de pions valide.");
-            socket.emit('player-request-pions', { code: monCode, qte: qte });
-            alert("✅ Demande envoyée à la régie !");
-            document.getElementById('input-qte-pions').value = '';
-        }
-
-        function crierPaina() {
-            socket.emit('player-announce-bingo', { code: monCode });
-            alert("📣 PAINA signalé à l'organisateur !");
-        }
-    </script>
-</body>
-</html>
+socket.on("update-dashboard",p=>{
+ display_nom.textContent=p.nom;
+ display_code.textContent="CODE: "+p.code;
+ display_pions.textContent=p.pions;
+});
+socket.on("new-ball",data=>{
+ numero_tire.textContent=lettre(data.actuelle)+" "+data.actuelle;
+ colorer(data.historique||[]);
+});
+</script>
+</body></html>
