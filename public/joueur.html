@@ -83,46 +83,46 @@ socket.on("new-ball", (data) => {
 
     let lettre = "";
 
-    if (numero >= 1 && numero <= 15) lettre = "B";
-    else if (numero >= 16 && numero <= 30) lettre = "I";
-    else if (numero >= 31 && numero <= 45) lettre = "N";
-    else if (numero >= 46 && numero <= 60) lettre = "G";
+    if (numero <= 15) lettre = "B";
+    else if (numero <= 30) lettre = "I";
+    else if (numero <= 45) lettre = "N";
+    else if (numero <= 60) lettre = "G";
     else lettre = "O";
 
     document.getElementById("numero-tire").innerText =
         lettre + " " + numero;
 
+    const zone = document.getElementById("historique-tirage");
+
+    zone.innerHTML = "";
+
+    data.historique.forEach(n => {
+
+        let l = "";
+
+        if (n <= 15) l = "B";
+        else if (n <= 30) l = "I";
+        else if (n <= 45) l = "N";
+        else if (n <= 60) l = "G";
+        else l = "O";
+
+        zone.innerHTML += `
+            <div style="
+                background:#f59e0b;
+                color:black;
+                padding:10px;
+                border-radius:8px;
+                text-align:center;
+                font-weight:bold;
+            ">
+                ${l} ${n}
+            </div>
+        `;
+
+    });
+
 });
-
-
-const zone = document.getElementById("historique-tirage");
-
-zone.innerHTML = "";
-
-data.livehistorique.forEach(n => {
-
-    let l = "";
-
-    if (n >= 1 && n <= 15) l = "B";
-    else if (n <= 30) l = "I";
-    else if (n <= 45) l = "N";
-    else if (n <= 60) l = "G";
-    else l = "O";
-
-    zone.innerHTML += `
-        <div style="
-            background:#f59e0b;
-            color:black;
-            padding:10px;
-            border-radius:8px;
-            text-align:center;
-            font-weight:bold;
-        ">
-            ${l} ${n}
-        </div>
-    `;
-
-});
+ 
 
 
 
