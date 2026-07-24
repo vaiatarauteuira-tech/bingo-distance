@@ -73,3 +73,300 @@ socket.on("new-ball",data=>{
 });
 </script>
 </body></html>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fenua Bingo - Espace Joueur</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      margin: 0;
+      padding: 15px;
+      text-align: center;
+    }
+
+    /* En-tête */
+    header {
+      background: #1f1f1f;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    h1 { color: #ffd700; margin: 0; font-size: 22px; }
+
+    /* Zone du dernier tirage */
+    .dernier-tirage-box {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 2px solid #ffd700;
+    }
+    .grosse-perle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      margin: 10px auto;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: bold;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Grille du Boulier (Suivi des tirages) */
+    .boulier-container {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+      max-width: 500px;
+      margin: 0 auto 20px auto;
+    }
+
+    .perle {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background-color: #000;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 13px;
+      border: 1px solid #333;
+    }
+
+    /* Couleurs des Perles Tirées (Mode 75) */
+    .perle.b-tiré { background-color: #ffffff; color: #000; } /* B: Blanc */
+    .perle.i-tiré { background-color: #e74c3c; color: #fff; } /* I: Rouge */
+    .perle.n-tiré { background-color: #3498db; color: #fff; } /* N: Bleu */
+    .perle.g-tiré { background-color: #9b59b6; color: #fff; } /* G: Mauve */
+    .perle.o-tiré { background-color: #2ecc71; color: #fff; } /* O: Vert */
+
+    /* Couleurs Mode 90 */
+    .perle.m90-tiré { background-color: #9b59b6; color: #fff; }
+
+    /* GROS BOUTON PAINA ! */
+    .btn-paina {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      border: none;
+      padding: 20px 40px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(255, 65, 108, 0.5);
+      width: 90%;
+      max-width: 400px;
+      margin: 10px auto 30px auto;
+      display: block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Overlay PAINA (Écran Rouge & Message) */
+    #paina-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(220, 20, 60, 0.95);
+      z-index: 999;
+      justify-content: center; align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .paina-card {
+      background: #111;
+      color: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      border: 3px solid #ffd700;
+      max-width: 350px;
+      width: 100%;
+    }
+
+    .message-banner {
+      display: none;
+      position: fixed;
+      top: 20px; left: 5%; width: 90%;
+      background: #ffd700;
+      color: #000;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BANNIÈRE DE NOTIFICATION REÇUE -->
+  <div id="message-banner" class="message-banner"></div>
+
+  <!-- EN-TÊTE -->
+  <header>
+    <h1>FENUA BINGO</h1>
+    <p style="margin: 5px 0 0 0; color: #bbb;">Ia ora na <span id="joueur-nom-disp">Joueur</span> !</p>
+  </header>
+
+  <!-- DERNIÈRE PERLE TIRÉE -->
+  <div class="dernier-tirage-box">
+    <div style="color: #aaa; font-size: 14px;">DERNIER NUMÉRO TIRÉ</div>
+    <div id="grosse-perle-affichage" class="grosse-perle perle">-</div>
+    <div id="dernier-texte" style="font-size: 18px; font-weight: bold; color: #ffd700;">En attente du tirage...</div>
+  </div>
+
+  <!-- BOUTON PAINA -->
+  <button class="btn-paina" onclick="crierPaina()">🔥 PAINA ! 🔥</button>
+
+  <h3>PERLES TIRÉES</h3>
+  <!-- GRILLE DU BOULIER -->
+  <div class="boulier-container" id="boulier-joueur"></div>
+
+  <!-- ECRAN ROUGE PAINA (PAUSE JEU) -->
+  <div id="paina-overlay">
+    <div class="paina-card">
+      <h2 style="color: #ff4b2b; margin-top: 0;">🚨 PAINA EN COURS !</h2>
+      <p style="font-size: 18px;">Vérification par l'organisateur...</p>
+      <div style="font-size: 14px; color: #bbb;">
+        Demandé par : <strong id="paina-auteur" style="color: #fff;">-</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- SDK SOCKET.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    // Informations du Joueur (À récupérer depuis ta session / login)
+    const joueurInfo = {
+      nom: "Manua", // Ex: Nom saisi lors du login
+      telephone: "87765432",
+      fiche: "Série B - N° 45"
+    };
+
+    document.getElementById('joueur-nom-disp').innerText = joueurInfo.nom;
+
+    let modeBingoActuel = 75;
+
+    // 1. Initialiser le plateau de perles (1 à 75 par défaut)
+    function genererPlateau(max = 75) {
+      const container = document.getElementById('boulier-joueur');
+      container.innerHTML = '';
+      for (let i = 1; i <= max; i++) {
+        const perle = document.createElement('div');
+        perle.className = 'perle';
+        perle.id = `j-perle-${i}`;
+        perle.innerText = i;
+        container.appendChild(perle);
+      }
+    }
+    genererPlateau(75);
+
+    // 2. Synchroniser l'état au moment de la connexion
+    socket.on('INIT_GAME_STATE', (state) => {
+      modeBingoActuel = state.modeBingo;
+      genererPlateau(modeBingoActuel);
+
+      // Reconstituer l'historique déjà tiré
+      state.numerosTires.forEach(num => colorerPerle(num));
+
+      if (state.enPause) {
+        document.getElementById('paina-overlay').style.display = 'flex';
+      }
+    });
+
+    // 3. ÉCOUTER LE TIRAGE EN DIRECT
+    socket.on('NOUVELLE_PERLE', (data) => {
+      const { numero, lettre } = data;
+
+      // Mettre à jour la grosse perle centrale
+      const grossePerle = document.getElementById('grosse-perle-affichage');
+      const dernierTexte = document.getElementById('dernier-texte');
+
+      grossePerle.innerText = numero;
+      dernierTexte.innerText = lettre ? `${lettre} ${numero}` : `N° ${numero}`;
+
+      // Appliquer le style de couleur à la grosse perle et à la grille
+      const classeColor = getClasseCouleur(numero);
+      grossePerle.className = `grosse-perle perle ${classeColor}`;
+
+      colorerPerle(numero);
+    });
+
+    // Helper pour ajouter la classe couleur sur une perle de la grille
+    function colorerPerle(num) {
+      const perle = document.getElementById(`j-perle-${num}`);
+      if (perle) {
+        const classe = getClasseCouleur(num);
+        perle.classList.add(classe);
+      }
+    }
+
+    // Helper pour déterminer la classe de couleur selon le numéro (1-75 vs 90)
+    function getClasseCouleur(num) {
+      if (modeBingoActuel === 90) return 'm90-tiré';
+
+      if (num <= 15) return 'b-tiré'; // Blanc
+      if (num <= 30) return 'i-tiré'; // Rouge
+      if (num <= 45) return 'n-tiré'; // Bleu
+      if (num <= 60) return 'g-tiré'; // Mauve
+      return 'o-tiré';                // Vert
+    }
+
+    // 4. ACTION : LE JOUEUR CLIQUE SUR "PAINA !"
+    function crierPaina() {
+      // Envoyer la demande au serveur Node.js / Railway
+      socket.emit('DECLENCHER_PAINA', joueurInfo);
+    }
+
+    // 5. ÉCOUTER L'ALERTE ROUGE (Quand quelqu'un a crié Paina)
+    socket.on('ALERTE_PAINA_DEBUT', (info) => {
+      document.getElementById('paina-auteur').innerText = info.joueur;
+      document.getElementById('paina-overlay').style.display = 'flex';
+    });
+
+    // 6. ÉCOUTER LE RÉSULTAT DU PAINA (Validé ou Malaise)
+    socket.on('PAINA_RESULTAT', (data) => {
+      // Retirer l'écran rouge
+      document.getElementById('paina-overlay').style.display = 'none';
+
+      // Afficher le message officiel en haut de l'écran
+      const banner = document.getElementById('message-banner');
+      banner.innerText = `📢 ${data.message}`;
+      banner.style.display = 'block';
+
+      if (data.status === 'VALIDE') {
+        banner.style.background = '#2ecc71'; // Vert
+        banner.style.color = '#ffffff';
+      } else {
+        banner.style.background = '#ffd700'; // Jaune / Orange pour "Ça continue"
+        banner.style.color = '#000000';
+      }
+
+      // Masquer la bannière après 5 secondes
+      setTimeout(() => {
+        banner.style.display = 'none';
+      }, 5000);
+    });
+
+    // 7. Changement de mode de bingo (75 ou 90)
+    socket.on('MODE_BINGO_CHANGE', (data) => {
+      modeBingoActuel = data.mode;
+      genererPlateau(modeBingoActuel);
+    });
+  </script>
+</body>
+</html>
+
